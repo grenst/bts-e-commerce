@@ -8,7 +8,8 @@
 
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "resolveJsonModule": true, // for importing JSON files
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
@@ -19,7 +20,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "types": ["jest", "node"] // Add types for Jest and Node
+    "types": ["jest", "node"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", ".eslintrc.cjs", "jest.config.cjs", "prettier.config.cjs", "vite.config.ts"] // Exclude build output, node_modules and config files
