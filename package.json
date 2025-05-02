@@ -8,7 +8,11 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "prepare": "husky",
-    "test": "jest"
+    "test": "jest",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,html,json,md}\""
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
@@ -23,6 +27,7 @@
     "prettier": "^3.5.3",
     "ts-jest": "^29.3.2",
     "typescript": "~5.7.2",
+    "typescript-eslint": "^8.31.1",
     "vite": "^6.3.1"
   },
   "lint-staged": {
@@ -30,5 +35,8 @@
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "gh-pages": "^6.3.0"
   }
 }
