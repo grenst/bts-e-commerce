@@ -1,4 +1,6 @@
-import './index.css';
+import '@styles/tailwind.css';
+import '@styles/global.scss';
+
 const bodyElement = document.body;
 
 const h1 = document.createElement('h1');

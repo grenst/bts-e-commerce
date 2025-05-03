@@ -1,0 +1,29 @@
+// @import 'variables';
+// @import 'mixins';
+// @import 'fonts';
+
+@use "variables" as *;
+@use "mixins" as *;
+@use "fonts" as *;
+
+// @use 'tailwindcss';
+// @import 'tailwindcss';
+
+// /* Tailwind directives */
+// @tailwind base;
+// @tailwind components;
+// @tailwind utilities;
+
+
+// Для Tailwind (если используете)
+// @tailwind base;
+// @tailwind components;
+// @tailwind utilities;
+
+/* Глобальные стили */
+// body {
+//   font-family: 'Inter', sans-serif;
+// }
+body {
+  background-color: aqua;
+}

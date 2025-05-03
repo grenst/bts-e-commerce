@@ -1,7 +1,32 @@
-// vite.config.ts
-import { defineConfig } from 'vite';
+
+import { defineConfig } from 'vite'
+import path from 'path'
 
 export default defineConfig({
-    base: '/',
-    plugins: [],
-});
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@styles': path.resolve(__dirname, './src/styles')
+    }
+  },
+  css: {
+    postcss: './postcss.config.cjs',
+    preprocessorOptions: {
+      scss: {
+        additionalData: `
+          @use "sass:math";
+          @use "@styles/variables" as *;
+          @use "@styles/mixins" as *;
+        `,
+      },
+    },
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    emptyOutDir: true,
+    sourcemap: true
+  }
+})
+
