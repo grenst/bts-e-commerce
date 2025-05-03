@@ -1,29 +1,30 @@
-// @import 'variables';
-// @import 'mixins';
-// @import 'fonts';
-
 @use "variables" as *;
 @use "mixins" as *;
 @use "fonts" as *;
 
-// @use 'tailwindcss';
-// @import 'tailwindcss';
-
-// /* Tailwind directives */
-// @tailwind base;
-// @tailwind components;
-// @tailwind utilities;
-
-
-// Для Tailwind (если используете)
-// @tailwind base;
-// @tailwind components;
-// @tailwind utilities;
-
-/* Глобальные стили */
-// body {
-//   font-family: 'Inter', sans-serif;
-// }
 body {
   background-color: aqua;
+  font-family: $font-family-sans;
+  color: #333;
+}
+
+.scss-button {
+  background-color: $primary-color;
+  margin-left: 10px;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  @include box-shadow();
+  
+  &:hover {
+    background-color: darken($primary-color, 25%);
+  }
+}
+
+.scss-container {
+  @include flex-center;
+  padding: 1rem;
+}
+.h1-bg-scss {
+  background-color: purple; // Example SCSS background
 }
