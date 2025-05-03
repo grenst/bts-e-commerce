@@ -22,7 +22,7 @@ body {
   @include box-shadow();
   
   &:hover {
-    background-color: darken($primary-color, 25%);
+    background-color: color.adjust($primary-color, $lightness: -25%);
   }
 }
 
