@@ -21,6 +21,7 @@ export default defineConfig({
         `,
       },
     },
+    devSourcemap: true,
   },
   build: {
     outDir: 'dist',
