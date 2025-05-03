@@ -38,4 +38,22 @@ tailwindButton.textContent = 'Tailwind Button';
 tailwindButton.className = 'bg-blue-500 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded shadow ml-2';
 scssContainer.appendChild(tailwindButton);
 
+// color changing wia SCSS or Tailwind by click 
+const removeBackgroundClasses = (element: HTMLElement) => {
+  const classesToRemove = Array.from(element.classList).filter(
+    (cls) => cls.startsWith('bg-') || cls === 'h1-bg-scss',
+  );
+  element.classList.remove(...classesToRemove);
+};
+
+scssButton.addEventListener('click', () => {
+  removeBackgroundClasses(h1);
+  h1.classList.add('h1-bg-scss');
+});
+
+tailwindButton.addEventListener('click', () => {
+  removeBackgroundClasses(h1);
+  h1.classList.add('bg-green-500');
+});
+
 export {};
