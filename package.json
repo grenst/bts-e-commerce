@@ -12,7 +12,8 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css,html,json,md}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,html,json,md}\"",
+    "lint-fix": "eslint . --fix"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.5",
