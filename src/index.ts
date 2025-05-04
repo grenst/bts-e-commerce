@@ -1,9 +1,16 @@
+import { Buffer } from 'buffer/';
+interface WindowWithBuffer extends Window {
+  Buffer: typeof Buffer;
+}
+
+(window as unknown as WindowWithBuffer).Buffer = Buffer;
 import '@styles/global.scss';
 import '@styles/tailwind.css';
 
 import svgSpriteElement from './sources/svg-sprite';
 import createFooter from './components/layout/footer/footer';
-import createButton from './components/ui/button/button';
+// import createButton from './components/ui/button/button';
+import { createCommerceTestComponent } from './components/test/CommerceTest';
 import { body } from './utils/elementUtils';
 
 svgSpriteElement();
@@ -19,54 +26,13 @@ h1.className =
 container.appendChild(h1);
 
 const p = document.createElement('p');
-p.textContent = 'Here is Tailwind CSS and SCSS working together';
+p.textContent = 'Here is CommerceTools tester';
 p.className =
   'font-serif text-lg text-center italic text-gray-500 bg-gray-100 p-2 m-4 rounded';
 container.appendChild(p);
 
-const scssContainer = document.createElement('div');
-scssContainer.className = 'scss-container bg-gray-50 m-4 rounded-lg';
-container.appendChild(scssContainer);
-
-const scssTitle = document.createElement('h2');
-scssTitle.textContent = 'SCSS & TW Styles Buttons:';
-scssTitle.className = 'text-l text-right font-bold';
-scssContainer.appendChild(scssTitle);
-
-// const scssButton = document.createElement('button');
-// scssButton.textContent = 'SCSS Button';
-// scssButton.className = 'scss-button mr-2';
-// scssContainer.appendChild(scssButton);
-
-const scssButton = createButton('SCSS Button', scssContainer, [
-  'scss-button',
-  'mr-2',
-]);
-
-const tailwindButton = document.createElement('button');
-tailwindButton.textContent = 'Tailwind Button';
-tailwindButton.className =
-  'bg-blue-500 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded shadow ml-2';
-scssContainer.appendChild(tailwindButton);
-
-// color changing wia SCSS or Tailwind by click
-const removeBackgroundClasses = (element: HTMLElement) => {
-  const classesToRemove = Array.from(element.classList).filter(
-    (cls) => cls.startsWith('bg-') || cls === 'h1-bg-scss'
-  );
-  element.classList.remove(...classesToRemove);
-};
-
-scssButton.addEventListener('click', () => {
-  removeBackgroundClasses(h1);
-  h1.classList.add('h1-bg-scss');
-});
-
-tailwindButton.addEventListener('click', () => {
-  removeBackgroundClasses(h1);
-  h1.classList.add('bg-green-500');
-});
-
+// Add the Commercetools test component
+createCommerceTestComponent(container);
 createFooter(body);
 
 export {};
