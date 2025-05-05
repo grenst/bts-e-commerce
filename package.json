@@ -50,6 +50,7 @@
     "@commercetools/sdk-client-v2": "^3.0.0",
     "@commercetools/sdk-middleware-auth": "^8.0.1",
     "@commercetools/sdk-middleware-http": "^8.0.1",
-    "gh-pages": "^6.3.0"
+    "gh-pages": "^6.3.0",
+    "zod": "^3.24.4"
   }
 }
