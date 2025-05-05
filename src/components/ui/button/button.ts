@@ -1,3 +1,4 @@
+import './button.scss';
 import { createEl } from '../../../utils/elementUtils';
 
 function createButton(
