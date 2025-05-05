@@ -50,7 +50,7 @@ This project showcases the use of **Commercetools**, a modern headless e-commerc
 
 | Category         | Technologies                              |
 |------------------|--------------------------------------------|
-| Frontend         | [TypeScript](https://www.typescriptlang.org), [Vite](https://vitejs.dev/), [TailwindCSS](https://tailwindcss.com/)             |
+| Frontend         | [TypeScript](https://www.typescriptlang.org), [Vite](https://vitejs.dev/), [TailwindCSS]             |
 | Validation       | [Zod](https://zod.dev/)                    |
 | State Management | [Zustand](https://docs.pmnd.rs/zustand/getting-started/introduction)         |
 | API              | [Commercetools SDK](https://docs.commercetools.com/) |
@@ -141,6 +141,11 @@ bubble-tea-shop/
 │   │   ├── auth
 │   │   ├── orders
 │   │   └── products
+│   │   │   └── auth.ts
+│   │   ├── orders
+│   │   │   └── orders.ts
+│   │   └── products
+│   │       └── products.ts
 │   ├── components
 │   │   ├── features
 │   │   │   └── product-card.ts
@@ -165,6 +170,23 @@ bubble-tea-shop/
 │   ├── sources
 │   │   └── svg-sprite.ts
 │   ├── store
+│   │   │   └── auth-page.ts
+│   │   ├── cart
+│   │   │   └── cart.ts
+│   │   ├── catalog
+│   │   │   └── сatalog.ts
+│   │   ├── checkout
+│   │   │   └── checkout.ts
+│   │   ├── home
+│   │   │   └── home.ts
+│   │   └── product
+│   │       └── product.ts
+│   ├── router
+│   │   └── router.ts
+│   ├── sources
+│   │   └── svg-sprite.ts
+│   ├── store
+│   │   └── store.ts
 │   ├── styles
 │   │   ├── _fonts.scss
 │   │   ├── _mixins.scss
@@ -172,6 +194,7 @@ bubble-tea-shop/
 │   │   ├── global.scss
 │   │   └── tailwind.css
 │   ├── types
+│   │   └── commercetools.d.ts
 │   ├── utils
 │   │   ├── apiCommerse.ts
 │   │   └── elementUtils.ts
@@ -211,28 +234,7 @@ Developer: **Andrii Mansorov**
 **Enjoy your tea time! 🧋**
 
 
----------------------------------------
-
-
-### Installation Steps
-
-```bash
-# Clone this repository
-$ git clone https://github.com/grenst/bts-e-commerce.git
-
-# Navigate to the project folder
-$ cd bts-e-commerce
-
-# Install dependencies
-$ npm install
-
-# Start the application
-$ npm run dev
-```
-
 ## 🔧 Technologies Used
-
-
 <div>
  <img src="https://github.com/devicons/devicon/blob/master/icons/html5/html5-plain-wordmark.svg" title="HTML5" alt="HTML" width="40" height="40"/>&nbsp;
 
@@ -267,7 +269,3 @@ $ npm run dev
 
 
 </div>
-
-
-
-
