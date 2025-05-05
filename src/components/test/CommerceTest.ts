@@ -24,8 +24,7 @@ export function createCommerceTestComponent(container: HTMLElement): void {
   componentDiv.appendChild(title);
 
   const note = document.createElement('p');
-  note.textContent =
-    'Note: This API client has various scopes.';
+  note.textContent = 'Note: This API client has various scopes.';
   note.classList.add('text-sm', 'text-gray-600', 'mb-4');
   componentDiv.appendChild(note);
 

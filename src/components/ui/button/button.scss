@@ -1,0 +1,14 @@
+@use "sass:color";
+
+.scss-button {
+  background-color: $primary-color;
+  margin-left: 10px;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  @include box-shadow();
+
+  &:hover {
+    background-color: color.adjust($primary-color, $lightness: -25%);
+  }
+}
