@@ -1,9 +1,10 @@
 import { z } from 'zod';
 import { createEl } from '../../utils/elementUtils';
 import createButton from '../../components/ui/button/button';
-import { loginUser, registerUser, getAuthState, subscribeToAuth } from '../../api/auth/auth';
 import { getRouter } from '../../router/router';
-import { setLoading, addNotification } from '../../store/store';
+import { uiStore } from '../../store/store';
+import { AuthService } from '../../services/auth.service';
+import { useCustomerStore } from '../../store/customer-store';
 
 const emailSchema = z
   .string()
@@ -77,13 +78,12 @@ function validateRegisterForm(
 }
 
 export function createLoginPage(container: HTMLElement): void {
-  const authState = getAuthState();
-  
-  if (authState.isAuthenticated) {
+  const { customer } = useCustomerStore.getState();
+  if (customer) {
     getRouter().navigateTo('/');
     return;
   }
-  
+
   const pageContainer = createEl({
     tag: 'div',
     parent: container,
@@ -311,76 +311,83 @@ export function createLoginPage(container: HTMLElement): void {
   
   loginButton.addEventListener('click', async () => {
     hideFormError();
-    
+    const { setLoading, addNotification } = uiStore.getState();
+
     const email = emailInput.value;
     const password = passwordInput.value;
-    
+
     if (isLoginForm) {
       const validation = validateLoginForm(email, password);
-      
+
       if (!validation.success) {
-        if (validation.errors.email) {
-          showFieldError(emailError, validation.errors.email);
-        } else {
-          hideFieldError(emailError);
-        }
-        
-        if (validation.errors.password) {
-          showFieldError(passwordError, validation.errors.password);
-        } else {
-          hideFieldError(passwordError);
-        }
-        
+        if (validation.errors.email) showFieldError(emailError, validation.errors.email);
+        else hideFieldError(emailError);
+        if (validation.errors.password) showFieldError(passwordError, validation.errors.password);
+        else hideFieldError(passwordError);
         addNotification('warning', 'Please fix the form errors before submitting.');
         return;
       }
-      
+      hideFieldError(emailError);
+      hideFieldError(passwordError);
+
+      setLoading(true);
       try {
-        await loginUser(email, password);
-        getRouter().navigateTo('/');
+        const success = await AuthService.login(email, password);
+        if (success) {
+          addNotification('success', 'Successfully logged in!');
+          getRouter().navigateTo('/');
+        } else {
+          showFormError('Invalid email or password. Please try again.');
+        }
       } catch (error) {
-        showFormError('Invalid email or password. Please try again.');
+        console.error('Login error:', error);
+        showFormError('Login failed. Please try again.');
+      } finally {
+        setLoading(false);
       }
-    } else {
+    } else { // Registration form
       const firstName = firstNameInput?.value || '';
       const lastName = lastNameInput?.value || '';
-      
+
       const validation = validateRegisterForm(email, password, firstName, lastName);
-      
+
       if (!validation.success) {
-        if (validation.errors.email) {
-          showFieldError(emailError, validation.errors.email);
-        } else {
-          hideFieldError(emailError);
+        if (validation.errors.email) showFieldError(emailError, validation.errors.email);
+        else hideFieldError(emailError);
+        if (validation.errors.password) showFieldError(passwordError, validation.errors.password);
+        else hideFieldError(passwordError);
+        if (firstNameError) {
+            if (validation.errors.firstName) showFieldError(firstNameError, validation.errors.firstName);
+            else hideFieldError(firstNameError);
         }
-        
-        if (validation.errors.password) {
-          showFieldError(passwordError, validation.errors.password);
-        } else {
-          hideFieldError(passwordError);
+        if (lastNameError) {
+            if (validation.errors.lastName) showFieldError(lastNameError, validation.errors.lastName);
+            else hideFieldError(lastNameError);
         }
-        
-        if (validation.errors.firstName && firstNameError) {
-          showFieldError(firstNameError, validation.errors.firstName);
-        } else if (firstNameError) {
-          hideFieldError(firstNameError);
-        }
-        
-        if (validation.errors.lastName && lastNameError) {
-          showFieldError(lastNameError, validation.errors.lastName);
-        } else if (lastNameError) {
-          hideFieldError(lastNameError);
-        }
-        
         addNotification('warning', 'Please fix the form errors before submitting.');
         return;
       }
-      
+      hideFieldError(emailError);
+      hideFieldError(passwordError);
+      if(firstNameError) hideFieldError(firstNameError);
+      if(lastNameError) hideFieldError(lastNameError);
+
+      setLoading(true);
       try {
-        await registerUser(email, password, firstName, lastName);
-        getRouter().navigateTo('/');
+        const success = await AuthService.register(email, password, firstName, lastName);
+        if (success) {
+          addNotification('success', 'Registration successful! Please log in.');
+          toggleForm(); // Switch to login form
+          emailInput.value = email;
+          passwordInput.value = '';
+        } else {
+          showFormError('Registration failed. This email may already be in use or another error occurred.');
+        }
       } catch (error) {
-        showFormError('Registration failed. This email may already be in use.');
+        console.error('Registration error:', error);
+        showFormError('Registration failed. Please try again.');
+      } finally {
+        setLoading(false);
       }
     }
   });
