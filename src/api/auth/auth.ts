@@ -137,95 +137,56 @@ export async function loginUser(
   setLoading(true);
   
   try {
-    const localUser = getLocalUser(email);
-    
-    if (localUser && localUser.password === password) {
-      authState.isAuthenticated = true;
-      authState.user = {
-        id: crypto.randomUUID(),
-        email,
-        firstName: localUser.firstName,
-        lastName: localUser.lastName,
-      };
-      
-      localStorage.setItem('auth', JSON.stringify(authState));
-      
-      notifyListeners('login');
-      
-      addNotification('success', 'Successfully logged in with local account!');
-      
-      return {
-        customer: {
-          id: authState.user.id,
-          version: 1,
-          email,
-          firstName: localUser.firstName,
-          lastName: localUser.lastName,
-          createdAt: new Date().toISOString(),
-          lastModifiedAt: new Date().toISOString(),
-          isEmailVerified: false,
-        },
-        cart: undefined,
-      } as unknown as CustomerSignInResult;
-    }
-    
-    try {
-      const token = await fetchCustomerToken(email, password);
-      console.log('Customer Access Token:', token);
-      
-      const projectKey = import.meta.env.VITE_CTP_PROJECT_KEY!;
-      const apiUrl = import.meta.env.VITE_CTP_API_URL!;
-      
-      const httpMiddleware = createHttpMiddleware({
-        host: apiUrl,
-        fetch,
-      });
-      
-      const client = createClient({
-        middlewares: [
-          {
-            execute: (request: { headers?: Record<string, string> }, next: (req: any) => void) => {
-              if (!request.headers) {
-                request.headers = {};
-              }
-              request.headers['Authorization'] = `Bearer ${token}`;
-              next(request);
+    const token = await fetchCustomerToken(email, password);
+    console.log('Customer Access Token:', token);
+
+    const projectKey = import.meta.env.VITE_CTP_PROJECT_KEY!;
+    const apiUrl = import.meta.env.VITE_CTP_API_URL!;
+
+    const httpMiddleware = createHttpMiddleware({
+      host: apiUrl,
+      fetch,
+    });
+
+    const client = createClient({
+      middlewares: [
+        {
+          execute: (request: { headers?: Record<string, string> }, next: (req: any) => void) => {
+            if (!request.headers) {
+              request.headers = {};
             }
-          } as unknown as Middleware,
-          httpMiddleware as Middleware
-        ],
-      });
-      
-      const apiRoot = createApiBuilderFromCtpClient(client).withProjectKey({
-        projectKey,
-      });
-      
-      const response = await apiRoot.me().get().execute();
-      console.log('Customer:', response.body);
-      
-      authState.isAuthenticated = true;
-      authState.user = {
-        id: response.body.id,
-        email: response.body.email,
-        firstName: response.body.firstName,
-        lastName: response.body.lastName,
-      };
-      authState.token = token;
-      
-      localStorage.setItem('auth', JSON.stringify(authState));
-      
-      notifyListeners('login');
-      
-      addNotification('success', 'Successfully logged in with Commercetools account!');
-      
-      return {
-        customer: response.body,
-        cart: undefined,
-      } as CustomerSignInResult;
-    } catch (ctError) {
-      console.error('Commercetools login error:', ctError);
-      throw new Error('Invalid email or password');
-    }
+            request.headers['Authorization'] = `Bearer ${token}`;
+            next(request);
+          }
+        } as unknown as Middleware,
+        httpMiddleware as Middleware
+      ],
+    });
+
+    const apiRoot = createApiBuilderFromCtpClient(client).withProjectKey({
+      projectKey,
+    });
+
+    const response = await apiRoot.me().get().execute();
+    console.log('Customer:', response.body);
+
+    authState.isAuthenticated = true;
+    authState.user = {
+      id: response.body.id,
+      email: response.body.email,
+      firstName: response.body.firstName,
+      lastName: response.body.lastName,
+    };
+    authState.token = token;
+
+    notifyListeners('login');
+
+    addNotification('success', 'Successfully logged in with Commercetools account!');
+
+    return {
+      customer: response.body,
+      cart: undefined,
+    } as CustomerSignInResult;
   } catch (error) {
     console.error('Login error:', error);
     addNotification('error', 'Login failed. Please check your credentials.');
@@ -235,38 +196,6 @@ export async function loginUser(
   }
 }
 
-interface LocalUser {
-  email: string;
-  password: string;
-  firstName?: string;
-  lastName?: string;
-}
-
-function getLocalUsers(): LocalUser[] {
-  const storedUsers = localStorage.getItem('localUsers');
-  return storedUsers ? JSON.parse(storedUsers) : [];
-}
-
-function saveLocalUsers(users: LocalUser[]): void {
-  localStorage.setItem('localUsers', JSON.stringify(users));
-}
-
-function userExistsLocally(email: string): boolean {
-  const users = getLocalUsers();
-  return users.some(user => user.email === email);
-}
-
-function addLocalUser(user: LocalUser): void {
-  const users = getLocalUsers();
-  users.push(user);
-  saveLocalUsers(users);
-}
-
-function getLocalUser(email: string): LocalUser | undefined {
-  const users = getLocalUsers();
-  return users.find(user => user.email === email);
-}
-
 export async function registerUser(
   email: string,
   password: string,
@@ -274,51 +203,40 @@ export async function registerUser(
   lastName?: string
 ): Promise<CustomerSignInResult | undefined> {
   setLoading(true);
-  
   try {
-    if (userExistsLocally(email)) {
-      addNotification('error', 'A user with this email already exists.');
-      throw new Error('User already exists');
-    }
-    
-    addLocalUser({
+    const apiRoot = createCustomerApiRoot(); // Ensure this uses the correct client for registration
+    const customerDraft = {
       email,
       password,
       firstName,
       lastName,
-    });
-    
-    addNotification('success', 'Registration successful! This is a simulated registration as we don\'t have the manage_customers scope.');
-    
-    authState.isAuthenticated = true;
-    authState.user = {
-      id: crypto.randomUUID(),
-      email,
-      firstName,
-      lastName,
     };
-    
-    localStorage.setItem('auth', JSON.stringify(authState));
-    
-    notifyListeners('login');
-    
-    return {
-      customer: {
-        id: authState.user.id,
-        version: 1,
-        email,
-        firstName,
-        lastName,
-        createdAt: new Date().toISOString(),
-        lastModifiedAt: new Date().toISOString(),
-        isEmailVerified: false,
-      },
-      cart: undefined,
-    } as unknown as CustomerSignInResult;
+
+    const response = await apiRoot
+      .customers()
+      .post({ body: customerDraft })
+      .execute();
+
+    addNotification('success', 'Registration successful!');
+
+    // Attempt to login the user immediately after registration
+    // This will populate authState and notify listeners
+    return loginUser(email, password);
+
   } catch (error) {
     console.error('Registration error:', error);
-    if (error instanceof Error && error.message !== 'User already exists') {
-      addNotification('error', 'Registration failed. Please try again.');
+    // Type guard for better error handling from CT SDK
+    if (error && typeof error === 'object' && 'body' in error) {
+        const ctError = error as { body?: { message?: string } };
+        if (ctError.body?.message?.includes('DuplicateField')) {
+            addNotification('error', 'A user with this email already exists.');
+        } else {
+            addNotification('error', `Registration failed: ${ctError.body?.message || 'Please try again.'}`);
+        }
+    } else if (error instanceof Error) {
+        addNotification('error', `Registration failed: ${error.message}`);
+    } else {
+        addNotification('error', 'Registration failed. Please try again.');
     }
     throw error;
   } finally {
@@ -328,37 +246,21 @@ export async function registerUser(
 
 export function logoutUser(): void {
   setLoading(true);
-  
+
   authState.isAuthenticated = false;
   authState.user = undefined;
   authState.token = undefined;
-  
-  localStorage.removeItem('auth');
-  
+
   notifyListeners('logout');
-  
+
   addNotification('info', 'You have been logged out.');
-  
+
   setLoading(false);
 }
 
 export function initializeAuth(): void {
-  const storedAuth = localStorage.getItem('auth');
-  
-  if (storedAuth) {
-    try {
-      const parsedAuth = JSON.parse(storedAuth) as AuthState;
-      
-      authState.isAuthenticated = parsedAuth.isAuthenticated;
-      authState.user = parsedAuth.user;
-      authState.token = parsedAuth.token;
-      
-      if (authState.isAuthenticated) {
-        notifyListeners('login');
-      }
-    } catch (error) {
-      console.error('Error parsing stored auth:', error);
-      localStorage.removeItem('auth');
-    }
-  }
+  // No longer initializing from localStorage
+  // If there's a need to check for an existing session (e.g., via a silent token refresh or checking a secure cookie),
+  // that logic would go here. For now, it starts fresh.
+  console.log('Auth initialized without local storage persistence.');
 }
