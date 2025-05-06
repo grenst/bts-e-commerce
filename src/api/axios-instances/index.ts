@@ -46,17 +46,25 @@ apiInstance.interceptors.response.use(
         if (newAccessToken) {
           console.log('Token refreshed successfully.');
           if (originalRequest.headers) {
-            originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+            originalRequest.headers['Authorization'] =
+              `Bearer ${newAccessToken}`;
           } else {
-            originalRequest.headers = { 'Authorization': `Bearer ${newAccessToken}` };
+            originalRequest.headers = {
+              Authorization: `Bearer ${newAccessToken}`,
+            };
           }
           return apiInstance(originalRequest);
         } else {
-          console.log('Failed to refresh token, newAccessToken is null. Logging out.');
+          console.log(
+            'Failed to refresh token, newAccessToken is null. Logging out.'
+          );
           return Promise.reject(error);
         }
       } catch (refreshError) {
-        console.error('Caught error during token refresh attempt or subsequent request retry:', refreshError);
+        console.error(
+          'Caught error during token refresh attempt or subsequent request retry:',
+          refreshError
+        );
         return Promise.reject(refreshError);
       }
     }

@@ -28,7 +28,9 @@ export interface CommercetoolsCustomer {
   lastName?: string;
 }
 
-export async function fetchMyCustomer(accessToken: string): Promise<CommercetoolsCustomer> {
+export async function fetchMyCustomer(
+  accessToken: string
+): Promise<CommercetoolsCustomer> {
   debug('GET /me (customer info)');
   const { data } = await apiInstance.get<CommercetoolsCustomer>('/me', {
     headers: { Authorization: `Bearer ${accessToken}` },

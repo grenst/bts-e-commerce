@@ -14,8 +14,12 @@ const emailSchema = z
 const passwordSchema = z
   .string()
   .min(8, { message: 'Password must be at least 8 characters' })
-  .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-  .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
+  .regex(/[A-Z]/, {
+    message: 'Password must contain at least one uppercase letter',
+  })
+  .regex(/[a-z]/, {
+    message: 'Password must contain at least one lowercase letter',
+  })
   .regex(/[0-9]/, { message: 'Password must contain at least one number' });
 
 const nameSchema = z
@@ -87,7 +91,15 @@ export function createLoginPage(container: HTMLElement): void {
   const pageContainer = createEl({
     tag: 'div',
     parent: container,
-    classes: ['auth-page', 'max-w-md', 'mx-auto', 'p-6', 'bg-white', 'rounded-lg', 'shadow-md'],
+    classes: [
+      'auth-page',
+      'max-w-md',
+      'mx-auto',
+      'p-6',
+      'bg-white',
+      'rounded-lg',
+      'shadow-md',
+    ],
   });
 
   createEl({
@@ -120,7 +132,17 @@ export function createLoginPage(container: HTMLElement): void {
   const emailInput = createEl({
     tag: 'input',
     parent: emailContainer,
-    classes: ['w-full', 'px-3', 'py-2', 'border', 'border-gray-300', 'rounded-md', 'focus:outline-none', 'focus:ring-blue-500', 'focus:border-blue-500'],
+    classes: [
+      'w-full',
+      'px-3',
+      'py-2',
+      'border',
+      'border-gray-300',
+      'rounded-md',
+      'focus:outline-none',
+      'focus:ring-blue-500',
+      'focus:border-blue-500',
+    ],
     attributes: { type: 'email', id: 'email', placeholder: 'Enter your email' },
   }) as HTMLInputElement;
 
@@ -148,8 +170,22 @@ export function createLoginPage(container: HTMLElement): void {
   const passwordInput = createEl({
     tag: 'input',
     parent: passwordContainer,
-    classes: ['w-full', 'px-3', 'py-2', 'border', 'border-gray-300', 'rounded-md', 'focus:outline-none', 'focus:ring-blue-500', 'focus:border-blue-500'],
-    attributes: { type: 'password', id: 'password', placeholder: 'Enter your password' },
+    classes: [
+      'w-full',
+      'px-3',
+      'py-2',
+      'border',
+      'border-gray-300',
+      'rounded-md',
+      'focus:outline-none',
+      'focus:ring-blue-500',
+      'focus:border-blue-500',
+    ],
+    attributes: {
+      type: 'password',
+      id: 'password',
+      placeholder: 'Enter your password',
+    },
   }) as HTMLInputElement;
 
   const passwordError = createEl({
@@ -170,11 +206,13 @@ export function createLoginPage(container: HTMLElement): void {
     classes: ['mt-6'],
   });
 
-  const loginButton = createButton(
-    'Login',
-    buttonContainer,
-    ['w-full', 'bg-blue-500', 'text-white', 'hover:bg-blue-600', 'py-2']
-  );
+  const loginButton = createButton('Login', buttonContainer, [
+    'w-full',
+    'bg-blue-500',
+    'text-white',
+    'hover:bg-blue-600',
+    'py-2',
+  ]);
 
   const registerContainer = createEl({
     tag: 'div',
@@ -184,7 +222,7 @@ export function createLoginPage(container: HTMLElement): void {
 
   createEl({
     tag: 'p',
-    text: 'Don\'t have an account? ',
+    text: "Don't have an account? ",
     parent: registerContainer,
     classes: ['text-sm', 'text-gray-600'],
   });
@@ -193,7 +231,12 @@ export function createLoginPage(container: HTMLElement): void {
     tag: 'a',
     text: 'Register',
     parent: registerContainer,
-    classes: ['text-sm', 'text-blue-500', 'hover:text-blue-700', 'cursor-pointer'],
+    classes: [
+      'text-sm',
+      'text-blue-500',
+      'hover:text-blue-700',
+      'cursor-pointer',
+    ],
   });
 
   let isLoginForm = true;
@@ -204,14 +247,14 @@ export function createLoginPage(container: HTMLElement): void {
 
   function toggleForm(): void {
     isLoginForm = !isLoginForm;
-    
+
     const title = pageContainer.querySelector('h1') as HTMLElement;
     title.textContent = isLoginForm ? 'Login' : 'Register';
-    
+
     loginButton.textContent = isLoginForm ? 'Login' : 'Register';
-    
+
     registerLink.textContent = isLoginForm ? 'Register' : 'Login';
-    
+
     if (isLoginForm) {
       if (firstNameInput?.parentElement) {
         firstNameInput.parentElement.remove();
@@ -223,9 +266,9 @@ export function createLoginPage(container: HTMLElement): void {
           tag: 'div',
           classes: ['mb-4'],
         });
-        
+
         formContainer.insertBefore(firstNameContainer, emailContainer);
-        
+
         createEl({
           tag: 'label',
           text: 'First Name',
@@ -233,27 +276,41 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'firstName' },
         });
-        
+
         firstNameInput = createEl({
           tag: 'input',
           parent: firstNameContainer,
-          classes: ['w-full', 'px-3', 'py-2', 'border', 'border-gray-300', 'rounded-md', 'focus:outline-none', 'focus:ring-blue-500', 'focus:border-blue-500'],
-          attributes: { type: 'text', id: 'firstName', placeholder: 'Enter your first name' },
+          classes: [
+            'w-full',
+            'px-3',
+            'py-2',
+            'border',
+            'border-gray-300',
+            'rounded-md',
+            'focus:outline-none',
+            'focus:ring-blue-500',
+            'focus:border-blue-500',
+          ],
+          attributes: {
+            type: 'text',
+            id: 'firstName',
+            placeholder: 'Enter your first name',
+          },
         }) as HTMLInputElement;
-        
+
         firstNameError = createEl({
           tag: 'p',
           parent: firstNameContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
-        
+
         const lastNameContainer = createEl({
           tag: 'div',
           classes: ['mb-4'],
         });
-        
+
         formContainer.insertBefore(lastNameContainer, emailContainer);
-        
+
         createEl({
           tag: 'label',
           text: 'Last Name',
@@ -261,14 +318,28 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'lastName' },
         });
-        
+
         lastNameInput = createEl({
           tag: 'input',
           parent: lastNameContainer,
-          classes: ['w-full', 'px-3', 'py-2', 'border', 'border-gray-300', 'rounded-md', 'focus:outline-none', 'focus:ring-blue-500', 'focus:border-blue-500'],
-          attributes: { type: 'text', id: 'lastName', placeholder: 'Enter your last name' },
+          classes: [
+            'w-full',
+            'px-3',
+            'py-2',
+            'border',
+            'border-gray-300',
+            'rounded-md',
+            'focus:outline-none',
+            'focus:ring-blue-500',
+            'focus:border-blue-500',
+          ],
+          attributes: {
+            type: 'text',
+            id: 'lastName',
+            placeholder: 'Enter your last name',
+          },
         }) as HTMLInputElement;
-        
+
         lastNameError = createEl({
           tag: 'p',
           parent: lastNameContainer,
@@ -276,39 +347,39 @@ export function createLoginPage(container: HTMLElement): void {
         });
       }
     }
-    
+
     emailInput.value = '';
     passwordInput.value = '';
     if (firstNameInput) firstNameInput.value = '';
     if (lastNameInput) lastNameInput.value = '';
-    
+
     errorContainer.classList.add('hidden');
     emailError.classList.add('hidden');
     passwordError.classList.add('hidden');
     if (firstNameError) firstNameError.classList.add('hidden');
     if (lastNameError) lastNameError.classList.add('hidden');
   }
-  
+
   registerLink.addEventListener('click', toggleForm);
-  
+
   function showFieldError(field: HTMLElement, message: string): void {
     field.textContent = message;
     field.classList.remove('hidden');
   }
-  
+
   function hideFieldError(field: HTMLElement): void {
     field.classList.add('hidden');
   }
-  
+
   function showFormError(message: string): void {
     errorContainer.textContent = message;
     errorContainer.classList.remove('hidden');
   }
-  
+
   function hideFormError(): void {
     errorContainer.classList.add('hidden');
   }
-  
+
   loginButton.addEventListener('click', async () => {
     hideFormError();
     const { setLoading, addNotification } = uiStore.getState();
@@ -320,11 +391,16 @@ export function createLoginPage(container: HTMLElement): void {
       const validation = validateLoginForm(email, password);
 
       if (!validation.success) {
-        if (validation.errors.email) showFieldError(emailError, validation.errors.email);
+        if (validation.errors.email)
+          showFieldError(emailError, validation.errors.email);
         else hideFieldError(emailError);
-        if (validation.errors.password) showFieldError(passwordError, validation.errors.password);
+        if (validation.errors.password)
+          showFieldError(passwordError, validation.errors.password);
         else hideFieldError(passwordError);
-        addNotification('warning', 'Please fix the form errors before submitting.');
+        addNotification(
+          'warning',
+          'Please fix the form errors before submitting.'
+        );
         return;
       }
       hideFieldError(emailError);
@@ -345,43 +421,63 @@ export function createLoginPage(container: HTMLElement): void {
       } finally {
         setLoading(false);
       }
-    } else { // Registration form
+    } else {
+      // Registration form
       const firstName = firstNameInput?.value || '';
       const lastName = lastNameInput?.value || '';
 
-      const validation = validateRegisterForm(email, password, firstName, lastName);
+      const validation = validateRegisterForm(
+        email,
+        password,
+        firstName,
+        lastName
+      );
 
       if (!validation.success) {
-        if (validation.errors.email) showFieldError(emailError, validation.errors.email);
+        if (validation.errors.email)
+          showFieldError(emailError, validation.errors.email);
         else hideFieldError(emailError);
-        if (validation.errors.password) showFieldError(passwordError, validation.errors.password);
+        if (validation.errors.password)
+          showFieldError(passwordError, validation.errors.password);
         else hideFieldError(passwordError);
         if (firstNameError) {
-            if (validation.errors.firstName) showFieldError(firstNameError, validation.errors.firstName);
-            else hideFieldError(firstNameError);
+          if (validation.errors.firstName)
+            showFieldError(firstNameError, validation.errors.firstName);
+          else hideFieldError(firstNameError);
         }
         if (lastNameError) {
-            if (validation.errors.lastName) showFieldError(lastNameError, validation.errors.lastName);
-            else hideFieldError(lastNameError);
+          if (validation.errors.lastName)
+            showFieldError(lastNameError, validation.errors.lastName);
+          else hideFieldError(lastNameError);
         }
-        addNotification('warning', 'Please fix the form errors before submitting.');
+        addNotification(
+          'warning',
+          'Please fix the form errors before submitting.'
+        );
         return;
       }
       hideFieldError(emailError);
       hideFieldError(passwordError);
-      if(firstNameError) hideFieldError(firstNameError);
-      if(lastNameError) hideFieldError(lastNameError);
+      if (firstNameError) hideFieldError(firstNameError);
+      if (lastNameError) hideFieldError(lastNameError);
 
       setLoading(true);
       try {
-        const success = await AuthService.register(email, password, firstName, lastName);
+        const success = await AuthService.register(
+          email,
+          password,
+          firstName,
+          lastName
+        );
         if (success) {
           addNotification('success', 'Registration successful! Please log in.');
           toggleForm(); // Switch to login form
           emailInput.value = email;
           passwordInput.value = '';
         } else {
-          showFormError('Registration failed. This email may already be in use or another error occurred.');
+          showFormError(
+            'Registration failed. This email may already be in use or another error occurred.'
+          );
         }
       } catch (error) {
         console.error('Registration error:', error);

@@ -87,10 +87,11 @@ export function getState(): UIState {
   return uiStore.getState();
 }
 
-export function subscribeToStore(callback: (state: UIState) => void): () => void {
+export function subscribeToStore(
+  callback: (state: UIState) => void
+): () => void {
   return uiStore.subscribe(callback);
 }
-
 
 export function createNotificationsContainer(parent: HTMLElement): HTMLElement {
   const container = document.createElement('div');

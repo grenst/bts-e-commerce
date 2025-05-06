@@ -18,7 +18,11 @@ import createLoginPage from './pages/auth/auth-page';
 import { AuthService } from '../src/services/auth.service';
 // Import for a potential cart page (though not creating it now)
 // import createCartPage from './pages/cart/cart';
-import { createNotificationsContainer, createLoadingIndicator, addNotification } from './store/store';
+import {
+  createNotificationsContainer,
+  createLoadingIndicator,
+  addNotification,
+} from './store/store';
 
 const container = createEl({
   tag: 'div',
@@ -28,7 +32,15 @@ const container = createEl({
 
 const header = createEl({
   tag: 'header',
-  classes: ['flex', 'justify-between', 'items-center', 'p-4', 'bg-gray-100', 'mb-4', 'rounded'],
+  classes: [
+    'flex',
+    'justify-between',
+    'items-center',
+    'p-4',
+    'bg-gray-100',
+    'mb-4',
+    'rounded',
+  ],
   parent: container,
 });
 
@@ -65,8 +77,12 @@ const routes: Route[] = [
   },
   {
     path: '/cart',
-    component: () => { // Placeholder for cart page
-      const cartPage = createEl({ tag: 'div', text: 'Cart Page - Coming Soon!' });
+    component: () => {
+      // Placeholder for cart page
+      const cartPage = createEl({
+        tag: 'div',
+        text: 'Cart Page - Coming Soon!',
+      });
       contentContainer.innerHTML = '';
       contentContainer.append(cartPage);
       return cartPage;
@@ -99,7 +115,12 @@ function updateAuthStatus(): void {
     createEl({
       tag: 'span',
       text: `Hi, ${customer.firstName || customer.email}!`,
-      classes: ['text-sm', 'text-gray-700', 'cursor-pointer', 'hover:text-blue-600'],
+      classes: [
+        'text-sm',
+        'text-gray-700',
+        'cursor-pointer',
+        'hover:text-blue-600',
+      ],
       parent: dropdownContainer,
     });
 
@@ -124,7 +145,15 @@ function updateAuthStatus(): void {
     const profileLink = createEl({
       tag: 'a',
       text: 'My profile',
-      classes: ['block', 'px-4', 'py-2', 'text-sm', 'text-gray-700', 'hover:bg-gray-100', 'cursor-pointer'],
+      classes: [
+        'block',
+        'px-4',
+        'py-2',
+        'text-sm',
+        'text-gray-700',
+        'hover:bg-gray-100',
+        'cursor-pointer',
+      ],
       parent: dropdownMenu,
     });
     profileLink.addEventListener('click', () => router.navigateTo('/profile'));
@@ -132,7 +161,15 @@ function updateAuthStatus(): void {
     const ordersLink = createEl({
       tag: 'a',
       text: 'My orders',
-      classes: ['block', 'px-4', 'py-2', 'text-sm', 'text-gray-700', 'hover:bg-gray-100', 'cursor-pointer'],
+      classes: [
+        'block',
+        'px-4',
+        'py-2',
+        'text-sm',
+        'text-gray-700',
+        'hover:bg-gray-100',
+        'cursor-pointer',
+      ],
       parent: dropdownMenu,
     });
     ordersLink.addEventListener('click', () => router.navigateTo('/orders'));
@@ -146,7 +183,15 @@ function updateAuthStatus(): void {
     const logoutButton = createEl({
       tag: 'a',
       text: 'Logout',
-      classes: ['block', 'px-4', 'py-2', 'text-sm', 'text-gray-700', 'hover:bg-gray-100', 'cursor-pointer'],
+      classes: [
+        'block',
+        'px-4',
+        'py-2',
+        'text-sm',
+        'text-gray-700',
+        'hover:bg-gray-100',
+        'cursor-pointer',
+      ],
       parent: dropdownMenu,
     });
     logoutButton.onclick = async () => {
@@ -158,7 +203,12 @@ function updateAuthStatus(): void {
     const cartLink = createEl({
       tag: 'a',
       text: '🛒 Cart',
-      classes: ['text-sm', 'text-blue-500', 'hover:text-blue-700', 'cursor-pointer'],
+      classes: [
+        'text-sm',
+        'text-blue-500',
+        'hover:text-blue-700',
+        'cursor-pointer',
+      ],
       parent: userActionsContainer,
     });
     cartLink.addEventListener('click', () => router.navigateTo('/cart'));
@@ -166,7 +216,12 @@ function updateAuthStatus(): void {
     const loginLink = createEl({
       tag: 'a',
       text: 'Login',
-      classes: ['text-sm', 'text-blue-500', 'hover:text-blue-700', 'cursor-pointer'],
+      classes: [
+        'text-sm',
+        'text-blue-500',
+        'hover:text-blue-700',
+        'cursor-pointer',
+      ],
       parent: userNav,
     });
     loginLink.addEventListener('click', () => {
@@ -174,7 +229,6 @@ function updateAuthStatus(): void {
     });
   }
 }
-
 
 updateAuthStatus();
 

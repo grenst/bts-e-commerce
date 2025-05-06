@@ -5,7 +5,11 @@ interface TokenState {
   accessToken: string | null;
   refreshToken: string | null;
   expiresAt: number | null;
-  setTokens: (accessToken: string, refreshToken: string | null, expiresIn: number) => void;
+  setTokens: (
+    accessToken: string,
+    refreshToken: string | null,
+    expiresIn: number
+  ) => void;
   clearTokens: () => void;
 }
 
@@ -15,16 +19,18 @@ export const useTokenStore = createStore<TokenState>()(
       accessToken: null,
       refreshToken: null,
       expiresAt: null,
-      setTokens: (accessToken, refreshToken, expiresIn) => set({
-        accessToken,
-        refreshToken,
-        expiresAt: Date.now() + expiresIn * 1000, // expiresIn is expected in seconds
-      }),
-      clearTokens: () => set({
-        accessToken: null,
-        refreshToken: null,
-        expiresAt: null,
-      }),
+      setTokens: (accessToken, refreshToken, expiresIn) =>
+        set({
+          accessToken,
+          refreshToken,
+          expiresAt: Date.now() + expiresIn * 1000, // expiresIn is expected in seconds
+        }),
+      clearTokens: () =>
+        set({
+          accessToken: null,
+          refreshToken: null,
+          expiresAt: null,
+        }),
     }),
     {
       name: 'token-storage',
