@@ -47,7 +47,16 @@ const header = createEl({
 createEl({
   tag: 'h1',
   text: 'Bubble Tea Shop',
-  classes: ['text-5xl', 'font-nexa-bold', 'text-blue-600', 'text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-cyan-500', 'to-pink-500'],
+  classes: [
+    'text-5xl',
+    'font-nexa-bold',
+    'text-blue-600',
+    'text-transparent',
+    'bg-clip-text',
+    'bg-gradient-to-r',
+    'from-cyan-500',
+    'to-pink-500',
+  ],
   parent: header,
 });
 
@@ -92,7 +101,7 @@ const routes: Route[] = [
 
 routes.forEach((route) => router.addRoute(route));
 
-function updateAuthStatus(): void {
+export function updateAuthStatus(): void {
   userNav.innerHTML = '';
   const { accessToken } = useTokenStore.getState();
   const { customer } = useCustomerStore.getState();

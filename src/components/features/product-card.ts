@@ -1,7 +1,7 @@
 interface Product {
   id: string;
-  name: {[key: string]: string;};
-  description?: {[key: string]: string;} | undefined;
+  name: { [key: string]: string };
+  description?: { [key: string]: string } | undefined;
   masterVariant: {
     images?: { url: string }[];
     prices?: { value: { centAmount: number; currencyCode: string } }[];
@@ -9,11 +9,11 @@ interface Product {
 }
 
 export function createProductCardElement(product: Product): HTMLElement {
-    console.log(product)
+  console.log(product);
   const card = document.createElement('div');
   card.classList.add(
     'product-card',
-    'border',
+    'border-none',
     'rounded-lg',
     'p-4',
     'shadow-md',
@@ -23,24 +23,41 @@ export function createProductCardElement(product: Product): HTMLElement {
     'm-2',
     'w-full',
     'h-68',
-    'bg-[url(@assets/images/straw-milk.png)]',
+    'bg-[url(@assets/images/straw-milk.png),linear-gradient(to_top,#e5e7eb_0%,#e5e7eb_30%,rgba(229,231,235,0)_60%,rgba(229,231,235,0)_100%)]',
+    'bg-contain',
+    'bg-center',
+    'bg-no-repeat',
     'transition',
     'duration-500',
     'hover:scale-110',
     '[transition-timing-function:cubic-bezier(0.68,-0.55,0.27,1.55)]',
-    'cursor-pointer'
+    'cursor-pointer',
+    'card__product'
   );
   card.style.minHeight = '200px';
 
   const nameElement = document.createElement('h3');
-  nameElement.textContent = product.name["en-US"] || 'N/A';
-  nameElement.classList.add('text-lg', 'font-semibold', 'mb-2', 'truncate', 'text-gray-200');
+  nameElement.textContent = product.name['en-US'] || 'N/A';
+  nameElement.classList.add(
+    'text-lg',
+    'font-semibold',
+    'mb-2',
+    'truncate',
+    'text-gray-200'
+  );
   card.appendChild(nameElement);
 
   if (product.description) {
     const descriptionElement = document.createElement('p');
-    descriptionElement.textContent = product.description["en-US"];
-    descriptionElement.classList.add('text-sm', 'text-gray-300', 'text-shadow-sm', 'mb-2', 'overflow-hidden', 'text-ellipsis');
+    descriptionElement.textContent = product.description['en-US'];
+    descriptionElement.classList.add(
+      'text-sm',
+      'text-gray-300',
+      'text-shadow-sm',
+      'mb-2',
+      'overflow-hidden',
+      'text-ellipsis'
+    );
     descriptionElement.style.maxHeight = '3em';
     card.appendChild(descriptionElement);
   }
@@ -52,7 +69,13 @@ export function createProductCardElement(product: Product): HTMLElement {
   } else {
     priceElement.textContent = 'Price not available';
   }
-  priceElement.classList.add('text-md', 'font-bold', 'text-gray-300', 'text-shadow-lg', 'mt-auto');
+  priceElement.classList.add(
+    'text-md',
+    'font-bold',
+    'text-green-600',
+    'text-shadow-lg',
+    'mt-auto'
+  );
   card.appendChild(priceElement);
 
   return card;

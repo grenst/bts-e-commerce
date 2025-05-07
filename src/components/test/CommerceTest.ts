@@ -3,20 +3,21 @@ import { createProductCardElement } from '../features/product-card';
 
 interface Product {
   id: string;
-  name: {[key: string]: string;};
-  description?: {[key: string]: string;};
+  name: { [key: string]: string };
+  description?: { [key: string]: string };
   masterVariant: {
     images?: { url: string }[];
     prices?: { value: { centAmount: number; currencyCode: string } }[];
   };
 }
 
-export async function createCommerceTestComponent(container: HTMLElement): Promise<void> {
-
+export async function createCommerceTestComponent(
+  container: HTMLElement
+): Promise<void> {
   const componentDiv = document.createElement('div');
   componentDiv.classList.add(
     'commerce-test-component',
-    'p-4',
+    'p-4'
     // 'border', // Removing border for a cleaner look with cards
     // 'rounded',
     // 'shadow'
@@ -24,7 +25,13 @@ export async function createCommerceTestComponent(container: HTMLElement): Promi
 
   const title = document.createElement('h2');
   title.textContent = 'Published Products';
-  title.classList.add('text-xl', 'font-bold', 'mb-4', 'text-gray-500', 'text-center');
+  title.classList.add(
+    'text-xl',
+    'font-bold',
+    'mb-4',
+    'text-gray-500',
+    'text-center'
+  );
   componentDiv.appendChild(title);
 
   const productsGrid = document.createElement('div');
@@ -44,7 +51,6 @@ export async function createCommerceTestComponent(container: HTMLElement): Promi
   loadingMessage.classList.add('text-center', 'text-gray-500', 'my-4');
   productsGrid.appendChild(loadingMessage);
 
-
   container.appendChild(componentDiv);
 
   try {
@@ -59,16 +65,16 @@ export async function createCommerceTestComponent(container: HTMLElement): Promi
       return;
     }
 
-    products.forEach(product => {
+    products.forEach((product) => {
       const productCard = createProductCardElement(product);
       productsGrid.appendChild(productCard);
     });
-
   } catch (error) {
     productsGrid.removeChild(loadingMessage); // Remove loading message
     console.error('Failed to load products for CommerceTestComponent:', error);
     const errorMessage = document.createElement('p');
-    errorMessage.textContent = 'Failed to load products. Please try again later.';
+    errorMessage.textContent =
+      'Failed to load products. Please try again later.';
     errorMessage.classList.add('text-center', 'text-red-500', 'my-4');
     productsGrid.appendChild(errorMessage);
   }
