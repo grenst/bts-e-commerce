@@ -10,13 +10,19 @@ import '@styles/tailwind.css';
 import svgSpriteElement from './sources/svg-sprite';
 import createFooter from './components/layout/footer/footer';
 import { body, createEl } from './utils/elementUtils';
+import { useTokenStore } from '../src/store/token-store';
+import { useCustomerStore } from '../src/store/customer-store';
 import { createRouter, Route } from './router/router';
 import createHomePage from './pages/home/home';
 import createLoginPage from './pages/auth/auth-page';
-import { initializeAuth, getAuthState, subscribeToAuth, logoutUser } from './api/auth/auth';
-import { createNotificationsContainer, createLoadingIndicator, addNotification } from './store/store';
-
-initializeAuth();
+import { AuthService } from '../src/services/auth.service';
+// Import for a potential cart page (though not creating it now)
+// import createCartPage from './pages/cart/cart';
+import {
+  createNotificationsContainer,
+  createLoadingIndicator,
+  addNotification,
+} from './store/store';
 
 const container = createEl({
   tag: 'div',
@@ -26,20 +32,29 @@ const container = createEl({
 
 const header = createEl({
   tag: 'header',
-  classes: ['flex', 'justify-between', 'items-center', 'p-4', 'bg-gray-100', 'mb-4', 'rounded'],
+  classes: [
+    'flex',
+    'justify-between',
+    'items-center',
+    'p-4',
+    'bg-transparent',
+    'mb-4',
+    'rounded',
+  ],
   parent: container,
 });
 
 createEl({
   tag: 'h1',
-  text: 'E-commerce App',
-  classes: ['text-xl', 'font-bold', 'text-blue-600'],
+  text: 'Bubble Tea Shop',
+  classes: ['text-5xl', 'font-nexa-bold', 'text-blue-600', 'text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-cyan-500', 'to-pink-500'],
   parent: header,
 });
 
-const authStatusContainer = createEl({
+const userNav = createEl({
   tag: 'div',
-  classes: ['flex', 'items-center', 'gap-4'],
+  attributes: { id: 'user_nav' }, // Corrected: Use attributes property
+  classes: ['flex', 'items-center', 'gap-4', 'relative'], // Added relative for dropdown positioning
   parent: header,
 });
 
@@ -60,53 +75,174 @@ const routes: Route[] = [
     path: '/login',
     component: createLoginPage,
   },
+  {
+    path: '/cart',
+    component: () => {
+      // Placeholder for cart page
+      const cartPage = createEl({
+        tag: 'div',
+        text: 'Cart Page - Coming Soon!',
+      });
+      contentContainer.innerHTML = '';
+      contentContainer.append(cartPage);
+      return cartPage;
+    },
+  },
 ];
 
 routes.forEach((route) => router.addRoute(route));
 
 function updateAuthStatus(): void {
-  authStatusContainer.innerHTML = '';
-  
-  const authState = getAuthState();
-  
-  if (authState.isAuthenticated && authState.user) {
-    // User info
-    const userInfo = createEl({
+  userNav.innerHTML = '';
+  const { accessToken } = useTokenStore.getState();
+  const { customer } = useCustomerStore.getState();
+
+  if (accessToken && customer) {
+    const userActionsContainer = createEl({
+      tag: 'div',
+      classes: ['flex', 'items-center', 'gap-4'],
+      parent: userNav,
+    });
+
+    const dropdownContainer = createEl({
+      tag: 'div',
+      classes: ['relative', 'group'],
+      parent: userActionsContainer,
+    });
+
+    createEl({
       tag: 'span',
-      text: `Hello, ${authState.user.firstName || authState.user.email}`,
-      classes: ['text-sm', 'text-gray-600'],
-      parent: authStatusContainer,
+      text: `Hi, ${customer.firstName || customer.email}!`,
+      classes: [
+        'text-sm',
+        'text-gray-700',
+        'cursor-pointer',
+        'hover:text-blue-600',
+      ],
+      parent: dropdownContainer,
     });
-    
-    // Logout button
+
+    const dropdownMenu = createEl({
+      tag: 'div',
+      classes: [
+        'absolute',
+        // 'mt-1',
+        'w-32',
+        'bg-transparent',
+        'rounded-md',
+        'shadow-lg',
+        'py-1',
+        'z-10',
+        'hidden',
+        'group-hover:block',
+      ],
+      parent: dropdownContainer,
+    });
+
+    const profileLink = createEl({
+      tag: 'a',
+      text: 'My profile',
+      classes: [
+        'block',
+        'px-4',
+        'py-2',
+        'mx-2',
+        'mb-1',
+        'rounded-md',
+        'text-sm',
+        'text-gray-700',
+        'transition',
+        'duration-500',
+        'hover:bg-gray-400',
+        'cursor-pointer',
+      ],
+      parent: dropdownMenu,
+    });
+    profileLink.addEventListener('click', () => router.navigateTo('/profile'));
+
+    const ordersLink = createEl({
+      tag: 'a',
+      text: 'My orders',
+      classes: [
+        'block',
+        'px-4',
+        'py-2',
+        'mx-2',
+        'mb-1',
+        'rounded-md',
+        'text-sm',
+        'text-gray-700',
+        'transition',
+        'duration-500',
+        'hover:bg-gray-400',
+        'hover:bg-gray-400',
+        'hover:bg-gray-400',
+        'cursor-pointer',
+      ],
+      parent: dropdownMenu,
+    });
+    ordersLink.addEventListener('click', () => router.navigateTo('/orders'));
+
+    createEl({
+      tag: 'hr',
+      classes: ['my-1', 'border-gray-200'],
+      parent: dropdownMenu,
+    });
+
     const logoutButton = createEl({
-      tag: 'button',
+      tag: 'a',
       text: 'Logout',
-      classes: ['text-sm', 'text-blue-500', 'hover:text-blue-700'],
-      parent: authStatusContainer,
+      classes: [
+        'block',
+        'px-4',
+        'py-2',
+        'mx-2',
+        'mb-1',
+        'rounded-md',
+        'text-sm',
+        'transition',
+        'duration-500',
+        'text-gray-700',
+        'hover:bg-gray-400',
+        'cursor-pointer',
+      ],
+      parent: dropdownMenu,
     });
-    
-    logoutButton.addEventListener('click', () => {
-      logoutUser();
+    logoutButton.onclick = async () => {
+      await AuthService.logout();
+      updateAuthStatus();
       router.navigateTo('/');
+    };
+
+    const cartLink = createEl({
+      tag: 'a',
+      text: '🛒 Cart',
+      classes: [
+        'text-sm',
+        'text-blue-500',
+        'hover:text-blue-700',
+        'cursor-pointer',
+      ],
+      parent: userActionsContainer,
     });
+    cartLink.addEventListener('click', () => router.navigateTo('/cart'));
   } else {
-    // Login link
     const loginLink = createEl({
       tag: 'a',
       text: 'Login',
-      classes: ['text-sm', 'text-blue-500', 'hover:text-blue-700', 'cursor-pointer'],
-      parent: authStatusContainer,
+      classes: [
+        'text-sm',
+        'text-blue-500',
+        'hover:text-blue-700',
+        'cursor-pointer',
+      ],
+      parent: userNav,
     });
-    
     loginLink.addEventListener('click', () => {
       router.navigateTo('/login');
     });
   }
 }
-
-subscribeToAuth('login', updateAuthStatus);
-subscribeToAuth('logout', updateAuthStatus);
 
 updateAuthStatus();
 

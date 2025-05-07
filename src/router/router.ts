@@ -26,12 +26,12 @@ export class Router {
 
   private handleRouteChange(): void {
     const path = window.location.pathname;
-    
+
     if (this.currentPath === path) return;
     this.currentPath = path;
-    
+
     const route = this.routes.find((r) => r.path === path);
-    
+
     if (route) {
       removeAllChild(this.container);
       route.component(this.container);
@@ -84,7 +84,9 @@ export function createRouter(container: HTMLElement): Router {
 
 export function getRouter(): Router {
   if (!routerInstance) {
-    throw new Error('Router has not been initialized. Call createRouter first.');
+    throw new Error(
+      'Router has not been initialized. Call createRouter first.'
+    );
   }
   return routerInstance;
 }

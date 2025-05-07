@@ -7,7 +7,12 @@
       "./src/index.ts"
     ],
     theme: {
-      extend: {},
+      extend: {
+        fontFamily: {
+          'nexa-bold': ['"Nexa Bold"', 'sans-serif'],
+          'nexa-light': ['"Nexa Light"', 'sans-serif']
+        }
+      },
     },
     plugins: [],
     safelist: [

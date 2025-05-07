@@ -9,7 +9,7 @@
 }
 
 body {
-  background-color: aqua;
+  background-color: rgb(8, 17, 22);
   font-family: $font-family-sans;
   color: #333;
 }
@@ -17,6 +17,9 @@ body {
 .scss-container {
   @include flex-center;
   padding: 1rem;
+}
+h1, h2 {
+  font-family: $font-family-nexa-light;
 }
 .h1-bg-scss {
   background-color: purple; // Example SCSS background
