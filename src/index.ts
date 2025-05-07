@@ -37,7 +37,7 @@ const header = createEl({
     'justify-between',
     'items-center',
     'p-4',
-    'bg-gray-100',
+    'bg-transparent',
     'mb-4',
     'rounded',
   ],
@@ -46,8 +46,8 @@ const header = createEl({
 
 createEl({
   tag: 'h1',
-  text: 'E-commerce App',
-  classes: ['text-xl', 'font-bold', 'text-blue-600'],
+  text: 'Bubble Tea Shop',
+  classes: ['text-5xl', 'font-nexa-bold', 'text-blue-600', 'text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-cyan-500', 'to-pink-500'],
   parent: header,
 });
 
@@ -93,10 +93,9 @@ const routes: Route[] = [
 routes.forEach((route) => router.addRoute(route));
 
 function updateAuthStatus(): void {
-  userNav.innerHTML = ''; // Clear previous content
+  userNav.innerHTML = '';
   const { accessToken } = useTokenStore.getState();
   const { customer } = useCustomerStore.getState();
-  // const authState = getAuthState();
 
   if (accessToken && customer) {
     const userActionsContainer = createEl({
@@ -105,10 +104,9 @@ function updateAuthStatus(): void {
       parent: userNav,
     });
 
-    // User Greeting and Dropdown
     const dropdownContainer = createEl({
       tag: 'div',
-      classes: ['relative', 'group'], // 'group' for group-hover
+      classes: ['relative', 'group'],
       parent: userActionsContainer,
     });
 
@@ -128,10 +126,9 @@ function updateAuthStatus(): void {
       tag: 'div',
       classes: [
         'absolute',
-        'left-0',
         // 'mt-1',
-        'w-28',
-        'bg-white',
+        'w-32',
+        'bg-transparent',
         'rounded-md',
         'shadow-lg',
         'py-1',
@@ -149,9 +146,14 @@ function updateAuthStatus(): void {
         'block',
         'px-4',
         'py-2',
+        'mx-2',
+        'mb-1',
+        'rounded-md',
         'text-sm',
         'text-gray-700',
-        'hover:bg-gray-100',
+        'transition',
+        'duration-500',
+        'hover:bg-gray-400',
         'cursor-pointer',
       ],
       parent: dropdownMenu,
@@ -165,9 +167,16 @@ function updateAuthStatus(): void {
         'block',
         'px-4',
         'py-2',
+        'mx-2',
+        'mb-1',
+        'rounded-md',
         'text-sm',
         'text-gray-700',
-        'hover:bg-gray-100',
+        'transition',
+        'duration-500',
+        'hover:bg-gray-400',
+        'hover:bg-gray-400',
+        'hover:bg-gray-400',
         'cursor-pointer',
       ],
       parent: dropdownMenu,
@@ -187,9 +196,14 @@ function updateAuthStatus(): void {
         'block',
         'px-4',
         'py-2',
+        'mx-2',
+        'mb-1',
+        'rounded-md',
         'text-sm',
+        'transition',
+        'duration-500',
         'text-gray-700',
-        'hover:bg-gray-100',
+        'hover:bg-gray-400',
         'cursor-pointer',
       ],
       parent: dropdownMenu,
