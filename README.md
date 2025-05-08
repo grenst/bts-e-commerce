@@ -50,7 +50,7 @@ This project showcases the use of **Commercetools**, a modern headless e-commerc
 
 | Category         | Technologies                              |
 |------------------|--------------------------------------------|
-| Frontend         | [TypeScript](https://www.typescriptlang.org), [Vite](https://vitejs.dev/), [TailwindCSS]             |
+| Frontend         | [TypeScript](https://www.typescriptlang.org), [Vite](https://vitejs.dev/), [TailwindCSS] , [GSAP]            |
 | Validation       | [Zod](https://zod.dev/)                    |
 | State Management | [Zustand](https://docs.pmnd.rs/zustand/getting-started/introduction)         |
 | API              | [Commercetools SDK](https://docs.commercetools.com/) |
