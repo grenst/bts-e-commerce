@@ -1,7 +1,7 @@
 interface Product {
   id: string;
-  name: {[key: string]: string;};
-  description?: {[key: string]: string;} | undefined;
+  name: { [key: string]: string };
+  description?: { [key: string]: string } | undefined;
   masterVariant: {
     images?: { url: string }[];
     prices?: { value: { centAmount: number; currencyCode: string } }[];
@@ -9,41 +9,85 @@ interface Product {
 }
 
 export function createProductCardElement(product: Product): HTMLElement {
-    console.log(product)
   const card = document.createElement('div');
   card.classList.add(
-    'product-card',
-    'border',
-    'rounded-lg',
-    'p-4',
-    'shadow-md',
+    'product-card-redesigned',
+    'bg-white',
+    'rounded-xl',
+    'shadow-lg',
+    'overflow-hidden',
     'flex',
     'flex-col',
-    'justify-between',
-    'm-2',
-    'w-full',
-    'h-68',
-    'bg-[url(@assets/images/straw-milk.png)]',
-    'transition',
-    'duration-500',
-    'hover:scale-110',
-    '[transition-timing-function:cubic-bezier(0.68,-0.55,0.27,1.55)]',
+    'transition-all',
+    'duration-300',
+    'ease-in-out',
+    'hover:shadow-2xl',
+    'hover:scale-[1.03]',
     'cursor-pointer'
   );
-  card.style.minHeight = '200px';
+  // card.style.minHeight = '350px'; // Adjust as needed, or make it aspect ratio based
+
+  // Image container
+  const imageContainer = document.createElement('div');
+  imageContainer.classList.add(
+    'w-full',
+    'h-48',
+    'bg-gray-100',
+    'overflow-hidden'
+  );
+  card.appendChild(imageContainer);
+
+  const productImage = document.createElement('img');
+  const imageUrl = product.masterVariant.images?.[0]?.url;
+  if (imageUrl) {
+    productImage.src = imageUrl;
+    productImage.alt = product.name['en-US'] || 'Product Image';
+    productImage.classList.add('w-full', 'h-full', 'object-cover'); // Cover the container
+  } else {
+    // Placeholder if no image is available
+    imageContainer.textContent = 'No Image ;(';
+    imageContainer.classList.add(
+      'flex',
+      'items-center',
+      'justify-center',
+      'text-gray-400'
+    );
+  }
+  imageContainer.appendChild(productImage);
+
+  // Content container
+  const contentContainer = document.createElement('div');
+  contentContainer.classList.add('p-5', 'flex', 'flex-col', 'flex-grow'); // p-5 for more padding
+  card.appendChild(contentContainer);
 
   const nameElement = document.createElement('h3');
-  nameElement.textContent = product.name["en-US"] || 'N/A';
-  nameElement.classList.add('text-lg', 'font-semibold', 'mb-2', 'truncate', 'text-gray-200');
-  card.appendChild(nameElement);
+  nameElement.textContent = product.name['en-US'] || 'N/A';
+  nameElement.classList.add(
+    'text-xl',
+    'font-nexa-bold',
+    'mb-2',
+    'text-gray-800',
+    'truncate' // Keep truncate if names can be long
+  );
+  contentContainer.appendChild(nameElement);
 
-  if (product.description) {
+  if (product.description && product.description['en-US']) {
     const descriptionElement = document.createElement('p');
-    descriptionElement.textContent = product.description["en-US"];
-    descriptionElement.classList.add('text-sm', 'text-gray-300', 'text-shadow-sm', 'mb-2', 'overflow-hidden', 'text-ellipsis');
-    descriptionElement.style.maxHeight = '3em';
-    card.appendChild(descriptionElement);
+    descriptionElement.textContent = product.description['en-US'];
+    descriptionElement.classList.add(
+      'text-sm',
+      'text-gray-600',
+      'mb-3',
+      'line-clamp-3' // Limit to 3 lines with ellipsis (Tailwind plugin might be needed for this or custom CSS)
+    );
+    
+    contentContainer.appendChild(descriptionElement);
   }
+
+  // Price and CTA container (to push price to the bottom)
+  const priceContainer = document.createElement('div');
+  priceContainer.classList.add('mt-auto', 'pt-3');
+  contentContainer.appendChild(priceContainer);
 
   const priceElement = document.createElement('p');
   const firstPrice = product.masterVariant.prices?.[0];
@@ -52,8 +96,15 @@ export function createProductCardElement(product: Product): HTMLElement {
   } else {
     priceElement.textContent = 'Price not available';
   }
-  priceElement.classList.add('text-md', 'font-bold', 'text-gray-300', 'text-shadow-lg', 'mt-auto');
-  card.appendChild(priceElement);
+  priceElement.classList.add(
+    'text-lg',
+    'font-nexa-bold',
+    'text-pink-600',
+    'mb-0' // No margin bottom if it's the last element
+  );
+  priceContainer.appendChild(priceElement);
+
+  // TODO: Add "Add to Cart" button or other CTAs here later
 
   return card;
 }

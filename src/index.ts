@@ -6,6 +6,8 @@ interface WindowWithBuffer extends Window {
 (window as unknown as WindowWithBuffer).Buffer = Buffer;
 import '@styles/global.scss';
 import '@styles/tailwind.css';
+import './animations/gsap-init'; // Initialize GSAP and plugins
+import { gsap } from './animations/gsap-init'; // Import gsap
 
 import svgSpriteElement from './sources/svg-sprite';
 import createFooter from './components/layout/footer/footer';
@@ -15,6 +17,7 @@ import { useCustomerStore } from '../src/store/customer-store';
 import { createRouter, Route } from './router/router';
 import createHomePage from './pages/home/home';
 import createLoginPage from './pages/auth/auth-page';
+import createProfilePage from './pages/profile/profile'; // Placeholder for now
 import { AuthService } from '../src/services/auth.service';
 // Import for a potential cart page (though not creating it now)
 // import createCartPage from './pages/cart/cart';
@@ -44,11 +47,32 @@ const header = createEl({
   parent: container,
 });
 
-createEl({
+const mainTitle = createEl({
   tag: 'h1',
+  attributes: { id: 'main-title' }, // Added ID for GSAP
   text: 'Bubble Tea Shop',
-  classes: ['text-5xl', 'font-nexa-bold', 'text-blue-600', 'text-transparent', 'bg-clip-text', 'bg-gradient-to-r', 'from-cyan-500', 'to-pink-500'],
+  classes: [
+    'text-5xl',
+    'font-nexa-bold',
+    // Removing gradient text for now, can be re-added or done with GSAP if needed
+    // 'text-blue-600',
+    // 'text-transparent',
+    // 'bg-clip-text',
+    // 'bg-gradient-to-r',
+    // 'from-cyan-500',
+    // 'to-pink-500',
+    'text-gray-800', // Color for light theme
+  ],
   parent: header,
+});
+
+// Animate the main title
+gsap.from(mainTitle, {
+  duration: 1,
+  opacity: 0,
+  y: -50,
+  ease: 'power3.out',
+  delay: 0.5,
 });
 
 const userNav = createEl({
@@ -88,11 +112,15 @@ const routes: Route[] = [
       return cartPage;
     },
   },
+  {
+    path: '/profile',
+    component: createProfilePage,
+  },
 ];
 
 routes.forEach((route) => router.addRoute(route));
 
-function updateAuthStatus(): void {
+export function updateAuthStatus(): void {
   userNav.innerHTML = '';
   const { accessToken } = useTokenStore.getState();
   const { customer } = useCustomerStore.getState();
@@ -128,7 +156,7 @@ function updateAuthStatus(): void {
         'absolute',
         // 'mt-1',
         'w-32',
-        'bg-transparent',
+        'bg-gray-100',
         'rounded-md',
         'shadow-lg',
         'py-1',

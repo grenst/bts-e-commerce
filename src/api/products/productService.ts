@@ -5,8 +5,8 @@ import { envVariables } from '../../config/commerce-tools-api';
 
 interface Product {
   id: string;
-  name: { [key: string]: string; };
-  description?: { [key: string]: string; };
+  name: { [key: string]: string };
+  description?: { [key: string]: string };
   masterVariant: {
     images?: { url: string }[];
     prices?: { value: { centAmount: number; currencyCode: string } }[];
@@ -28,7 +28,9 @@ export async function getAllPublishedProducts(): Promise<Product[]> {
       console.warn('Access token not found');
       const refreshedState = useTokenStore.getState();
       if (!refreshedState.accessToken) {
-        throw new Error('Authentication token is not available or scope is insufficient');
+        throw new Error(
+          'Authentication token is not available or scope is insufficient'
+        );
       }
     }
 
@@ -38,7 +40,7 @@ export async function getAllPublishedProducts(): Promise<Product[]> {
         headers: {
           Authorization: `Bearer ${accessToken || useTokenStore.getState().accessToken}`, // Use potentially refreshed token
         },
-      },
+      }
     );
     return response.data.results;
   } catch (e) {
@@ -46,7 +48,9 @@ export async function getAllPublishedProducts(): Promise<Product[]> {
     console.error('Error fetching published products:', error.message);
     if ('isAxiosError' in error && error.isAxiosError && error.response) {
       if (error.response.status === 403) {
-        console.error("Forbidden: Check if the token has the 'view_published_products' scope.");
+        console.error(
+          "Forbidden: Check if the token has the 'view_published_products' scope."
+        );
       }
     } else {
       console.error('An unexpected error occurred:', error.message);
