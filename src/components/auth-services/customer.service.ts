@@ -26,6 +26,7 @@ export interface CommercetoolsCustomer {
   email: string;
   firstName?: string;
   lastName?: string;
+  version: number; // Added version for updates
 }
 
 export async function fetchMyCustomer(

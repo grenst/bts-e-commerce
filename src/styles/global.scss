@@ -5,13 +5,21 @@
 
 
 :root {
-  --background-primary: linear-gradient(rgb(0, 0, 0), rgba(255, 255, 255, 0.7));
+  // Light Theme Palette
+  --color-background-light: #FFFFFF;
+  --color-text-primary-light: #212529; // A common dark gray for text
+  --color-text-secondary-light: #495057;
+  --color-primary-light: #007bff; // Example primary color (blue)
+  --color-secondary-light: #6c757d; // Example secondary color (gray)
+  --color-accent-light: #ffc107; // Example accent color (yellow)
+  --color-surface-light: #f8f9fa; // For cards, sections backgrounds
+  --color-border-light: #dee2e6;
 }
 
 body {
-  background-color: rgb(8, 17, 22);
+  background-color: var(--color-background-light);
   font-family: $font-family-sans;
-  color: #333;
+  color: var(--color-text-primary-light); // Updated
 }
 
 .scss-container {

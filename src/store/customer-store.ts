@@ -6,6 +6,7 @@ interface Customer {
   email: string;
   firstName?: string;
   lastName?: string;
+  version: number; // Added version to match CommercetoolsCustomer
 }
 
 interface CustomerState {

@@ -8,7 +8,9 @@ import {
   signupCustomer,
   fetchMyCustomer,
   CustomerDraft,
+  CommercetoolsCustomer, // Import CommercetoolsCustomer for return type
 } from '../components/auth-services/customer.service';
+import { apiInstance } from '../api/axios-instances'; // Import apiInstance for direct calls
 import { useTokenStore } from '../store/token-store';
 import { useCustomerStore } from '../store/customer-store';
 import { uiStore as useUIStore } from '../store/store';
@@ -96,6 +98,38 @@ export class AuthService {
       debug('Refresh error', error);
       await this.logout();
       return null;
+    }
+  }
+
+  static async updateCurrentCustomer(
+    version: number,
+    actions: { action: string; [key: string]: unknown }[]
+  ): Promise<CommercetoolsCustomer> {
+    const { accessToken } = useTokenStore.getState();
+    if (!accessToken) {
+      throw new Error('No access token available for updating customer.');
+    }
+
+    debug('POST /me (update customer)', { version, actions });
+    try {
+      const { data } = await apiInstance.post<CommercetoolsCustomer>(
+        '/me',
+        { version, actions },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      debug('Customer update successful', data.email);
+      // Update customer in store after successful API call
+      useCustomerStore.getState().setCustomer(data);
+      return data;
+    } catch (error) {
+      debug('Customer update error', error);
+      useUIStore
+        .getState()
+        .addNotification(
+          'error',
+          `Customer update failed: ${(error as Error).message}`
+        );
+      throw error;
     }
   }
 }
