@@ -58,3 +58,41 @@ export async function getAllPublishedProducts(): Promise<Product[]> {
     throw error;
   }
 }
+
+export interface DrinkProduct {
+  id: string;
+  name: string;
+  description: string;
+  price?: number; // centAmounts
+  currency?: string;
+  imageUrl?: string;
+}
+
+export async function getDrinkProducts(): Promise<DrinkProduct[]> {
+  try {
+    const products = await getAllPublishedProducts();
+    return products.map((product): DrinkProduct => {
+      const name = product.name.en || Object.values(product.name)[0] || 'N/A';
+      const description =
+        product.description?.en ||
+        Object.values(product.description || {})[0] ||
+        'No description available.';
+      const priceInfo = product.masterVariant.prices?.[0]?.value;
+      const imageUrl = product.masterVariant.images?.[0]?.url;
+
+      return {
+        id: product.id,
+        name,
+        description,
+        price: priceInfo?.centAmount,
+        currency: priceInfo?.currencyCode,
+        imageUrl,
+      };
+    });
+  } catch (e) {
+    const error = e as AxiosError | Error;
+    console.error('Error processing products into DrinkProduct format:', error.message);
+    // Re-throw the error so the caller can handle it if needed
+    throw error;
+  }
+}
