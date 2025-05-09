@@ -2,6 +2,7 @@ import { createEl } from '../../utils/elementUtils';
 import { getAllPublishedProducts } from '../../api/products/productService';
 import { createProductCardElement } from '../../components/features/product-card'; // Will be used for product listing
 import { gsap, ScrollTrigger } from '../../animations/gsap-init'; // Import GSAP and ScrollTrigger
+import { fetchBestProducts } from '../../api/products/productServiceTest';
 
 export async function createHomePage(container: HTMLElement): Promise<void> {
   container.innerHTML = '';
@@ -71,7 +72,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   createEl({
     tag: 'h2',
     text: 'Our Special Blends',
-    classes: ['text-3xl', 'font-nexa-bold', 'text-center', 'mb-12', 'text-gray-800'],
+    classes: [
+      'text-3xl',
+      'font-nexa-bold',
+      'text-center',
+      'mb-12',
+      'text-gray-800',
+    ],
     parent: featuredWrapper,
   });
 
@@ -106,7 +113,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     const img = createEl({
       tag: 'img',
       attributes: { src: imgPath, alt: `Featured Blend ${index + 1}` },
-      classes: ['max-h-full', 'max-w-full', 'object-contain', 'rounded-lg', 'shadow-md'],
+      classes: [
+        'max-h-full',
+        'max-w-full',
+        'object-contain',
+        'rounded-lg',
+        'shadow-md',
+      ],
       parent: panel,
     });
   });
@@ -120,10 +133,27 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       scrub: 1, // Smooth scrubbing, 1 second delay
       // markers: true, // For debugging
       start: 'top top', // When the top of the trigger hits the top of the viewport
-      end: () => `+=${horizontalTrack.offsetWidth - featuredWrapper.offsetWidth}`, // End after scrolling the entire track width minus one screen width
+      end: () =>
+        `+=${horizontalTrack.offsetWidth - featuredWrapper.offsetWidth}`, // End after scrolling the entire track width minus one screen width
       invalidateOnRefresh: true, // Recalculate on resize
     },
   });
+
+  // Create section the best products
+  const productBestChoice: HTMLElement = createEl({
+    tag: 'section',
+    attributes: { id: 'product-best-choice' },
+    classes: ['py-16'],
+    parent: homeContainer,
+  });
+
+  const productBestChoiceItem: HTMLElement = createEl({
+    tag: 'div',
+    attributes: { id: 'productBestChoiceItem' },
+    classes: ['py-16'],
+    parent: productBestChoice,
+  });
+  displayBestProduct(productBestChoiceItem);
 
   // Product Listing Section
   const productListingSection = createEl({
@@ -140,7 +170,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   createEl({
     tag: 'h2',
     text: 'Explore Our Drinks',
-    classes: ['text-3xl', 'font-nexa-bold', 'text-center', 'mb-12', 'text-gray-800'],
+    classes: [
+      'text-3xl',
+      'font-nexa-bold',
+      'text-center',
+      'mb-12',
+      'text-gray-800',
+    ],
     parent: productListingWrapper,
   });
 
@@ -211,7 +247,52 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       parent: productsGrid,
     });
   }
-  
+  async function displayBestProduct(containerElement: HTMLElement) {
+    const loadingMessage = createEl({
+      tag: 'p',
+      text: 'Loading your delightful drinks...',
+      classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
+      parent: containerElement,
+    });
+
+    try {
+      const bestProducts = await fetchBestProducts();
+      loadingMessage.remove();
+
+      if (bestProducts.length === 0) {
+        createEl({
+          tag: 'p',
+          text: 'No drinks available at the moment. Please check back soon!',
+          classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
+          parent: productsGrid,
+        });
+      } else {
+        bestProducts.forEach((product, index) => {
+          const productCard = createProductCardElement(product);
+          containerElement.appendChild(productCard);
+
+          // GSAP animation for card entrance
+          gsap.from(productCard, {
+            duration: 0.5,
+            opacity: 0,
+            y: 50,
+            scale: 0.95,
+            ease: 'power1.out',
+            delay: index * 0.1, // Stagger the animation slightly for each card
+          });
+        });
+      }
+    } catch (error) {
+      loadingMessage.remove();
+      console.error('Failed to load products for home page:', error);
+      createEl({
+        tag: 'p',
+        text: 'Oops! We couldn’t fetch the drinks. Please try refreshing.',
+        classes: ['text-center', 'text-red-500', 'my-4', 'col-span-full'],
+        parent: productsGrid,
+      });
+    }
+  }
 }
 
 export default createHomePage;
