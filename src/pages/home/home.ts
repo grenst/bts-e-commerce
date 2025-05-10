@@ -18,7 +18,8 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     attributes: { id: 'hero-section' },
     classes: [
       'h-[70vh]',
-      "bg-[url('@assets/images/poring-milk-into-boba-tea.jpg')]", // Added background image
+      "bg-transparent",
+      // "bg-[url('@assets/images/poring-milk-into-boba-tea.jpg')]",
       'bg-cover',
       'bg-center',
       'flex',
@@ -34,12 +35,12 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const heroTitle = createEl({ // Temporary section
     tag: 'h2',
     attributes: { id: 'hero-title' }, // Added ID for GSAP
-    text: 'Welcome to the Refreshed Bubble Tea Experience!',
+    text: '',
     classes: [
       'text-4xl',
       'font-nexa-bold',
       'text-white',
-      'bg-black/50', // Added a semi-transparent overlay for readability
+      'bg-black/50',
       'p-4',
       'rounded-md',
     ],
@@ -60,12 +61,12 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const featuredSection = createEl({
     tag: 'section',
     attributes: { id: 'featured-products-section' },
-    classes: ['py-16', 'bg-white', 'overflow-hidden'], // Added overflow-hidden for pinning
+    classes: ['py-16', 'bg-white', 'overflow-hidden'],
     parent: homeContainer,
   });
   const featuredWrapper = createEl({
     tag: 'div',
-    classes: ['container', 'mx-auto', 'px-4', 'relative'], // Added relative for positioning track
+    classes: ['container', 'mx-auto', 'px-4', 'relative'],
     parent: featuredSection,
   });
   createEl({
@@ -79,7 +80,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const horizontalTrack = createEl({
     tag: 'div',
     attributes: { id: 'horizontal-track' },
-    classes: ['flex', 'w-max'], // w-max to allow content to exceed parent width, flex for items
+    classes: ['flex', 'w-max'],
     parent: featuredWrapper,
   });
 
@@ -112,10 +113,10 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   });
 
   gsap.to(horizontalTrack, {
-    xPercent: -100 * (featuredImages.length - 1), // Scroll by (number of panels - 1) * 100%
+    xPercent: -100 * (featuredImages.length - 1),
     ease: 'none', // Linear scroll
     scrollTrigger: {
-      trigger: featuredSection, // The section itself
+      trigger: featuredSection,
       pin: true, // Pin the section while scrolling horizontally
       scrub: 1, // Smooth scrubbing, 1 second delay
       // markers: true, // For debugging
@@ -129,7 +130,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const productListingSection = createEl({
     tag: 'section',
     attributes: { id: 'product-listing-section' },
-    classes: ['py-16', 'bg-gray-50'], // Example styling, using a light surface color
+    classes: ['py-16', 'bg-gray-50'],
     parent: homeContainer,
   });
   const productListingWrapper = createEl({
@@ -192,13 +193,11 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
           scrollTrigger: {
             trigger: productCard,
             start: 'top 90%', // Trigger when 90% of the card is visible
-            // markers: true, // Uncomment for debugging ScrollTrigger
             toggleActions: 'play none none none', // Play animation once when it enters viewport
           },
           delay: index * 0.1, // Stagger the animation slightly for each card
         });
       });
-      // Refresh ScrollTrigger after all cards are added to ensure correct calculations
       ScrollTrigger.refresh();
     }
   } catch (error) {

@@ -7,7 +7,12 @@ interface WindowWithBuffer extends Window {
 import '@styles/global.scss';
 import '@styles/tailwind.css';
 import './animations/gsap-init'; // Initialize GSAP and plugins
-import { gsap } from './animations/gsap-init'; // Import gsap
+import { gsap, setupBackgroundAnimations } from './animations/gsap-init'; // Import gsap and setup function
+import logoImagePath from './assets/images/logo.webp';
+import circleBg1Path from './assets/images/circle_bg_1.webp';
+import circleBg2Path from './assets/images/circle_bg_2.webp';
+import circleBg3Path from './assets/images/circle_bg_3.webp';
+import circleBg4Path from './assets/images/circle_bg_4.webp';
 
 import svgSpriteElement from './sources/svg-sprite';
 import createFooter from './components/layout/footer/footer';
@@ -27,24 +32,149 @@ import {
   addNotification,
 } from './store/store';
 
-const container = createEl({
+// --- Animated Background Container ---
+const animatedBackgroundContainer = createEl({
   tag: 'div',
-  classes: ['max-w-4xl', 'mx-auto', 'p-4'],
+  attributes: { id: 'animated-background-container' },
+  classes: [
+    'fixed',
+    'top-0',
+    'left-0',
+    'w-screen',
+    'h-screen',
+    'z-[-1]',
+    'overflow-hidden',
+    'flex',
+    'items-center',
+    'justify-center',
+  ],
   parent: body,
 });
+
+// --- Background Circle Bubble Images ---
+const bgCircleImagesData = [
+  { id: 'bg-circle-4', src: circleBg4Path, alt: 'Background Circle 4' },
+  { id: 'bg-circle-3', src: circleBg3Path, alt: 'Background Circle 3' },
+  { id: 'bg-circle-2', src: circleBg2Path, alt: 'Background Circle 2' },
+  { id: 'bg-circle-1', src: circleBg1Path, alt: 'Background Circle 1' },
+];
+
+bgCircleImagesData.forEach(imgData => {
+  createEl({
+    tag: 'img',
+    attributes: {
+      id: imgData.id,
+      src: imgData.src,
+      alt: imgData.alt,
+    },
+    parent: animatedBackgroundContainer,
+  });
+});
+
+// --- Losung Text ---
+const bgLosung = createEl({
+  tag: 'div',
+  attributes: { id: 'bg-losung' },
+  classes: [
+    'px-4',
+    'pb-16',
+    'bg-transparent',
+    'rounded-md',
+    'text-center',
+    'max-w-md',
+    'z-30',
+  ],
+  parent: animatedBackgroundContainer,
+});
+
+// Create and animate lines for bgLosung
+const losungTextLines = [
+  'Your market',
+  'for a world in',
+  'freshness crisis.',
+];
+const animatedLineElements: HTMLElement[] = [];
+
+losungTextLines.forEach((text) => {
+  const lineContainer = createEl({
+    tag: 'div',
+    classes: [
+      'overflow-hidden',
+      'relative',
+      'leading-8',
+    ],
+    parent: bgLosung,
+  });
+
+  const textElement = createEl({
+    tag: 'span',
+    text,
+    classes: [
+      'text-black',
+      'inline-block',
+      'whitespace-nowrap',
+    ],
+    parent: lineContainer,
+  });
+  animatedLineElements.push(textElement);
+});
+
+if (animatedLineElements.length > 0) {
+  gsap.fromTo(
+    animatedLineElements,
+    { yPercent: 120 },
+    {
+      yPercent: 0,
+      stagger: 0.25,
+      duration: 0.8,
+      ease: 'power2.out',
+      delay: 0.3,
+    },
+  );
+}
+
+setupBackgroundAnimations();
 
 const header = createEl({
   tag: 'header',
   classes: [
+    'fixed',
+    'top-0',
+    'left-0',
+    'right-0',
     'flex',
     'justify-between',
     'items-center',
-    'p-4',
-    'bg-transparent',
-    'mb-4',
-    'rounded',
+    'h-10',
+    'px-4',
+    'bg-white/50',
+    'w-full',
+    'transition-colors',
+    'duration-300',
+    'z-10',
   ],
-  parent: container,
+  parent: body,
+});
+
+const container = createEl({
+  tag: 'div',
+  classes: ['max-w-4xl', 'py-4', 'mx-auto', 'relative', 'z-[1]', 'mt-[80px]'],
+  parent: body,
+});
+
+// Logo
+const logoImg = createEl({
+  tag: 'img',
+  attributes: {
+    src: logoImagePath,
+    alt: 'Bubble Tee Shop Logo',
+  },
+  classes: ['h-[28px]', 'w-[30px]', 'flex-shrink-0', 'cursor-pointer'],
+  parent: header,
+});
+
+logoImg.addEventListener('click', () => {
+  router.navigateTo('/');
 });
 
 const mainTitle = createEl({
@@ -52,16 +182,13 @@ const mainTitle = createEl({
   attributes: { id: 'main-title' }, // Added ID for GSAP
   text: 'Bubble Tea Shop',
   classes: [
-    'text-5xl',
-    'font-nexa-bold',
-    // Removing gradient text for now, can be re-added or done with GSAP if needed
-    // 'text-blue-600',
-    // 'text-transparent',
-    // 'bg-clip-text',
-    // 'bg-gradient-to-r',
-    // 'from-cyan-500',
-    // 'to-pink-500',
-    'text-gray-800', // Color for light theme
+    'text-3xl',
+    'font-impact',
+    'text-gray-800',
+    'flex-grow',
+    'text-start',
+    'text-justify',
+    'pt-3',
   ],
   parent: header,
 });
@@ -70,15 +197,21 @@ const mainTitle = createEl({
 gsap.from(mainTitle, {
   duration: 1,
   opacity: 0,
-  y: -50,
+  x: -30,
   ease: 'power3.out',
   delay: 0.5,
 });
 
 const userNav = createEl({
   tag: 'div',
-  attributes: { id: 'user_nav' }, // Corrected: Use attributes property
-  classes: ['flex', 'items-center', 'gap-4', 'relative'], // Added relative for dropdown positioning
+  attributes: { id: 'user_nav' },
+  classes: [
+    'flex',
+    'items-center',
+    'gap-4',
+    'relative',
+    'flex-shrink-0',
+  ],
   parent: header,
 });
 
@@ -283,6 +416,26 @@ createNotificationsContainer(body);
 createLoadingIndicator(body);
 
 addNotification('info', 'Welcome to the E-commerce App!');
+
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 40) {
+    header.classList.add('bg-transparent');
+    header.classList.remove('bg-white/50');
+    mainTitle.classList.add('text-xl');
+    mainTitle.classList.remove('text-5xl');
+    mainTitle.classList.remove('text-center');
+    mainTitle.classList.add('text-left');
+    // mainTitle.classList.remove('flex-grow'); // Move title towards logo
+  } else {
+    header.classList.remove('bg-transparent');
+    header.classList.add('bg-white/50');
+    mainTitle.classList.add('text-center');
+    mainTitle.classList.remove('text-left');
+    mainTitle.classList.add('text-3xl');
+    mainTitle.classList.remove('text-xl');
+    // mainTitle.classList.add('flex-grow'); // Restore title to center
+  }
+});
 
 router.init();
 
