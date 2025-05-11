@@ -18,7 +18,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     attributes: { id: 'hero-section' },
     classes: [
       'h-[70vh]',
-      "bg-transparent",
+      'bg-transparent',
       // "bg-[url('@assets/images/poring-milk-into-boba-tea.jpg')]",
       'bg-cover',
       'bg-center',
@@ -32,7 +32,8 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: homeContainer,
   });
 
-  const heroTitle = createEl({ // Temporary section
+  const heroTitle = createEl({
+    // Temporary section
     tag: 'h2',
     attributes: { id: 'hero-title' }, // Added ID for GSAP
     text: '',
@@ -53,9 +54,8 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     opacity: 0,
     scale: 0.5,
     ease: 'back.out(1.7)',
-    delay: 0.3, // Delay slightly after main title animation
+    delay: 0.3,
   });
-  // TODO: Consider adding parallax to the background image itself if desired
 
   // Featured Products/Categories Section (Placeholder)
   const featuredSection = createEl({
@@ -72,7 +72,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   createEl({
     tag: 'h2',
     text: 'Our Special Blends',
-    classes: ['text-3xl', 'font-nexa-bold', 'text-center', 'mb-12', 'text-gray-800'],
+    classes: [
+      'text-3xl',
+      'font-nexa-bold',
+      'text-center',
+      'mb-12',
+      'text-gray-800',
+    ],
     parent: featuredWrapper,
   });
 
@@ -93,7 +99,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     const panel = createEl({
       tag: 'div',
       classes: [
-        'w-screen', // Each panel takes full screen width initially
+        'w-screen',
         'h-[50vh]', // Example height for panels
         'flex-shrink-0', // Prevent panels from shrinking
         'flex',
@@ -104,10 +110,16 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       ],
       parent: horizontalTrack,
     });
-    const img = createEl({
+    createEl({
       tag: 'img',
       attributes: { src: imgPath, alt: `Featured Blend ${index + 1}` },
-      classes: ['max-h-full', 'max-w-full', 'object-contain', 'rounded-lg', 'shadow-md'],
+      classes: [
+        'max-h-full',
+        'max-w-full',
+        'object-contain',
+        'rounded-lg',
+        'shadow-md',
+      ],
       parent: panel,
     });
   });
@@ -121,7 +133,8 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       scrub: 1, // Smooth scrubbing, 1 second delay
       // markers: true, // For debugging
       start: 'top top', // When the top of the trigger hits the top of the viewport
-      end: () => `+=${horizontalTrack.offsetWidth - featuredWrapper.offsetWidth}`, // End after scrolling the entire track width minus one screen width
+      end: () =>
+        `+=${horizontalTrack.offsetWidth - featuredWrapper.offsetWidth}`, // End after scrolling the entire track width minus one screen width
       invalidateOnRefresh: true, // Recalculate on resize
     },
   });
@@ -141,7 +154,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   createEl({
     tag: 'h2',
     text: 'Explore Our Drinks',
-    classes: ['text-3xl', 'font-nexa-bold', 'text-center', 'mb-12', 'text-gray-800'],
+    classes: [
+      'text-3xl',
+      'font-nexa-bold',
+      'text-center',
+      'mb-12',
+      'text-gray-800',
+    ],
     parent: productListingWrapper,
   });
 
@@ -210,7 +229,6 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       parent: productsGrid,
     });
   }
-  
 }
 
 export default createHomePage;

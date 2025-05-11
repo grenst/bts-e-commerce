@@ -57,7 +57,7 @@ export function createProductCardElement(product: Product): HTMLElement {
 
   // Content container
   const contentContainer = document.createElement('div');
-  contentContainer.classList.add('p-5', 'flex', 'flex-col', 'flex-grow'); // p-5 for more padding
+  contentContainer.classList.add('p-5', 'flex', 'flex-col', 'flex-grow');
   card.appendChild(contentContainer);
 
   const nameElement = document.createElement('h3');
@@ -78,13 +78,12 @@ export function createProductCardElement(product: Product): HTMLElement {
       'text-sm',
       'text-gray-600',
       'mb-3',
-      'line-clamp-3' // Limit to 3 lines with ellipsis (Tailwind plugin might be needed for this or custom CSS)
+      'line-clamp-3'
     );
-    
+
     contentContainer.appendChild(descriptionElement);
   }
 
-  // Price and CTA container (to push price to the bottom)
   const priceContainer = document.createElement('div');
   priceContainer.classList.add('mt-auto', 'pt-3');
   contentContainer.appendChild(priceContainer);
@@ -100,7 +99,7 @@ export function createProductCardElement(product: Product): HTMLElement {
     'text-lg',
     'font-nexa-bold',
     'text-pink-600',
-    'mb-0' // No margin bottom if it's the last element
+    'mb-0'
   );
   priceContainer.appendChild(priceElement);
 

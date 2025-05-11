@@ -63,7 +63,7 @@ export interface DrinkProduct {
   id: string;
   name: string;
   description: string;
-  price?: number; // centAmounts
+  price?: number;
   currency?: string;
   imageUrl?: string;
 }
@@ -91,8 +91,10 @@ export async function getDrinkProducts(): Promise<DrinkProduct[]> {
     });
   } catch (e) {
     const error = e as AxiosError | Error;
-    console.error('Error processing products into DrinkProduct format:', error.message);
-    // Re-throw the error so the caller can handle it if needed
+    console.error(
+      'Error processing products into DrinkProduct format:',
+      error.message
+    );
     throw error;
   }
 }

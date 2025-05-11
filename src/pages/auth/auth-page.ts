@@ -5,7 +5,7 @@ import { getRouter } from '../../router/router';
 import { uiStore } from '../../store/store';
 import { AuthService } from '../../services/auth.service';
 import { useCustomerStore } from '../../store/customer-store';
-import { updateAuthStatus } from '../../index';
+import { triggerHeaderUpdate } from '../../index';
 
 const emailSchema = z
   .string()
@@ -412,7 +412,7 @@ export function createLoginPage(container: HTMLElement): void {
         const success = await AuthService.login(email, password);
         if (success) {
           addNotification('success', 'Successfully logged in!');
-          updateAuthStatus();
+          triggerHeaderUpdate();
           getRouter().navigateTo('/');
         } else {
           showFormError('Invalid email or password. Please try again.');

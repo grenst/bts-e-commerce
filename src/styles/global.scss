@@ -35,6 +35,10 @@ header {
     transition: font-size 0.2s;
     font-family: $font-family-nexa-bold;
     transform: scaleX(0.9);
+    
+    @media screen and (max-width: 450px) {
+      font-size: 1.2rem;
+    }
   }
 }
 #bg-losung {
@@ -49,6 +53,13 @@ header {
   }
 }
 
+.name-usr-bold {
+  font-family: $font-family-nexa-bold;
+}
+.my_cocpit {
+  font-family: $font-family-nexa-light;
+  font-size: 1.5rem;
+}
 // --- Animated Background Styles ---
 #animated-background-container {
   position: fixed;
@@ -77,8 +88,12 @@ header {
       transform: translate(-50%, -0%) scale(1.7);
     }
     
-    @media screen and (max-width: 600px) {
+    @media screen and (max-width: 600px) and (min-width: 451px)  {
       transform: translate(-50%, -0%) scale(2.3);
+    }
+
+    @media screen and (max-width: 450px)  {
+      transform: translate(-50%, -0%) scale(2.7);
     }
   }
 }

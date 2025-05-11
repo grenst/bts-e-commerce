@@ -6,16 +6,15 @@ gsap.registerPlugin(ScrollTrigger);
 
 function setupBackgroundAnimations() {
   const circles = [
-      { id: '#bg-circle-4', rotation: '+=10' }, // slow, CW
-      { id: '#bg-circle-3', rotation: '-=35' }, // even faster, CCW
-      { id: '#bg-circle-2', rotation: '+=20' }, // faster, CW
+    { id: '#bg-circle-4', rotation: '+=10' }, // slow, CW
+    { id: '#bg-circle-3', rotation: '-=35' }, // even faster, CCW
+    { id: '#bg-circle-2', rotation: '+=20' }, // faster, CW
     { id: '#bg-circle-1', rotation: '-=10' }, // slow, CCW
   ];
 
-  circles.forEach(circle => {
+  circles.forEach((circle) => {
     const element = document.querySelector(circle.id);
     if (element) {
-      // Set initial transform origin to ensure it's correct before animation starts
       gsap.set(element, { transformOrigin: 'center center' });
 
       gsap.to(element, {
@@ -29,7 +28,9 @@ function setupBackgroundAnimations() {
         },
       });
     } else {
-      console.warn(`Background circle element ${circle.id} not found for animation.`);
+      console.warn(
+        `Background circle element ${circle.id} not found for animation.`
+      );
     }
   });
 }
