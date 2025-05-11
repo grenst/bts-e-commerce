@@ -61,7 +61,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const actualSection = createEl({
     tag: 'section',
     attributes: { id: 'actual-products' },
-    classes: ['py-16', 'bg-gray-50'],
+    classes: ['py-8', 'backdrop-blur-sm', 'bg-gray-50/30'],
     parent: homeContainer,
   });
 
@@ -151,7 +151,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const featuredSection = createEl({
     tag: 'section',
     attributes: { id: 'featured-products-section' },
-    classes: ['py-8', 'bg-white', 'overflow-hidden'],
+    classes: [
+      'mt-16',
+      'py-4',
+      'backdrop-blur-sm',
+      'bg-white/30',
+      'overflow-hidden',
+    ],
     parent: homeContainer,
   });
   const featuredWrapper = createEl({
@@ -181,7 +187,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   });
 
   const featuredImages = [
-    './src/assets/images/21-bumble.jpg',
+    './src/assets/images/urZC1GHMf9ve.webp',
     './src/assets/images/21-bumble.webp',
   ];
 
@@ -233,7 +239,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const productListingSection = createEl({
     tag: 'section',
     attributes: { id: 'product-listing-section' },
-    classes: ['py-16', 'bg-gray-50'],
+    classes: ['py-16', 'backdrop-blur-sm', 'bg-white/30'],
     parent: homeContainer,
   });
   const productListingWrapper = createEl({
