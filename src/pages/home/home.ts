@@ -92,7 +92,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
 
   const featuredImages = [
     './src/assets/images/21-bumble.jpg',
-    './src/assets/images/75849566_m_normal_none.jpg',
+    './src/assets/images/21-bumble.webp',
   ];
 
   featuredImages.forEach((imgPath, index) => {

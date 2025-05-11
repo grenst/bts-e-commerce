@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createEl } from '../../utils/elementUtils';
-import createButton from '../../components/ui/button/button';
+import createButton from '../../components/layout/button/button';
 import { getRouter } from '../../router/router';
 import { uiStore } from '../../store/store';
 import { AuthService } from '../../services/auth.service';
