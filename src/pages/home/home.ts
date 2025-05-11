@@ -17,7 +17,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     tag: 'section',
     attributes: { id: 'hero-section' },
     classes: [
-      'h-[70vh]',
+      'h-[calc(100dvh-140px)]',
       'bg-transparent',
       // "bg-[url('@assets/images/poring-milk-into-boba-tea.jpg')]",
       'bg-cover',
@@ -61,7 +61,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const featuredSection = createEl({
     tag: 'section',
     attributes: { id: 'featured-products-section' },
-    classes: ['py-16', 'bg-white', 'overflow-hidden'],
+    classes: ['py-3', 'bg-white', 'overflow-hidden'],
     parent: homeContainer,
   });
   const featuredWrapper = createEl({
@@ -76,7 +76,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       'text-3xl',
       'font-nexa-bold',
       'text-center',
-      'mb-12',
+      'mb-4',
       'text-gray-800',
     ],
     parent: featuredWrapper,
@@ -86,7 +86,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const horizontalTrack = createEl({
     tag: 'div',
     attributes: { id: 'horizontal-track' },
-    classes: ['flex', 'w-max'],
+    classes: ['flex', 'w-max', 'transform-gpu'],
     parent: featuredWrapper,
   });
 

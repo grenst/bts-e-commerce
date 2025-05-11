@@ -45,6 +45,20 @@ type ValidationResult = {
   errors: Record<string, string>;
 };
 
+const inputParams = [
+  'text-3xl',
+  'placeholder:text-sm',
+  'input-field',
+  'w-full',
+  'px-3',
+  'py-2',
+  'border-b-1',
+  'border-gray-400',
+  'focus:outline-none',
+  'focus:ring-none',
+  'focus:border-b-10',
+];
+
 function validateLoginForm(email: string, password: string): ValidationResult {
   try {
     loginFormSchema.parse({ email, password });
@@ -96,10 +110,12 @@ export function createLoginPage(container: HTMLElement): void {
       'auth-page',
       'max-w-md',
       'mx-auto',
+      'mt-20',
       'p-6',
       'bg-white',
-      'rounded-lg',
       'shadow-md',
+      '-z-0',
+      'relative',
     ],
   });
 
@@ -107,7 +123,21 @@ export function createLoginPage(container: HTMLElement): void {
     tag: 'h1',
     text: 'Login',
     parent: pageContainer,
-    classes: ['text-2xl', 'font-bold', 'mb-6', 'text-center', 'text-gray-800'],
+    classes: [
+      'text-2xl',
+      'font-bold',
+      'mb-6',
+      'z-30',
+      'text-center',
+      'text-gray-800',
+      "before:content-['']",
+      'before:absolute',
+      'before:h-6',
+      'before:w-20',
+      'before:bg-yellow-400',
+      'before:-z-1',
+      'login-name',
+    ],
   });
 
   const formContainer = createEl({
@@ -133,17 +163,7 @@ export function createLoginPage(container: HTMLElement): void {
   const emailInput = createEl({
     tag: 'input',
     parent: emailContainer,
-    classes: [
-      'w-full',
-      'px-3',
-      'py-2',
-      'border',
-      'border-gray-300',
-      'rounded-md',
-      'focus:outline-none',
-      'focus:ring-blue-500',
-      'focus:border-blue-500',
-    ],
+    classes: inputParams,
     attributes: { type: 'email', id: 'email', placeholder: 'Enter your email' },
   }) as HTMLInputElement;
 
@@ -164,7 +184,7 @@ export function createLoginPage(container: HTMLElement): void {
     tag: 'label',
     text: 'Password',
     parent: passwordContainer,
-    classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+    classes: ['block', 'text-sm', 'font-large', 'text-gray-700', 'mb-1'],
     attributes: { for: 'password' },
   });
 
@@ -175,12 +195,11 @@ export function createLoginPage(container: HTMLElement): void {
       'w-full',
       'px-3',
       'py-2',
-      'border',
+      'mb-2',
       'border-gray-300',
-      'rounded-md',
       'focus:outline-none',
-      'focus:ring-blue-500',
-      'focus:border-blue-500',
+      'focus:pb-2',
+      'focus:mb-1',
     ],
     attributes: {
       type: 'password',
@@ -198,7 +217,7 @@ export function createLoginPage(container: HTMLElement): void {
   const errorContainer = createEl({
     tag: 'div',
     parent: formContainer,
-    classes: ['mt-4', 'p-3', 'bg-red-100', 'text-red-700', 'rounded', 'hidden'],
+    classes: ['mt-4', 'p-3', 'bg-red-100', 'text-red-700', 'hidden'],
   });
 
   const buttonContainer = createEl({
@@ -209,9 +228,9 @@ export function createLoginPage(container: HTMLElement): void {
 
   const loginButton = createButton('Login', buttonContainer, [
     'w-full',
-    'bg-blue-500',
+    'bg-gray-800',
     'text-white',
-    'hover:bg-blue-600',
+    'hover:bg-gray-900',
     'py-2',
   ]);
 
@@ -234,8 +253,8 @@ export function createLoginPage(container: HTMLElement): void {
     parent: registerContainer,
     classes: [
       'text-sm',
-      'text-blue-500',
-      'hover:text-blue-700',
+      'text-gray-900',
+      'hover:text-gray-700',
       'cursor-pointer',
     ],
   });
@@ -260,6 +279,17 @@ export function createLoginPage(container: HTMLElement): void {
       if (firstNameInput?.parentElement) {
         firstNameInput.parentElement.remove();
         lastNameInput?.parentElement?.remove();
+        // Reset the variables to ensure they are recreated when switching back to register form
+        firstNameInput = undefined;
+        lastNameInput = undefined;
+        firstNameError = undefined;
+        lastNameError = undefined;
+        title.classList.add('before:w-20');
+        title.classList.remove('before:w-29');
+
+        title.classList.add('reset-animation'); // Reseting animation
+        void title.offsetWidth;
+        title.classList.remove('reset-animation');
       }
     } else {
       if (!firstNameInput) {
@@ -269,6 +299,14 @@ export function createLoginPage(container: HTMLElement): void {
         });
 
         formContainer.insertBefore(firstNameContainer, emailContainer);
+
+        title.classList.add('before:w-29');
+        title.classList.remove('before:w-20');
+        title.classList.remove('login-name::before');
+
+        title.classList.add('reset-animation'); // Reseting animation
+        void title.offsetWidth;
+        title.classList.remove('reset-animation');
 
         createEl({
           tag: 'label',
@@ -281,17 +319,7 @@ export function createLoginPage(container: HTMLElement): void {
         firstNameInput = createEl({
           tag: 'input',
           parent: firstNameContainer,
-          classes: [
-            'w-full',
-            'px-3',
-            'py-2',
-            'border',
-            'border-gray-300',
-            'rounded-md',
-            'focus:outline-none',
-            'focus:ring-blue-500',
-            'focus:border-blue-500',
-          ],
+          classes: inputParams,
           attributes: {
             type: 'text',
             id: 'firstName',
@@ -323,17 +351,7 @@ export function createLoginPage(container: HTMLElement): void {
         lastNameInput = createEl({
           tag: 'input',
           parent: lastNameContainer,
-          classes: [
-            'w-full',
-            'px-3',
-            'py-2',
-            'border',
-            'border-gray-300',
-            'rounded-md',
-            'focus:outline-none',
-            'focus:ring-blue-500',
-            'focus:border-blue-500',
-          ],
+          classes: inputParams,
           attributes: {
             type: 'text',
             id: 'lastName',

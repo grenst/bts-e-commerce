@@ -19,7 +19,7 @@
 body {
   background-color: var(--color-background-light);
   font-family: $font-family-sans;
-  color: var(--color-text-primary-light); // Updated
+  color: var(--color-text-primary-light);
 }
 
 .scss-container {
@@ -53,6 +53,20 @@ header {
   }
 }
 
+input {
+  font-family: $font-family-nexa-light;
+  &::placeholder {
+    font-family: $font-family-nexa-bold;
+  }
+}
+input:focus {
+  border-bottom: 3px solid rgb(80, 80, 80);
+}
+
+// .input-field:hover:before {
+//   transform: scaleX(1);
+// }
+
 .name-usr-bold {
   font-family: $font-family-nexa-bold;
 }
@@ -74,6 +88,21 @@ header {
   transform: translateX(-110px) scaleX(2);
 }
 
+.login-name::before {
+  transform: rotate(-5deg) translateX(-5px) scaleX(0);
+  animation: scaleElement 0.5s ease-in-out forwards;
+}
+.reset-animation::before { // Reset-class for animation
+  animation: none;
+}
+@keyframes scaleElement {
+  0% {
+    transform: rotate(-5deg) translateX(-70px) scaleX(0);
+  }
+  100% {
+    transform: rotate(-5deg) translateX(-8px) scaleX(1);
+  }
+}
 
 // --- Animated Background Styles ---
 #animated-background-container {
