@@ -17,8 +17,9 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     tag: 'section',
     attributes: { id: 'hero-section' },
     classes: [
-      'h-[70vh]',
-      "bg-[url('@assets/images/poring-milk-into-boba-tea.jpg')]", // Added background image
+      'h-[calc(100dvh-140px)]',
+      'bg-transparent',
+      // "bg-[url('@assets/images/poring-milk-into-boba-tea.jpg')]",
       'bg-cover',
       'bg-center',
       'flex',
@@ -31,15 +32,16 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: homeContainer,
   });
 
-  const heroTitle = createEl({ // Temporary section
+  const heroTitle = createEl({
+    // Temporary section
     tag: 'h2',
     attributes: { id: 'hero-title' }, // Added ID for GSAP
-    text: 'Welcome to the Refreshed Bubble Tea Experience!',
+    text: '',
     classes: [
       'text-4xl',
       'font-nexa-bold',
       'text-white',
-      'bg-black/50', // Added a semi-transparent overlay for readability
+      'bg-black/50',
       'p-4',
       'rounded-md',
     ],
@@ -52,26 +54,121 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     opacity: 0,
     scale: 0.5,
     ease: 'back.out(1.7)',
-    delay: 0.3, // Delay slightly after main title animation
+    delay: 0.3,
   });
-  // TODO: Consider adding parallax to the background image itself if desired
+
+  /* ---------- ACTUAL PRODUCTS (NEW BLOCK) ---------- */
+  const actualSection = createEl({
+    tag: 'section',
+    attributes: { id: 'actual-products' },
+    classes: ['py-16', 'bg-gray-50'],
+    parent: homeContainer,
+  });
+
+  const actualWrapper = createEl({
+    tag: 'div',
+    classes: ['container', 'mx-auto', 'px-4'],
+    parent: actualSection,
+  });
+
+  createEl({
+    tag: 'h2',
+    text: 'Actual Products',
+    classes: [
+      'text-3xl',
+      'font-nexa-bold',
+      'text-center',
+      'mb-12',
+      'text-gray-800',
+    ],
+    parent: actualWrapper,
+  });
+
+  const actualGrid = createEl({
+    tag: 'div',
+    classes: [
+      'grid',
+      'grid-cols-1',
+      'sm:grid-cols-2',
+      'md:grid-cols-3',
+      'lg:grid-cols-4',
+      'gap-8',
+    ],
+    parent: actualWrapper,
+  });
+
+  const actualLoading = createEl({
+    tag: 'p',
+    text: 'Loading products...',
+    classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
+    parent: actualGrid,
+  });
+
+  try {
+    const products = await getAllPublishedProducts();
+    actualLoading.remove();
+
+    if (products.length === 0) {
+      createEl({
+        tag: 'p',
+        text: 'No products found.',
+        classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
+        parent: actualGrid,
+      });
+    } else {
+      products.forEach((product, index) => {
+        const card = createProductCardElement(product);
+        actualGrid.appendChild(card);
+
+        gsap.from(card, {
+          duration: 0.5,
+          opacity: 0,
+          y: 50,
+          scale: 0.95,
+          ease: 'power1.out',
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 90%',
+            toggleActions: 'play none none none',
+          },
+          delay: index * 0.05,
+        });
+      });
+      ScrollTrigger.refresh();
+    }
+  } catch (e) {
+    actualLoading.remove();
+    createEl({
+      tag: 'p',
+      text: 'Failed to load products. Please try again later.',
+      classes: ['text-center', 'text-red-500', 'my-4', 'col-span-full'],
+      parent: actualGrid,
+    });
+    console.log(e);
+  }
 
   // Featured Products/Categories Section (Placeholder)
   const featuredSection = createEl({
     tag: 'section',
     attributes: { id: 'featured-products-section' },
-    classes: ['py-16', 'bg-white', 'overflow-hidden'], // Added overflow-hidden for pinning
+    classes: ['py-8', 'bg-white', 'overflow-hidden'],
     parent: homeContainer,
   });
   const featuredWrapper = createEl({
     tag: 'div',
-    classes: ['container', 'mx-auto', 'px-4', 'relative'], // Added relative for positioning track
+    classes: ['container', 'mx-auto', 'px-4', 'relative'],
     parent: featuredSection,
   });
   createEl({
     tag: 'h2',
     text: 'Our Special Blends',
-    classes: ['text-3xl', 'font-nexa-bold', 'text-center', 'mb-12', 'text-gray-800'],
+    classes: [
+      'text-3xl',
+      'font-nexa-bold',
+      'text-center',
+      'mb-4',
+      'text-gray-800',
+    ],
     parent: featuredWrapper,
   });
 
@@ -79,20 +176,20 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const horizontalTrack = createEl({
     tag: 'div',
     attributes: { id: 'horizontal-track' },
-    classes: ['flex', 'w-max'], // w-max to allow content to exceed parent width, flex for items
+    classes: ['flex', 'w-max', 'transform-gpu'],
     parent: featuredWrapper,
   });
 
   const featuredImages = [
     './src/assets/images/21-bumble.jpg',
-    './src/assets/images/75849566_m_normal_none.jpg',
+    './src/assets/images/21-bumble.webp',
   ];
 
   featuredImages.forEach((imgPath, index) => {
     const panel = createEl({
       tag: 'div',
       classes: [
-        'w-screen', // Each panel takes full screen width initially
+        'w-screen',
         'h-[50vh]', // Example height for panels
         'flex-shrink-0', // Prevent panels from shrinking
         'flex',
@@ -103,24 +200,31 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       ],
       parent: horizontalTrack,
     });
-    const img = createEl({
+    createEl({
       tag: 'img',
       attributes: { src: imgPath, alt: `Featured Blend ${index + 1}` },
-      classes: ['max-h-full', 'max-w-full', 'object-contain', 'rounded-lg', 'shadow-md'],
+      classes: [
+        'max-h-full',
+        'max-w-full',
+        'object-contain',
+        'rounded-lg',
+        'shadow-md',
+      ],
       parent: panel,
     });
   });
 
   gsap.to(horizontalTrack, {
-    xPercent: -100 * (featuredImages.length - 1), // Scroll by (number of panels - 1) * 100%
+    xPercent: -100 * (featuredImages.length - 1),
     ease: 'none', // Linear scroll
     scrollTrigger: {
-      trigger: featuredSection, // The section itself
+      trigger: featuredSection,
       pin: true, // Pin the section while scrolling horizontally
       scrub: 1, // Smooth scrubbing, 1 second delay
       // markers: true, // For debugging
       start: 'top top', // When the top of the trigger hits the top of the viewport
-      end: () => `+=${horizontalTrack.offsetWidth - featuredWrapper.offsetWidth}`, // End after scrolling the entire track width minus one screen width
+      end: () =>
+        `+=${horizontalTrack.offsetWidth - featuredWrapper.offsetWidth}`, // End after scrolling the entire track width minus one screen width
       invalidateOnRefresh: true, // Recalculate on resize
     },
   });
@@ -129,7 +233,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const productListingSection = createEl({
     tag: 'section',
     attributes: { id: 'product-listing-section' },
-    classes: ['py-16', 'bg-gray-50'], // Example styling, using a light surface color
+    classes: ['py-16', 'bg-gray-50'],
     parent: homeContainer,
   });
   const productListingWrapper = createEl({
@@ -140,7 +244,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   createEl({
     tag: 'h2',
     text: 'Explore Our Drinks',
-    classes: ['text-3xl', 'font-nexa-bold', 'text-center', 'mb-12', 'text-gray-800'],
+    classes: [
+      'text-3xl',
+      'font-nexa-bold',
+      'text-center',
+      'mb-12',
+      'text-gray-800',
+    ],
     parent: productListingWrapper,
   });
 
@@ -192,13 +302,11 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
           scrollTrigger: {
             trigger: productCard,
             start: 'top 90%', // Trigger when 90% of the card is visible
-            // markers: true, // Uncomment for debugging ScrollTrigger
             toggleActions: 'play none none none', // Play animation once when it enters viewport
           },
           delay: index * 0.1, // Stagger the animation slightly for each card
         });
       });
-      // Refresh ScrollTrigger after all cards are added to ensure correct calculations
       ScrollTrigger.refresh();
     }
   } catch (error) {
@@ -211,7 +319,6 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       parent: productsGrid,
     });
   }
-  
 }
 
 export default createHomePage;

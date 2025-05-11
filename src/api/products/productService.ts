@@ -1,7 +1,7 @@
 import { apiInstance } from '../axios-instances';
 import { AxiosError } from 'axios';
 import { useTokenStore } from '../../store/token-store';
-import { envVariables } from '../../config/commerce-tools-api';
+import { getAnonymousToken } from '../../components/auth-services/token.service';
 
 interface Product {
   id: string;
@@ -23,38 +23,75 @@ interface ProductProjectionPagedQueryResponse {
 
 export async function getAllPublishedProducts(): Promise<Product[]> {
   try {
-    const { accessToken } = useTokenStore.getState();
+    let { accessToken } = useTokenStore.getState();
+
     if (!accessToken) {
-      console.warn('Access token not found');
-      const refreshedState = useTokenStore.getState();
-      if (!refreshedState.accessToken) {
-        throw new Error(
-          'Authentication token is not available or scope is insufficient'
+      const anon = await getAnonymousToken();
+      useTokenStore
+        .getState()
+        .setTokens(
+          anon.access_token,
+          anon.refresh_token ?? null,
+          anon.expires_in
         );
-      }
+      accessToken = anon.access_token;
     }
 
     const response = await apiInstance.get<ProductProjectionPagedQueryResponse>(
-      `${envVariables.API_URL}/${envVariables.PROJECT_KEY}/product-projections?staged=false`, // Fetch only published products
+      '/product-projections',
       {
-        headers: {
-          Authorization: `Bearer ${accessToken || useTokenStore.getState().accessToken}`, // Use potentially refreshed token
-        },
+        params: { staged: 'false' },
+        headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
+
     return response.data.results;
   } catch (e) {
     const error = e as AxiosError | Error;
     console.error('Error fetching published products:', error.message);
-    if ('isAxiosError' in error && error.isAxiosError && error.response) {
-      if (error.response.status === 403) {
+    if ('isAxiosError' in error && (error as AxiosError).isAxiosError) {
+      const axiosErr = error as AxiosError;
+      if (axiosErr.response?.status === 403) {
         console.error(
-          "Forbidden: Check if the token has the 'view_published_products' scope."
+          "Forbidden: token lacks the 'view_published_products' scope."
         );
       }
-    } else {
-      console.error('An unexpected error occurred:', error.message);
     }
+    throw error;
+  }
+}
+
+export interface DrinkProduct {
+  id: string;
+  name: string;
+  description: string;
+  price?: number;
+  currency?: string;
+  imageUrl?: string;
+}
+
+export async function getDrinkProducts(): Promise<DrinkProduct[]> {
+  try {
+    const products = await getAllPublishedProducts();
+    return products.map(
+      (product): DrinkProduct => ({
+        id: product.id,
+        name: product.name.en || Object.values(product.name)[0] || 'N/A',
+        description:
+          product.description?.en ||
+          Object.values(product.description ?? {})[0] ||
+          'No description available.',
+        price: product.masterVariant.prices?.[0]?.value.centAmount,
+        currency: product.masterVariant.prices?.[0]?.value.currencyCode,
+        imageUrl: product.masterVariant.images?.[0]?.url,
+      })
+    );
+  } catch (e) {
+    const error = e as AxiosError | Error;
+    console.error(
+      'Error transforming products to DrinkProduct format:',
+      error.message
+    );
     throw error;
   }
 }

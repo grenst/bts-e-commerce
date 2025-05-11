@@ -54,14 +54,28 @@ export default function createProfilePage(container: HTMLElement): void {
 
   const profileContainer = createEl({
     tag: 'div',
-    classes: ['profile-page', 'container', 'mx-auto', 'p-6', 'bg-white', 'rounded-lg', 'shadow-xl'], // Enhanced shadow
+    classes: [
+      'profile-page',
+      'container',
+      'mx-auto',
+      'p-6',
+      'bg-white',
+      'rounded-lg',
+      'shadow-xl',
+    ],
     parent: container,
   });
 
   createEl({
     tag: 'h1',
     text: 'My Profile',
-    classes: ['text-3xl', 'font-nexa-bold', 'mb-8', 'text-gray-800', 'text-center'], // Centered title
+    classes: [
+      'text-3xl',
+      'font-nexa-bold',
+      'mb-8',
+      'text-gray-800',
+      'text-center',
+    ],
     parent: profileContainer,
   });
 
@@ -118,7 +132,7 @@ export default function createProfilePage(container: HTMLElement): void {
     customer.email,
     formGrid
   );
-  emailInput.classList.add('md:col-span-2'); // Email spans two columns on medium screens
+  emailInput.classList.add('md:col-span-2');
 
   const savePersonalInfoButton = createEl({
     tag: 'button',
@@ -152,13 +166,19 @@ export default function createProfilePage(container: HTMLElement): void {
     try {
       const currentCustomer = useCustomerStore.getState().customer;
       if (!currentCustomer) {
-        addNotification('error', 'Customer data not found. Please log in again.');
+        addNotification(
+          'error',
+          'Customer data not found. Please log in again.'
+        );
         return;
       }
 
       const actions = [];
       if (firstNameInput.value !== (currentCustomer.firstName || '')) {
-        actions.push({ action: 'setFirstName', firstName: firstNameInput.value });
+        actions.push({
+          action: 'setFirstName',
+          firstName: firstNameInput.value,
+        });
       }
       if (lastNameInput.value !== (currentCustomer.lastName || '')) {
         actions.push({ action: 'setLastName', lastName: lastNameInput.value });
@@ -168,21 +188,28 @@ export default function createProfilePage(container: HTMLElement): void {
       }
 
       if (actions.length > 0) {
-        await AuthService.updateCurrentCustomer(currentCustomer.version, actions);
-        // The AuthService.updateCurrentCustomer method already updates the store
-        addNotification('success', 'Personal information updated successfully!');
+        await AuthService.updateCurrentCustomer(
+          currentCustomer.version,
+          actions
+        );
+        addNotification(
+          'success',
+          'Personal information updated successfully!'
+        );
       } else {
         addNotification('info', 'No changes detected in personal information.');
       }
     } catch (error) {
       console.error('Failed to update personal information:', error);
-      addNotification('error', 'Failed to update personal information. Please try again.');
+      addNotification(
+        'error',
+        'Failed to update personal information. Please try again.'
+      );
     } finally {
       savePersonalInfoButton.textContent = 'Save Personal Info';
       savePersonalInfoButton.removeAttribute('disabled');
     }
   });
-
 
   // Placeholder for address sections
   createEl({
@@ -197,7 +224,6 @@ export default function createProfilePage(container: HTMLElement): void {
     classes: ['text-gray-600', 'mb-4'],
     parent: profileContainer,
   });
-
 
   // TODO:
   // 1. Implement address management (display, add, edit, remove for shipping & billing).

@@ -7,88 +7,41 @@ interface WindowWithBuffer extends Window {
 import '@styles/global.scss';
 import '@styles/tailwind.css';
 import './animations/gsap-init'; // Initialize GSAP and plugins
-import { gsap } from './animations/gsap-init'; // Import gsap
+import { createAnimatedBackground } from './components/layout/animatedBackground'; // Import createAnimatedBackground
+import {
+  createHeaderElements,
+  updateUserNavOnHeader,
+} from './components/layout/header'; // Import header functions
 
 import svgSpriteElement from './sources/svg-sprite';
 import createFooter from './components/layout/footer/footer';
 import { body, createEl } from './utils/elementUtils';
-import { useTokenStore } from '../src/store/token-store';
-import { useCustomerStore } from '../src/store/customer-store';
 import { createRouter, Route } from './router/router';
 import createHomePage from './pages/home/home';
 import createLoginPage from './pages/auth/auth-page';
-import createProfilePage from './pages/profile/profile'; // Placeholder for now
-import { AuthService } from '../src/services/auth.service';
-// Import for a potential cart page (though not creating it now)
-// import createCartPage from './pages/cart/cart';
+import createProfilePage from './pages/profile/profile';
 import {
   createNotificationsContainer,
   createLoadingIndicator,
   addNotification,
 } from './store/store';
 
-const container = createEl({
-  tag: 'div',
-  classes: ['max-w-4xl', 'mx-auto', 'p-4'],
-  parent: body,
-});
-
-const header = createEl({
-  tag: 'header',
-  classes: [
-    'flex',
-    'justify-between',
-    'items-center',
-    'p-4',
-    'bg-transparent',
-    'mb-4',
-    'rounded',
-  ],
-  parent: container,
-});
-
-const mainTitle = createEl({
-  tag: 'h1',
-  attributes: { id: 'main-title' }, // Added ID for GSAP
-  text: 'Bubble Tea Shop',
-  classes: [
-    'text-5xl',
-    'font-nexa-bold',
-    // Removing gradient text for now, can be re-added or done with GSAP if needed
-    // 'text-blue-600',
-    // 'text-transparent',
-    // 'bg-clip-text',
-    // 'bg-gradient-to-r',
-    // 'from-cyan-500',
-    // 'to-pink-500',
-    'text-gray-800', // Color for light theme
-  ],
-  parent: header,
-});
-
-// Animate the main title
-gsap.from(mainTitle, {
-  duration: 1,
-  opacity: 0,
-  y: -50,
-  ease: 'power3.out',
-  delay: 0.5,
-});
-
-const userNav = createEl({
-  tag: 'div',
-  attributes: { id: 'user_nav' }, // Corrected: Use attributes property
-  classes: ['flex', 'items-center', 'gap-4', 'relative'], // Added relative for dropdown positioning
-  parent: header,
-});
+createAnimatedBackground();
 
 const contentContainer = createEl({
   tag: 'main',
   classes: ['min-h-[60vh]'],
-  parent: container,
 });
 
 const router = createRouter(contentContainer);
+const { header, mainTitle, userNav } = createHeaderElements(router);
+
+createEl({
+  tag: 'div',
+  classes: ['max-w-4xl', 'py-4', 'mx-auto', 'relative', 'z-[1]', 'mt-[80px]'],
+  parent: body,
+  children: [contentContainer],
+});
 
 const routes: Route[] = [
   {
@@ -120,159 +73,11 @@ const routes: Route[] = [
 
 routes.forEach((route) => router.addRoute(route));
 
-export function updateAuthStatus(): void {
-  userNav.innerHTML = '';
-  const { accessToken } = useTokenStore.getState();
-  const { customer } = useCustomerStore.getState();
+updateUserNavOnHeader(userNav, router);
 
-  if (accessToken && customer) {
-    const userActionsContainer = createEl({
-      tag: 'div',
-      classes: ['flex', 'items-center', 'gap-4'],
-      parent: userNav,
-    });
-
-    const dropdownContainer = createEl({
-      tag: 'div',
-      classes: ['relative', 'group'],
-      parent: userActionsContainer,
-    });
-
-    createEl({
-      tag: 'span',
-      text: `Hi, ${customer.firstName || customer.email}!`,
-      classes: [
-        'text-sm',
-        'text-gray-700',
-        'cursor-pointer',
-        'hover:text-blue-600',
-      ],
-      parent: dropdownContainer,
-    });
-
-    const dropdownMenu = createEl({
-      tag: 'div',
-      classes: [
-        'absolute',
-        // 'mt-1',
-        'w-32',
-        'bg-gray-100',
-        'rounded-md',
-        'shadow-lg',
-        'py-1',
-        'z-10',
-        'hidden',
-        'group-hover:block',
-      ],
-      parent: dropdownContainer,
-    });
-
-    const profileLink = createEl({
-      tag: 'a',
-      text: 'My profile',
-      classes: [
-        'block',
-        'px-4',
-        'py-2',
-        'mx-2',
-        'mb-1',
-        'rounded-md',
-        'text-sm',
-        'text-gray-700',
-        'transition',
-        'duration-500',
-        'hover:bg-gray-400',
-        'cursor-pointer',
-      ],
-      parent: dropdownMenu,
-    });
-    profileLink.addEventListener('click', () => router.navigateTo('/profile'));
-
-    const ordersLink = createEl({
-      tag: 'a',
-      text: 'My orders',
-      classes: [
-        'block',
-        'px-4',
-        'py-2',
-        'mx-2',
-        'mb-1',
-        'rounded-md',
-        'text-sm',
-        'text-gray-700',
-        'transition',
-        'duration-500',
-        'hover:bg-gray-400',
-        'hover:bg-gray-400',
-        'hover:bg-gray-400',
-        'cursor-pointer',
-      ],
-      parent: dropdownMenu,
-    });
-    ordersLink.addEventListener('click', () => router.navigateTo('/orders'));
-
-    createEl({
-      tag: 'hr',
-      classes: ['my-1', 'border-gray-200'],
-      parent: dropdownMenu,
-    });
-
-    const logoutButton = createEl({
-      tag: 'a',
-      text: 'Logout',
-      classes: [
-        'block',
-        'px-4',
-        'py-2',
-        'mx-2',
-        'mb-1',
-        'rounded-md',
-        'text-sm',
-        'transition',
-        'duration-500',
-        'text-gray-700',
-        'hover:bg-gray-400',
-        'cursor-pointer',
-      ],
-      parent: dropdownMenu,
-    });
-    logoutButton.onclick = async () => {
-      await AuthService.logout();
-      updateAuthStatus();
-      router.navigateTo('/');
-    };
-
-    const cartLink = createEl({
-      tag: 'a',
-      text: '🛒 Cart',
-      classes: [
-        'text-sm',
-        'text-blue-500',
-        'hover:text-blue-700',
-        'cursor-pointer',
-      ],
-      parent: userActionsContainer,
-    });
-    cartLink.addEventListener('click', () => router.navigateTo('/cart'));
-  } else {
-    const loginLink = createEl({
-      tag: 'a',
-      text: 'Login',
-      classes: [
-        'text-sm',
-        'text-blue-500',
-        'hover:text-blue-700',
-        'cursor-pointer',
-      ],
-      parent: userNav,
-    });
-    loginLink.addEventListener('click', () => {
-      router.navigateTo('/login');
-    });
-  }
+export function triggerHeaderUpdate(): void {
+  updateUserNavOnHeader(userNav, router);
 }
-
-updateAuthStatus();
 
 svgSpriteElement();
 
@@ -283,6 +88,20 @@ createNotificationsContainer(body);
 createLoadingIndicator(body);
 
 addNotification('info', 'Welcome to the E-commerce App!');
+
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 618) {
+    header.classList.add('bg-transparent');
+    header.classList.remove('bg-white/50');
+    mainTitle.classList.add('text-xl');
+    mainTitle.classList.remove('text-5xl');
+  } else {
+    header.classList.remove('bg-transparent');
+    header.classList.add('bg-white/50');
+    mainTitle.classList.add('text-3xl');
+    mainTitle.classList.remove('text-xl');
+  }
+});
 
 router.init();
 

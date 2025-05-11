@@ -1,7 +1,7 @@
 import { createStore } from 'zustand/vanilla';
 import { persist } from 'zustand/middleware';
 
-interface Customer {
+export interface Customer {
   id: string;
   email: string;
   firstName?: string;

@@ -11,7 +11,7 @@ function createButton(
     tag: 'button',
     parent,
     text,
-    classes: ['button', 'border', 'p-2', 'rounded-xl', ...addClasses],
+    classes: ['button', 'border', 'p-2', 'rounded-sm', ...addClasses],
     attributes: { type },
   }) as HTMLButtonElement;
 }
