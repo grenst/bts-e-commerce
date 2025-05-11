@@ -26,6 +26,7 @@ dist-ssr
 # Cache files
 .eslintcache
 netlify.toml
+.env
 
 # Drafts
 draft*
