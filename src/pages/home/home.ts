@@ -57,11 +57,101 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     delay: 0.3,
   });
 
+  /* ---------- ACTUAL PRODUCTS (NEW BLOCK) ---------- */
+  const actualSection = createEl({
+    tag: 'section',
+    attributes: { id: 'actual-products' },
+    classes: ['py-16', 'bg-gray-50'],
+    parent: homeContainer,
+  });
+
+  const actualWrapper = createEl({
+    tag: 'div',
+    classes: ['container', 'mx-auto', 'px-4'],
+    parent: actualSection,
+  });
+
+  createEl({
+    tag: 'h2',
+    text: 'Actual Products',
+    classes: [
+      'text-3xl',
+      'font-nexa-bold',
+      'text-center',
+      'mb-12',
+      'text-gray-800',
+    ],
+    parent: actualWrapper,
+  });
+
+  const actualGrid = createEl({
+    tag: 'div',
+    classes: [
+      'grid',
+      'grid-cols-1',
+      'sm:grid-cols-2',
+      'md:grid-cols-3',
+      'lg:grid-cols-4',
+      'gap-8',
+    ],
+    parent: actualWrapper,
+  });
+
+  const actualLoading = createEl({
+    tag: 'p',
+    text: 'Loading products...',
+    classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
+    parent: actualGrid,
+  });
+
+  try {
+    const products = await getAllPublishedProducts();
+    actualLoading.remove();
+
+    if (products.length === 0) {
+      createEl({
+        tag: 'p',
+        text: 'No products found.',
+        classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
+        parent: actualGrid,
+      });
+    } else {
+      products.forEach((product, index) => {
+        const card = createProductCardElement(product);
+        actualGrid.appendChild(card);
+
+        gsap.from(card, {
+          duration: 0.5,
+          opacity: 0,
+          y: 50,
+          scale: 0.95,
+          ease: 'power1.out',
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 90%',
+            toggleActions: 'play none none none',
+          },
+          delay: index * 0.05,
+        });
+      });
+      ScrollTrigger.refresh();
+    }
+  } catch (e) {
+    actualLoading.remove();
+    createEl({
+      tag: 'p',
+      text: 'Failed to load products. Please try again later.',
+      classes: ['text-center', 'text-red-500', 'my-4', 'col-span-full'],
+      parent: actualGrid,
+    });
+    console.log(e);
+  }
+
   // Featured Products/Categories Section (Placeholder)
   const featuredSection = createEl({
     tag: 'section',
     attributes: { id: 'featured-products-section' },
-    classes: ['py-3', 'bg-white', 'overflow-hidden'],
+    classes: ['py-8', 'bg-white', 'overflow-hidden'],
     parent: homeContainer,
   });
   const featuredWrapper = createEl({
