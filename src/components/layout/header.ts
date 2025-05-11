@@ -54,7 +54,7 @@ export function createHeaderElements(router: Router): HeaderElements {
   const mainTitle = createEl({
     tag: 'h1',
     attributes: { id: 'main-title' },
-    text: 'Bubble Tea Shop',
+    text: 'Bubble Tea Store',
     classes: [
       'text-3xl',
       'font-impact',
@@ -113,7 +113,7 @@ export function updateUserNavOnHeader(
         src: usrImagePath,
         alt: 'my cocpit',
       },
-      classes: ['h-[24px]', 'w-[30px]', 'flex-shrink-0', 'cursor-pointer'],
+      classes: ['h-[23px]', 'w-[30px]', 'flex-shrink-0', 'cursor-pointer'],
       parent: dropdownContainer,
     });
 
@@ -155,8 +155,8 @@ export function updateUserNavOnHeader(
       text: 'Login',
       classes: [
         'text-md',
-        'text-blue-500',
-        'hover:text-blue-700',
+        'text-gray-900',
+        'hover:text-gray-700',
         'cursor-pointer',
       ],
       parent: userNav,

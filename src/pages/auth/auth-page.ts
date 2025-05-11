@@ -472,7 +472,10 @@ export function createLoginPage(container: HTMLElement): void {
           lastName
         );
         if (success) {
-          addNotification('success', 'Registration successful! Please log in.');
+          addNotification(
+            'success',
+            "Registration successful! You're loged in."
+          );
           toggleForm(); // Switch to login form
           emailInput.value = email;
           passwordInput.value = '';

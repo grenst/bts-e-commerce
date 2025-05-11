@@ -60,6 +60,21 @@ header {
   font-family: $font-family-nexa-light;
   font-size: 1.5rem;
 }
+.my_cocpit::before {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  height: 10px;
+  width: 100%;
+  background: #564275d6;
+  transform: translateX(-110px) scaleX(0);
+  transition: transform 0.2s ease-out;
+}
+.my_cocpit:hover:before {
+  transform: translateX(-110px) scaleX(2);
+}
+
+
 // --- Animated Background Styles ---
 #animated-background-container {
   position: fixed;

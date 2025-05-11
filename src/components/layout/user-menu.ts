@@ -31,7 +31,7 @@ export function createUserDropdown(
       'z-10',
       'hidden', // Initially hidden
       'overflow-hidden',
-      '-translate-x-35',
+      '-translate-x-19',
       'my_cocpit',
     ],
     parent: dropdownContainer,
