@@ -54,7 +54,6 @@ export function createHeaderElements(router: Router): HeaderElements {
   const mainTitle = createEl({
     tag: 'h1',
     attributes: { id: 'main-title' },
-    text: 'Bubble Tea Store',
     classes: [
       'text-3xl',
       'font-impact',
@@ -66,6 +65,14 @@ export function createHeaderElements(router: Router): HeaderElements {
     ],
     parent: header,
   });
+
+  const textNodeBefore = document.createTextNode('Bubble ');
+  const spanElement = createEl({ tag: 'span', text: 'Tea' });
+  const textNodeAfter = document.createTextNode(' Store');
+
+  mainTitle.appendChild(textNodeBefore);
+  mainTitle.appendChild(spanElement);
+  mainTitle.appendChild(textNodeAfter);
 
   gsap.from(mainTitle, {
     duration: 1,

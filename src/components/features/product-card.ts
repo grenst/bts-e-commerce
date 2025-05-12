@@ -13,8 +13,7 @@ export function createProductCardElement(product: Product): HTMLElement {
   card.classList.add(
     'product-card-redesigned',
     'bg-white',
-    'rounded-xl',
-    'shadow-lg',
+    'cursor-pointer',
     'overflow-hidden',
     'flex',
     'flex-col',
@@ -23,7 +22,7 @@ export function createProductCardElement(product: Product): HTMLElement {
     'ease-in-out',
     'hover:shadow-2xl',
     'hover:scale-[1.03]',
-    'cursor-pointer'
+    'group'
   );
   // card.style.minHeight = '350px'; // Adjust as needed, or make it aspect ratio based
 
@@ -85,21 +84,42 @@ export function createProductCardElement(product: Product): HTMLElement {
   }
 
   const priceContainer = document.createElement('div');
-  priceContainer.classList.add('mt-auto', 'pt-3');
+  priceContainer.classList.add('mt-auto', 'pt-3', 'relative', '-z-0');
   contentContainer.appendChild(priceContainer);
 
   const priceElement = document.createElement('p');
   const firstPrice = product.masterVariant.prices?.[0];
   if (firstPrice) {
-    priceElement.textContent = `${(firstPrice.value.centAmount / 100).toFixed(2)} ${firstPrice.value.currencyCode}`;
+    const pr = `${(firstPrice.value.centAmount / 100).toFixed(2)} ${firstPrice.value.currencyCode}`;
+
+    priceElement.setAttribute('data-price', pr); // only for ::after
+
+    const priceSpan = document.createElement('span'); // ★
+    priceSpan.textContent = pr;
+    priceElement.appendChild(priceSpan); // ★
   } else {
     priceElement.textContent = 'Price not available';
   }
   priceElement.classList.add(
-    'text-lg',
-    'font-nexa-bold',
-    'text-pink-600',
-    'mb-0'
+    'text-xl',
+    'pricee',
+    'h-6',
+    'border',
+    'border-gray-300',
+    'bg-gray-50',
+    'text-gray-900',
+    'px-3',
+    "before:content-['ADD']",
+    'before:px-3',
+    'before:absolute',
+    'before:inset-0',
+    'before:bg-transparent',
+    'before:z-10',
+    'group-hover:bg-gray-900',
+    'group-hover:text-gray-50',
+    'before:hover:text-white',
+    'group-hover:border-white',
+    'group-hover:before:border-gray-100'
   );
   priceContainer.appendChild(priceElement);
 
