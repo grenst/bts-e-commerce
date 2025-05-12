@@ -91,13 +91,13 @@ addNotification('info', 'Welcome to the E-commerce App!');
 
 window.addEventListener('scroll', () => {
   if (window.scrollY > 618) {
-    header.classList.add('bg-transparent');
-    header.classList.remove('bg-white/50');
+    header.classList.add('bg-white/50');
+    header.classList.remove('bg-transparent');
     mainTitle.classList.add('text-xl');
     mainTitle.classList.remove('text-5xl');
   } else {
-    header.classList.remove('bg-transparent');
-    header.classList.add('bg-white/50');
+    header.classList.add('bg-transparent');
+    header.classList.remove('bg-white/50');
     mainTitle.classList.add('text-3xl');
     mainTitle.classList.remove('text-xl');
   }

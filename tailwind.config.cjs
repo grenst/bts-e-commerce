@@ -10,7 +10,8 @@
       extend: {
         fontFamily: {
           'nexa-bold': ['"Nexa Bold"', 'sans-serif'],
-          'nexa-light': ['"Nexa Light"', 'sans-serif']
+          'nexa-light': ['"Nexa Light"', 'sans-serif'],
+          'alumni': ['"Alumni"', 'sans-serif'],
         }
       },
     },

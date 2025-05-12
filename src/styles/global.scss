@@ -35,6 +35,12 @@ header {
     transition: font-size 0.2s;
     font-family: $font-family-nexa-bold;
     transform: scaleX(0.9);
+    span {
+      font-style: italic;
+      font-weight: 200;
+      // font-family:Georgia, 'Times New Roman', Times, serif;
+      font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    }
     
     @media screen and (max-width: 450px) {
       font-size: 1.2rem;
@@ -62,10 +68,6 @@ input {
 input:focus {
   border-bottom: 3px solid rgb(80, 80, 80);
 }
-
-// .input-field:hover:before {
-//   transform: scaleX(1);
-// }
 
 .name-usr-bold {
   font-family: $font-family-nexa-bold;
@@ -102,6 +104,42 @@ input:focus {
   100% {
     transform: rotate(-5deg) translateX(-8px) scaleX(1);
   }
+}
+
+.pricee {
+  position: relative;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  font-family: $font-family-alumni;
+  overflow: hidden;
+  &::before {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+  }
+}
+.pricee::after {
+  content: attr(data-price);
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  text-align: right;
+  transform: translateY(100%) translateX(-12px);
+  transition: transform .15s linear;
+}
+.pricee > span {
+  display: block;
+  transition: transform .15s linear;
+}
+// .group:hover .pricee {
+//   @apply bg-gray-900 text-white border-transparent;
+// }
+.group:hover .pricee > span {
+  transform: translateY(-100%);
+}
+.group:hover .pricee::after {
+  transform: translateY(-15%) translateX(-12px);
 }
 
 // --- Animated Background Styles ---

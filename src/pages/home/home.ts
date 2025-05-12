@@ -57,11 +57,11 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     delay: 0.3,
   });
 
-  /* ---------- ACTUAL PRODUCTS (NEW BLOCK) ---------- */
+  /* ---------- ACTUAL PRODUCTS ---------- */
   const actualSection = createEl({
     tag: 'section',
     attributes: { id: 'actual-products' },
-    classes: ['py-8', 'backdrop-blur-sm', 'bg-gray-50/30'],
+    classes: ['py-8', 'backdrop-blur-sm', 'bg-white/30'],
     parent: homeContainer,
   });
 
@@ -141,7 +141,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     createEl({
       tag: 'p',
       text: 'Failed to load products. Please try again later.',
-      classes: ['text-center', 'text-red-500', 'my-4', 'col-span-full'],
+      classes: [
+        'text-center',
+        'text-red-500',
+        'pt-16',
+        'my-20',
+        'col-span-full',
+      ],
       parent: actualGrid,
     });
     console.log(e);
@@ -153,7 +159,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     attributes: { id: 'featured-products-section' },
     classes: [
       'mt-16',
-      'py-4',
+      'py-12',
       'backdrop-blur-sm',
       'bg-white/30',
       'overflow-hidden',
@@ -162,7 +168,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   });
   const featuredWrapper = createEl({
     tag: 'div',
-    classes: ['container', 'mx-auto', 'px-4', 'relative'],
+    classes: ['relative', 'overflow-hidden', 'w-full'],
     parent: featuredSection,
   });
   createEl({
@@ -182,11 +188,12 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const horizontalTrack = createEl({
     tag: 'div',
     attributes: { id: 'horizontal-track' },
-    classes: ['flex', 'w-max', 'transform-gpu'],
+    classes: ['flex', 'w-max', 'gap-0', 'transform-gpu'],
     parent: featuredWrapper,
   });
 
   const featuredImages = [
+    './src/assets/images/21-bumble.webp',
     './src/assets/images/urZC1GHMf9ve.webp',
     './src/assets/images/21-bumble.webp',
   ];
@@ -195,14 +202,12 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     const panel = createEl({
       tag: 'div',
       classes: [
-        'w-screen',
-        'h-[50vh]', // Example height for panels
-        'flex-shrink-0', // Prevent panels from shrinking
+        'w-[100vw]',
+        'h-[50vh]',
+        'flex-shrink-0',
         'flex',
         'items-center',
         'justify-center',
-        'p-1',
-        'box-border',
       ],
       parent: horizontalTrack,
     });
@@ -220,20 +225,25 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     });
   });
 
+  // const panels = Array.from(horizontalTrack.children) as HTMLElement[];
+
+  const scrollDistance = () =>
+    horizontalTrack.scrollWidth - featuredWrapper.clientWidth;
+
   gsap.to(horizontalTrack, {
-    xPercent: -100 * (featuredImages.length - 1),
-    ease: 'none', // Linear scroll
+    x: () => -scrollDistance(),
+    ease: 'none',
     scrollTrigger: {
       trigger: featuredSection,
-      pin: true, // Pin the section while scrolling horizontally
-      scrub: 1, // Smooth scrubbing, 1 second delay
-      // markers: true, // For debugging
-      start: 'top top', // When the top of the trigger hits the top of the viewport
-      end: () =>
-        `+=${horizontalTrack.offsetWidth - featuredWrapper.offsetWidth}`, // End after scrolling the entire track width minus one screen width
-      invalidateOnRefresh: true, // Recalculate on resize
+      pin: true,
+      scrub: 1,
+      start: 'top top',
+      end: () => '+=' + scrollDistance(),
+      invalidateOnRefresh: true,
     },
   });
+
+  window.addEventListener('load', () => ScrollTrigger.refresh());
 
   // Product Listing Section
   const productListingSection = createEl({
