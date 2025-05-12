@@ -44,7 +44,8 @@
   transition: all 0.4s;
   opacity: 100%;
 
-  color:#04ecec
+  // color:#04ecec
+  color: var(--color-primary-light);
 }
 
 .footer-link:active {

@@ -11,7 +11,7 @@ import { createAnimatedBackground } from './components/layout/animatedBackground
 import {
   createHeaderElements,
   updateUserNavOnHeader,
-} from './components/layout/header'; // Import header functions
+} from './components/layout/header/header'; // Import header functions
 
 import svgSpriteElement from './sources/svg-sprite';
 import createFooter from './components/layout/footer/footer';
@@ -25,6 +25,9 @@ import {
   createLoadingIndicator,
   addNotification,
 } from './store/store';
+
+// --- sprite
+svgSpriteElement();
 
 createAnimatedBackground();
 
@@ -78,8 +81,6 @@ updateUserNavOnHeader(userNav, router);
 export function triggerHeaderUpdate(): void {
   updateUserNavOnHeader(userNav, router);
 }
-
-svgSpriteElement();
 
 // --- footer
 createFooter(body);

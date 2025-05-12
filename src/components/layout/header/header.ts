@@ -1,13 +1,16 @@
-import { gsap } from '../../animations/gsap-init';
-import logoImagePath from '../../assets/images/logo.webp';
-import usrImagePath from '../../assets/images/person.svg';
-import cartImagePath from '../../assets/images/cart.svg';
-import aboutImagePath from '../../assets/images/help.svg';
-import { body, createEl } from '../../utils/elementUtils';
-import { useTokenStore } from '../../store/token-store';
-import { useCustomerStore } from '../../store/customer-store';
-import { Router } from '../../router/router';
-import { createUserDropdown } from './user-menu';
+import './header.scss';
+import { gsap } from '../../../animations/gsap-init';
+import logoImagePath from '../../../assets/images/logo.webp';
+import {
+  body,
+  createEl,
+  createSvgUse,
+  removeAllChild,
+} from '../../../utils/elementUtils';
+import { useTokenStore } from '../../../store/token-store';
+import { useCustomerStore } from '../../../store/customer-store';
+import { Router } from '../../../router/router';
+import { createUserDropdown } from '../user-menu';
 
 interface HeaderElements {
   header: HTMLElement;
@@ -89,37 +92,30 @@ export function updateUserNavOnHeader(
   userNav: HTMLElement,
   router: Router
 ): void {
-  userNav.innerHTML = '';
+  removeAllChild(userNav);
+
   const { accessToken } = useTokenStore.getState();
   const { customer } = useCustomerStore.getState();
 
   if (accessToken && customer) {
     const userActionsContainer = createEl({
-      tag: 'div',
+      // tag: 'div',
       classes: ['flex', 'items-center', 'gap-4'],
       parent: userNav,
     });
 
     const dropdownContainer = createEl({
-      tag: 'div',
+      // tag: 'div',
       classes: ['relative'], // Removed 'group'
       parent: userActionsContainer,
     });
 
-    const userIcon = createEl({
-      // Renamed for clarity
-      tag: 'img',
-      attributes: {
-        src: usrImagePath,
-        alt: 'my cocpit',
-      },
-      classes: ['h-[23px]', 'w-[30px]', 'flex-shrink-0', 'cursor-pointer'],
-      parent: dropdownContainer,
-    });
+    const userLink = createSvgUse('#person', 'header-link');
+    dropdownContainer.append(userLink);
 
     // Create and manage the dropdown menu using the new module
     createUserDropdown(
-      userIcon,
+      userLink,
       dropdownContainer,
       router,
       customer,
@@ -127,25 +123,12 @@ export function updateUserNavOnHeader(
       updateUserNavOnHeader
     );
 
-    const cartLink = createEl({
-      tag: 'img',
-      attributes: {
-        src: cartImagePath,
-        alt: 'my cart',
-      },
-      classes: ['h-[24px]', 'w-[30px]', 'flex-shrink-0', 'cursor-pointer'],
-      parent: userActionsContainer,
-    });
+    const cartLink = createSvgUse('#cart', 'header-link');
+    const aboutLink = createSvgUse('#about', 'header-link');
 
-    const aboutLink = createEl({
-      tag: 'img',
-      attributes: {
-        src: aboutImagePath,
-        alt: 'about us',
-      },
-      classes: ['h-[26px]', 'w-[30px]', 'flex-shrink-0', 'cursor-pointer'],
-      parent: userActionsContainer,
-    });
+    userActionsContainer.append(cartLink);
+    userActionsContainer.append(aboutLink);
+
     aboutLink.classList.add('about-icon');
 
     cartLink.addEventListener('click', () => router.navigateTo('/cart'));
