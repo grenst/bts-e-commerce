@@ -13,7 +13,8 @@ interface UserMenuElements {
 }
 
 export function createUserDropdown(
-  userIcon: HTMLElement,
+  userIcon: SVGElement,
+  // userIcon: HTMLElement,
   dropdownContainer: HTMLElement,
   router: Router,
   customer: Customer,
