@@ -1,4 +1,4 @@
-import { createEl as createElement } from '../../utils/element-utils';
+import { createEl as createElement } from '../../utils/element-utilities';
 import {
   getAllPublishedProducts,
   getAllCategories,

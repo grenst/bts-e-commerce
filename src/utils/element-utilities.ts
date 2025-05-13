@@ -39,6 +39,8 @@ function createElement(options: CreateElementOptions): HTMLElement {
   return element;
 }
 
+/* *************************************** */
+
 function createSvgUse(idSvgSymbol: string, elementClass: string): SVGElement {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('class', elementClass);
@@ -48,11 +50,15 @@ function createSvgUse(idSvgSymbol: string, elementClass: string): SVGElement {
   return svg;
 }
 
+/* *************************************** */
+
 function removeAllChild(element: HTMLElement): void {
   while (element.firstElementChild) {
     element.firstElementChild.remove();
   }
 }
+
+/* *************************************** */
 
 function shuffleArray<T>(baseArray: T[]): T[] {
   const array = [...baseArray];
@@ -62,6 +68,8 @@ function shuffleArray<T>(baseArray: T[]): T[] {
   }
   return array;
 }
+
+/* *************************************** */
 
 function createCounterID(initialValue: number = 0) {
   let count = initialValue;
@@ -80,6 +88,8 @@ function createCounterID(initialValue: number = 0) {
   };
 }
 
+/* *************************************** */
+
 function getMaxID<T extends { id: string | number }>(initialData: T[]): number {
   let maxId = 0;
   for (const item of initialData) {
@@ -87,6 +97,8 @@ function getMaxID<T extends { id: string | number }>(initialData: T[]): number {
   }
   return maxId;
 }
+
+/* *************************************** */
 
 const getUUID = (): string => globalThis.crypto.randomUUID();
 

@@ -3,7 +3,7 @@ import logoImagePath from '../../assets/images/logo.webp';
 import usrImagePath from '../../assets/images/person.svg';
 import cartImagePath from '../../assets/images/cart.svg';
 import aboutImagePath from '../../assets/images/help.svg';
-import { body, createEl as createElement } from '../../utils/element-utils';
+import { body, createEl as createElement } from '../../utils/element-utilities';
 import { useTokenStore } from '../../store/token-store';
 import { useCustomerStore } from '../../store/customer-store';
 import { Router } from '../../router/router';

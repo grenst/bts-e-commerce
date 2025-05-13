@@ -3,7 +3,7 @@ import './footer.scss';
 import {
   createEl as createElement,
   createSvgUse,
-} from '../../../utils/element-utils';
+} from '../../../utils/element-utilities';
 
 const createFooter = (parent: HTMLElement) => {
   const footer = createElement({ tag: 'footer', classes: ['footer'], parent });

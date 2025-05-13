@@ -1,4 +1,4 @@
-import { body } from '../utils/element-utils';
+import { body } from '../utils/element-utilities';
 
 const svgSprite = `
     <svg style="display: none;">
