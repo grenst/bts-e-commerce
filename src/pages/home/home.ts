@@ -1,7 +1,121 @@
 import { createEl } from '../../utils/elementUtils';
-import { getAllPublishedProducts } from '../../api/products/productService';
-import { createProductCardElement } from '../../components/features/product-card'; // Will be used for product listing
-import { gsap, ScrollTrigger } from '../../animations/gsap-init'; // Import GSAP and ScrollTrigger
+import {
+  getAllPublishedProducts,
+  getAllCategories,
+} from '../../api/products/productService';
+import type { Product, Category } from '../../api/products/productService'; // Import Product and Category types
+import { createProductCardElement } from '../../components/features/product-card';
+import { gsap, ScrollTrigger } from '../../animations/gsap-init';
+
+// Interfaces for Actuality List
+interface ActualityProduct extends Product {}
+
+interface ActualityCategory {
+  id: string;
+  name: string;
+  products: ActualityProduct[];
+}
+
+interface ActualityCache {
+  dateUTC: string;
+  categories: ActualityCategory[];
+}
+
+const ACTUALITY_STORAGE_KEY = 'actualityProductList';
+
+// Helper function to get today's UTC date string
+function getTodaysUTCDateString(): string {
+  const today = new Date();
+  return `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}`;
+}
+
+// Helper function to shuffle an array (Fisher-Yates shuffle)
+function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
+// Helper function to generate the actuality list
+async function generateActualityList(
+  allProducts: Product[],
+  allCategories: Category[]
+): Promise<ActualityCategory[]> {
+  const productsByCategory: Record<string, Product[]> = {};
+  const categoryNameMap: Record<string, string> = {};
+
+  allCategories.forEach((cat) => {
+    categoryNameMap[cat.id] =
+      cat.name.en ||
+      cat.name[Object.keys(cat.name)[0]] ||
+      `Category ${cat.id.substring(0, 4)}`;
+  });
+
+  allProducts.forEach((product) => {
+    if (product.categories && product.categories.length > 0) {
+      const categoryId = product.categories[0].id;
+      if (!productsByCategory[categoryId]) {
+        productsByCategory[categoryId] = [];
+      }
+      productsByCategory[categoryId].push(product);
+    }
+  });
+
+  const actualityCategories: ActualityCategory[] = [];
+  for (const categoryId in productsByCategory) {
+    if (
+      Object.prototype.hasOwnProperty.call(productsByCategory, categoryId) &&
+      productsByCategory[categoryId].length > 0
+    ) {
+      const shuffledProducts = shuffleArray(productsByCategory[categoryId]);
+      actualityCategories.push({
+        id: categoryId,
+        name:
+          categoryNameMap[categoryId] ||
+          `Category ${categoryId.substring(0, 8)}...`, // Use fetched name
+        products: shuffledProducts.slice(0, 2) as ActualityProduct[],
+      });
+    }
+  }
+  return shuffleArray(actualityCategories);
+}
+
+// Helper function to get actuality data from localStorage or generate new
+async function getActualityData(
+  allProducts: Product[],
+  allCategories: Category[]
+): Promise<ActualityCategory[]> {
+  const todayUTCString = getTodaysUTCDateString();
+  const cachedDataRaw = localStorage.getItem(ACTUALITY_STORAGE_KEY);
+
+  if (cachedDataRaw) {
+    try {
+      const cachedData: ActualityCache = JSON.parse(cachedDataRaw);
+      if (cachedData.dateUTC === todayUTCString && cachedData.categories) {
+        console.log('Using cached actuality data for today.');
+        return cachedData.categories;
+      }
+    } catch (error) {
+      console.error('Error parsing cached actuality data:', error);
+      localStorage.removeItem(ACTUALITY_STORAGE_KEY); // Clear corrupted data
+    }
+  }
+
+  console.log('Generating new actuality data for today.');
+  const newActualityCategories = await generateActualityList(
+    allProducts,
+    allCategories
+  ); // Pass categories
+  const newCache: ActualityCache = {
+    dateUTC: todayUTCString,
+    categories: newActualityCategories,
+  };
+  localStorage.setItem(ACTUALITY_STORAGE_KEY, JSON.stringify(newCache));
+  return newActualityCategories;
+}
 
 export async function createHomePage(container: HTMLElement): Promise<void> {
   container.innerHTML = '';
@@ -17,9 +131,8 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     tag: 'section',
     attributes: { id: 'hero-section' },
     classes: [
-      'h-[calc(100dvh-140px)]',
+      'h-[calc(100dvh-140px)]', // Adjusted height if actuality section is above
       'bg-transparent',
-      // "bg-[url('@assets/images/poring-milk-into-boba-tea.jpg')]",
       'bg-cover',
       'bg-center',
       'flex',
@@ -33,9 +146,8 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   });
 
   const heroTitle = createEl({
-    // Temporary section
     tag: 'h2',
-    attributes: { id: 'hero-title' }, // Added ID for GSAP
+    attributes: { id: 'hero-title' },
     text: '',
     classes: [
       'text-4xl',
@@ -48,7 +160,6 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: heroSection,
   });
 
-  // GSAP animation for hero title
   gsap.from(heroTitle, {
     duration: 1.2,
     opacity: 0,
@@ -57,7 +168,220 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     delay: 0.3,
   });
 
-  /* ---------- ACTUAL PRODUCTS ---------- */
+  // Fetch all products and categories once for the page
+  let allProducts: Product[] = [];
+  let allCategories: Category[] = [];
+  try {
+    [allProducts, allCategories] = await Promise.all([
+      getAllPublishedProducts(),
+      getAllCategories(),
+    ]);
+  } catch (e) {
+    console.error(
+      'Failed to load initial products or categories for home page:',
+      e
+    );
+  }
+
+  // --- ACTUALITY SECTION ---
+  const actualitySection = createEl({
+    tag: 'section',
+    attributes: { id: 'actuality-section' },
+    classes: ['py-8', 'backdrop-blur-sm', 'bg-black/10', 'relative'],
+    parent: homeContainer,
+  });
+
+  const actualityWrapper = createEl({
+    tag: 'div',
+    classes: ['container', 'mx-auto', 'px-4'],
+    parent: actualitySection,
+  });
+
+  createEl({
+    tag: 'h2',
+    text: 'Fresh Picks For You',
+    classes: [
+      'text-3xl',
+      'font-nexa-bold',
+      'text-center',
+      'mb-6',
+      'text-gray-800',
+    ],
+    parent: actualityWrapper,
+  });
+
+  // --- Actuality Category Header (Title + Nav Buttons) ---
+  const actualityCategoryHeader = createEl({
+    tag: 'div',
+    classes: [
+      'actuality-category-header',
+      'flex',
+      'justify-between',
+      'items-center',
+      'mb-4',
+    ],
+    parent: actualityWrapper,
+  });
+
+  const actualityCategoryTitle = createEl({
+    tag: 'h3',
+    text: 'Loading category...',
+    classes: ['text-xl', 'font-nexa-light', 'text-gray-700'],
+    parent: actualityCategoryHeader,
+  });
+
+  const actualityProductsContainer = createEl({
+    tag: 'div',
+    attributes: { id: 'actuality-products-display' },
+    classes: [
+      'grid',
+      'grid-cols-1',
+      'sm:grid-cols-[1fr_auto_1fr]',
+      'gap-x',
+      'gap-y-1',
+      'items-stretch',
+      'justify-center',
+    ],
+    parent: actualityWrapper,
+  });
+
+  const actualityNavContainer = createEl({
+    tag: 'div',
+    classes: ['space-x-2'],
+    parent: actualityCategoryHeader,
+  });
+
+  const prevCategoryButton = createEl({
+    tag: 'button',
+    text: '<-',
+    classes: [
+      'px-3',
+      'py-1',
+      'bg-gray-700',
+      'text-white',
+      'rounded',
+      'hover:bg-gray-600',
+      'disabled:opacity-50',
+    ],
+    parent: actualityNavContainer,
+  }) as HTMLButtonElement;
+
+  const nextCategoryButton = createEl({
+    tag: 'button',
+    text: '->',
+    classes: [
+      'px-3',
+      'py-1',
+      'bg-gray-700',
+      'text-white',
+      'rounded',
+      'hover:bg-gray-600',
+      'disabled:opacity-50',
+    ],
+    parent: actualityNavContainer,
+  }) as HTMLButtonElement;
+
+  let actualityCategories: ActualityCategory[] = [];
+  let currentActualityCategoryIndex = 0;
+
+  function displayActualityProducts() {
+    actualityProductsContainer.innerHTML = '';
+    if (
+      !actualityCategories ||
+      actualityCategories.length === 0 ||
+      !actualityCategories[currentActualityCategoryIndex]
+    ) {
+      actualityCategoryTitle.textContent = 'No special picks available today.';
+      createEl({
+        tag: 'p',
+        text: 'Please check back later!',
+        classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
+        parent: actualityProductsContainer,
+      });
+      prevCategoryButton.disabled = true;
+      nextCategoryButton.disabled = true;
+      return;
+    }
+
+    const currentCategory = actualityCategories[currentActualityCategoryIndex];
+    actualityCategoryTitle.textContent = `-->${currentCategory.name}`;
+
+    if (currentCategory.products.length === 0) {
+      createEl({
+        tag: 'p',
+        text: `No specific items from ${currentCategory.name} today.`,
+        classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
+        parent: actualityProductsContainer,
+      });
+    } else {
+      currentCategory.products.forEach((product, index) => {
+        const card = createProductCardElement(product as Product);
+        actualityProductsContainer.appendChild(card);
+
+        if (index === 0 && currentCategory.products.length > 1) {
+          const divider = createEl({
+            tag: 'div',
+            classes: [
+              'w-px',
+              'bg-gray-600',
+              'hidden',
+              'sm:block',
+              'self-stretch',
+            ],
+          });
+          actualityProductsContainer.appendChild(divider);
+        }
+      });
+    }
+
+    const disableButtons = actualityCategories.length <= 1;
+    prevCategoryButton.disabled = disableButtons;
+    nextCategoryButton.disabled = disableButtons;
+  }
+
+  prevCategoryButton.addEventListener('click', () => {
+    if (actualityCategories.length > 0) {
+      // Check if there are categories to navigate
+      currentActualityCategoryIndex =
+        (currentActualityCategoryIndex - 1 + actualityCategories.length) %
+        actualityCategories.length;
+      displayActualityProducts();
+    }
+  });
+
+  nextCategoryButton.addEventListener('click', () => {
+    if (actualityCategories.length > 0) {
+      // Check if there are categories to navigate
+      currentActualityCategoryIndex =
+        (currentActualityCategoryIndex + 1) % actualityCategories.length;
+      displayActualityProducts();
+    }
+  });
+
+  // Initialize Actuality Section
+  if (allProducts.length > 0 && allCategories.length > 0) {
+    getActualityData(allProducts, allCategories)
+      .then((data) => {
+        actualityCategories = data;
+        if (actualityCategories.length > 0) {
+          currentActualityCategoryIndex = 0;
+        }
+        displayActualityProducts();
+      })
+      .catch((err) => {
+        console.error('Error initializing actuality section:', err);
+        actualityCategoryTitle.textContent = 'Could not load special picks.';
+        prevCategoryButton.disabled = true;
+        nextCategoryButton.disabled = true;
+      });
+  } else {
+    actualityCategoryTitle.textContent =
+      'No products or categories available to pick from.';
+    prevCategoryButton.disabled = true;
+    nextCategoryButton.disabled = true;
+  }
+
+  /* ---------- ACTUAL PRODUCTS (Original list of all products) ---------- */
   const actualSection = createEl({
     tag: 'section',
     attributes: { id: 'actual-products' },
@@ -73,7 +397,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
 
   createEl({
     tag: 'h2',
-    text: 'Actual Products',
+    text: 'All Our Products',
     classes: [
       'text-3xl',
       'font-nexa-bold',
@@ -97,63 +421,48 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: actualWrapper,
   });
 
-  const actualLoading = createEl({
-    tag: 'p',
-    text: 'Loading products...',
-    classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
-    parent: actualGrid,
-  });
-
-  try {
-    const products = await getAllPublishedProducts();
-    actualLoading.remove();
-
-    if (products.length === 0) {
+  if (
+    allProducts.length === 0 &&
+    !document.querySelector('#actual-products .text-red-500')
+  ) {
+    if (!actualGrid.querySelector('p')) {
       createEl({
         tag: 'p',
         text: 'No products found.',
         classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
         parent: actualGrid,
       });
-    } else {
-      products.forEach((product, index) => {
-        const card = createProductCardElement(product);
-        actualGrid.appendChild(card);
-
-        gsap.from(card, {
-          duration: 0.5,
-          opacity: 0,
-          y: 50,
-          scale: 0.95,
-          ease: 'power1.out',
-          scrollTrigger: {
-            trigger: card,
-            start: 'top 90%',
-            toggleActions: 'play none none none',
-          },
-          delay: index * 0.05,
-        });
-      });
-      ScrollTrigger.refresh();
     }
-  } catch (e) {
-    actualLoading.remove();
+  } else if (allProducts.length > 0) {
+    allProducts.forEach((product, index) => {
+      const card = createProductCardElement(product);
+      actualGrid.appendChild(card);
+
+      gsap.from(card, {
+        duration: 0.5,
+        opacity: 0,
+        y: 50,
+        scale: 0.95,
+        ease: 'power1.out',
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 90%',
+          toggleActions: 'play none none none',
+        },
+        delay: index * 0.05,
+      });
+    });
+    ScrollTrigger.refresh();
+  } else if (!actualGrid.querySelector('p')) {
     createEl({
       tag: 'p',
-      text: 'Failed to load products. Please try again later.',
-      classes: [
-        'text-center',
-        'text-red-500',
-        'pt-16',
-        'my-20',
-        'col-span-full',
-      ],
+      text: 'Loading products or no products available.',
+      classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
       parent: actualGrid,
     });
-    console.log(e);
   }
 
-  // Featured Products/Categories Section (Placeholder)
+  // Featured Products/Categories Section
   const featuredSection = createEl({
     tag: 'section',
     attributes: { id: 'featured-products-section' },
@@ -184,7 +493,6 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: featuredWrapper,
   });
 
-  // Horizontal scrolling track
   const horizontalTrack = createEl({
     tag: 'div',
     attributes: { id: 'horizontal-track' },
@@ -225,27 +533,26 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     });
   });
 
-  // const panels = Array.from(horizontalTrack.children) as HTMLElement[];
-
   const scrollDistance = () =>
     horizontalTrack.scrollWidth - featuredWrapper.clientWidth;
 
-  gsap.to(horizontalTrack, {
-    x: () => -scrollDistance(),
-    ease: 'none',
-    scrollTrigger: {
-      trigger: featuredSection,
-      pin: true,
-      scrub: 1,
-      start: 'top top',
-      end: () => '+=' + scrollDistance(),
-      invalidateOnRefresh: true,
-    },
-  });
+  if (featuredImages.length > 0) {
+    gsap.to(horizontalTrack, {
+      x: () => -scrollDistance(),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: featuredSection,
+        pin: true,
+        scrub: 1,
+        start: 'top top',
+        end: () => `+=${scrollDistance()}`,
+        invalidateOnRefresh: true,
+      },
+    });
+  }
 
   window.addEventListener('load', () => ScrollTrigger.refresh());
 
-  // Product Listing Section
   const productListingSection = createEl({
     tag: 'section',
     attributes: { id: 'product-listing-section' },
@@ -284,54 +591,31 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: productListingWrapper,
   });
 
-  // Fetch and display products (similar to CommerceTestComponent logic)
-  const loadingMessage = createEl({
-    tag: 'p',
-    text: 'Loading your delightful drinks...',
-    classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
-    parent: productsGrid,
-  });
-
-  try {
-    const products = await getAllPublishedProducts();
-    loadingMessage.remove();
-
-    if (products.length === 0) {
-      createEl({
-        tag: 'p',
-        text: 'No drinks available at the moment. Please check back soon!',
-        classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
-        parent: productsGrid,
+  if (allProducts.length > 0) {
+    const displayedProducts = allProducts.slice(0, 4);
+    displayedProducts.forEach((product, index) => {
+      const productCard = createProductCardElement(product);
+      productsGrid.appendChild(productCard);
+      gsap.from(productCard, {
+        duration: 0.5,
+        opacity: 0,
+        y: 50,
+        scale: 0.95,
+        ease: 'power1.out',
+        scrollTrigger: {
+          trigger: productCard,
+          start: 'top 90%',
+          toggleActions: 'play none none none',
+        },
+        delay: index * 0.1,
       });
-    } else {
-      products.forEach((product, index) => {
-        const productCard = createProductCardElement(product);
-        productsGrid.appendChild(productCard);
-
-        // GSAP animation for card entrance
-        gsap.from(productCard, {
-          duration: 0.5,
-          opacity: 0,
-          y: 50,
-          scale: 0.95,
-          ease: 'power1.out',
-          scrollTrigger: {
-            trigger: productCard,
-            start: 'top 90%', // Trigger when 90% of the card is visible
-            toggleActions: 'play none none none', // Play animation once when it enters viewport
-          },
-          delay: index * 0.1, // Stagger the animation slightly for each card
-        });
-      });
-      ScrollTrigger.refresh();
-    }
-  } catch (error) {
-    loadingMessage.remove();
-    console.error('Failed to load products for home page:', error);
+    });
+    if (displayedProducts.length > 0) ScrollTrigger.refresh();
+  } else if (!productsGrid.querySelector('p')) {
     createEl({
       tag: 'p',
-      text: 'Oops! We couldn’t fetch the drinks. Please try refreshing.',
-      classes: ['text-center', 'text-red-500', 'my-4', 'col-span-full'],
+      text: 'No drinks to display in this section.',
+      classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
       parent: productsGrid,
     });
   }

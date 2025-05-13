@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettier from "eslint-plugin-prettier";
 import eslintConfigPrettier from "eslint-config-prettier";
+import unicorn from "eslint-plugin-unicorn";
 import globals from "globals";
 
 export default tseslint.config(
@@ -40,9 +41,11 @@ export default tseslint.config(
     plugins: {
       "@typescript-eslint": tseslint.plugin,
       "prettier": prettier,
+      "unicorn": unicorn,
     },
     rules: {
       ...eslintConfigPrettier.rules,
+      ...unicorn.configs.recommended.rules,
       "prettier/prettier": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
     },
