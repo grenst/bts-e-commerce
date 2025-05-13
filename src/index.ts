@@ -48,7 +48,8 @@ createEl({
 
 const routes: Route[] = [
   {
-    path: '/',
+    // path: '/',
+    path: '/main',
     component: createHomePage,
   },
   {
@@ -62,15 +63,26 @@ const routes: Route[] = [
       const cartPage = createEl({
         tag: 'div',
         text: 'Cart Page - Coming Soon!',
+        parent: contentContainer,
       });
-      contentContainer.innerHTML = '';
-      contentContainer.append(cartPage);
+      // contentContainer.append(cartPage);
       return cartPage;
     },
   },
   {
     path: '/profile',
     component: createProfilePage,
+  },
+  {
+    path: '*',
+    component: () => {
+      // Placeholder for Error page
+      createEl({
+        tag: 'h1',
+        text: 'Error Page - Coming Soon! With BIG BUTTON. Go to Login or to About or to Main',
+        parent: contentContainer,
+      });
+    },
   },
 ];
 

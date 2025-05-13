@@ -30,23 +30,34 @@ export class Router {
     if (this.currentPath === path) return;
     this.currentPath = path;
 
+    if (path === '/') {
+      this.navigateTo('/main'); // редирект
+      return;
+    }
+
     const route = this.routes.find((r) => r.path === path);
 
     if (route) {
       removeAllChild(this.container);
       route.component(this.container);
-    } else {
-      // Default to home if route not found
-      const homeRoute = this.routes.find((r) => r.path === '/');
-      if (homeRoute) {
-        removeAllChild(this.container);
-        homeRoute.component(this.container);
-      }
+      return;
+    }
+
+    // Error Page if route not found
+    const wildcardRoute = this.routes.find((r) => r.path === '*');
+    if (wildcardRoute) {
+      removeAllChild(this.container);
+      wildcardRoute.component(this.container);
+      return;
     }
   }
 
   init(): void {
-    this.handleRouteChange();
+    if (window.location.pathname === '/') {
+      this.navigateTo('/main'); // Редирект на /main при загрузке
+    } else {
+      this.handleRouteChange(); // Обычная обработка
+    }
   }
 }
 
