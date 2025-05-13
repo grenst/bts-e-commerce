@@ -1,5 +1,5 @@
 import './button.scss';
-import { createEl as createElement } from '../../../utils/element-utils';
+import { createEl as createElement } from '../../../utils/element-utilities';
 
 function createButton(
   text: string,

@@ -1,7 +1,7 @@
 import {
   createEl as createElement,
   removeAllChild,
-} from '../utils/element-utils';
+} from '../utils/element-utilities';
 
 export interface Route {
   path: string;

@@ -1,6 +1,6 @@
 import { gsap } from '../../animations/gsap-init';
 import menuArrowImagePath from '../../assets/images/menu-arrow.svg';
-import { createEl as createElement } from '../../utils/element-utils';
+import { createEl as createElement } from '../../utils/element-utilities';
 import { Router } from '../../router/router';
 import { AuthService } from '../../services/auth.service';
 import { Customer } from '../../store/customer-store';
