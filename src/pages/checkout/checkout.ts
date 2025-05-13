@@ -1,1 +1,1 @@
-// Оформление заказа
+export function checkout() {}

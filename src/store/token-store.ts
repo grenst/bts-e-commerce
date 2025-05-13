@@ -2,12 +2,12 @@ import { createStore } from 'zustand/vanilla';
 import { persist } from 'zustand/middleware';
 
 interface TokenState {
-  accessToken: string | null;
-  refreshToken: string | null;
-  expiresAt: number | null;
+  accessToken: string | undefined;
+  refreshToken: string | undefined;
+  expiresAt: number | undefined;
   setTokens: (
     accessToken: string,
-    refreshToken: string | null,
+    refreshToken: string | undefined,
     expiresIn: number
   ) => void;
   clearTokens: () => void;
@@ -16,9 +16,9 @@ interface TokenState {
 export const useTokenStore = createStore<TokenState>()(
   persist(
     (set) => ({
-      accessToken: null,
-      refreshToken: null,
-      expiresAt: null,
+      accessToken: undefined,
+      refreshToken: undefined,
+      expiresAt: undefined,
       setTokens: (accessToken, refreshToken, expiresIn) =>
         set({
           accessToken,
@@ -27,9 +27,9 @@ export const useTokenStore = createStore<TokenState>()(
         }),
       clearTokens: () =>
         set({
-          accessToken: null,
-          refreshToken: null,
-          expiresAt: null,
+          accessToken: undefined,
+          refreshToken: undefined,
+          expiresAt: undefined,
         }),
     }),
     {

@@ -3,7 +3,8 @@ import { AxiosError } from 'axios';
 import { useTokenStore } from '../../store/token-store';
 import { getAnonymousToken } from '../../components/auth-services/token.service';
 
-interface Product {
+export interface Product {
+  // Added export
   id: string;
   name: { [key: string]: string };
   description?: { [key: string]: string };
@@ -11,6 +12,22 @@ interface Product {
     images?: { url: string }[];
     prices?: { value: { centAmount: number; currencyCode: string } }[];
   };
+  categories: Array<{ id: string; typeId: 'category' }>; // Added categories
+}
+
+// Interface for Category
+export interface Category {
+  id: string;
+  name: { [key: string]: string };
+  // Add other category fields if needed, e.g., slug, description
+}
+
+interface CategoryPagedQueryResponse {
+  limit: number;
+  offset: number;
+  count: number;
+  total?: number;
+  results: Category[];
 }
 
 interface ProductProjectionPagedQueryResponse {
@@ -31,7 +48,7 @@ export async function getAllPublishedProducts(): Promise<Product[]> {
         .getState()
         .setTokens(
           anon.access_token,
-          anon.refresh_token ?? null,
+          anon.refresh_token ?? undefined,
           anon.expires_in
         );
       accessToken = anon.access_token;
@@ -46,15 +63,51 @@ export async function getAllPublishedProducts(): Promise<Product[]> {
     );
 
     return response.data.results;
-  } catch (e) {
-    const error = e as AxiosError | Error;
+  } catch (error_) {
+    const error = error_ as AxiosError | Error;
     console.error('Error fetching published products:', error.message);
     if ('isAxiosError' in error && (error as AxiosError).isAxiosError) {
-      const axiosErr = error as AxiosError;
-      if (axiosErr.response?.status === 403) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 403) {
         console.error(
           "Forbidden: token lacks the 'view_published_products' scope."
         );
+      }
+    }
+    throw error;
+  }
+}
+
+export async function getAllCategories(): Promise<Category[]> {
+  try {
+    let { accessToken } = useTokenStore.getState();
+
+    if (!accessToken) {
+      const anon = await getAnonymousToken();
+      useTokenStore
+        .getState()
+        .setTokens(
+          anon.access_token,
+          anon.refresh_token ?? undefined,
+          anon.expires_in
+        );
+      accessToken = anon.access_token;
+    }
+
+    const response = await apiInstance.get<CategoryPagedQueryResponse>(
+      '/categories',
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+    return response.data.results;
+  } catch (error_) {
+    const error = error_ as AxiosError | Error;
+    console.error('Error fetching categories:', error.message);
+    if ('isAxiosError' in error && (error as AxiosError).isAxiosError) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 403) {
+        console.error("Forbidden: token lacks the 'view_categories' scope.");
       }
     }
     throw error;
@@ -86,8 +139,8 @@ export async function getDrinkProducts(): Promise<DrinkProduct[]> {
         imageUrl: product.masterVariant.images?.[0]?.url,
       })
     );
-  } catch (e) {
-    const error = e as AxiosError | Error;
+  } catch (error_) {
+    const error = error_ as AxiosError | Error;
     console.error(
       'Error transforming products to DrinkProduct format:',
       error.message

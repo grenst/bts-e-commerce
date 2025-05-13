@@ -1,1 +1,1 @@
-// Корзина
+export function cart() {}

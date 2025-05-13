@@ -1,4 +1,4 @@
-import { body } from '../utils/elementUtils';
+import { body } from '../utils/element-utils';
 
 const svgSprite = `
     <svg style="display: none;">
@@ -134,8 +134,8 @@ const svgSprite = `
 
 const svgSpriteElement = () => {
   const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(svgSprite, 'image/svg+xml');
-  const svgElement = svgDoc.documentElement;
+  const svgDocument = parser.parseFromString(svgSprite, 'image/svg+xml');
+  const svgElement = svgDocument.documentElement;
   body.append(svgElement);
 };
 

@@ -10,17 +10,17 @@ export interface Customer {
 }
 
 interface CustomerState {
-  customer: Customer | null;
-  setCustomer: (customer: Customer | null) => void; // Allow setting to null
+  customer: Customer | undefined;
+  setCustomer: (customer: Customer | undefined) => void;
   clearCustomer: () => void;
 }
 
 export const useCustomerStore = createStore<CustomerState>()(
   persist(
     (set) => ({
-      customer: null,
+      customer: undefined,
       setCustomer: (customer) => set({ customer }),
-      clearCustomer: () => set({ customer: null }),
+      clearCustomer: () => set({ customer: undefined }),
     }),
     {
       name: 'customer-storage', // name of the item in localStorage

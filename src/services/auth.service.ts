@@ -8,9 +8,9 @@ import {
   signupCustomer,
   fetchMyCustomer,
   CustomerDraft,
-  CommercetoolsCustomer, // Import CommercetoolsCustomer for return type
+  CommercetoolsCustomer,
 } from '../components/auth-services/customer.service';
-import { apiInstance } from '../api/axios-instances'; // Import apiInstance for direct calls
+import { apiInstance } from '../api/axios-instances';
 import { useTokenStore } from '../store/token-store';
 import { useCustomerStore } from '../store/customer-store';
 import { uiStore as useUIStore } from '../store/store';
@@ -20,11 +20,11 @@ function persistTokens(token: OAuthTokenResponse) {
   const { access_token, refresh_token, expires_in } = token;
   useTokenStore
     .getState()
-    .setTokens(access_token, refresh_token ?? null, expires_in);
+    .setTokens(access_token, refresh_token ?? undefined, expires_in);
 }
 
-export class AuthService {
-  static async register(
+export const AuthService = {
+  async register(
     email: string,
     password: string,
     firstName?: string,
@@ -51,10 +51,10 @@ export class AuthService {
         );
       return false;
     }
-  }
+  },
 
   //  Login
-  static async login(email: string, password: string): Promise<boolean> {
+  async login(email: string, password: string): Promise<boolean> {
     try {
       const token = await getPasswordToken(email, password);
       persistTokens(token);
@@ -64,7 +64,11 @@ export class AuthService {
 
       useUIStore
         .getState()
-        .addNotification('info', `Access‑token:\n${token.access_token}`, 10000);
+        .addNotification(
+          'info',
+          `Access‑token:\n${token.access_token}`,
+          10_000
+        );
 
       return true;
     } catch (error) {
@@ -75,20 +79,20 @@ export class AuthService {
         .addNotification('error', 'Login failed. Check credentials.');
       return false;
     }
-  }
+  },
 
   //  Logout
-  static async logout(): Promise<void> {
+  async logout(): Promise<void> {
     useTokenStore.getState().clearTokens();
     useCustomerStore.getState().clearCustomer();
-  }
+  },
 
   //  Refresh
-  static async refreshToken(): Promise<string | null> {
+  async refreshToken(): Promise<string | undefined> {
     const { refreshToken } = useTokenStore.getState();
     if (!refreshToken) {
       debug('No refreshToken, skip refresh');
-      return null;
+      return undefined;
     }
     try {
       const token = await refreshAccessToken(refreshToken);
@@ -97,11 +101,11 @@ export class AuthService {
     } catch (error) {
       debug('Refresh error', error);
       await this.logout();
-      return null;
+      return undefined;
     }
-  }
+  },
 
-  static async updateCurrentCustomer(
+  async updateCurrentCustomer(
     version: number,
     actions: { action: string; [key: string]: unknown }[]
   ): Promise<CommercetoolsCustomer> {
@@ -131,5 +135,5 @@ export class AuthService {
         );
       throw error;
     }
-  }
-}
+  },
+};

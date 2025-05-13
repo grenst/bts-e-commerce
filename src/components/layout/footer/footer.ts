@@ -1,14 +1,17 @@
 import './footer.scss';
 
-import { createEl, createSvgUse } from '../../../utils/elementUtils';
+import {
+  createEl as createElement,
+  createSvgUse,
+} from '../../../utils/element-utils';
 
 const createFooter = (parent: HTMLElement) => {
-  const footer = createEl({ tag: 'footer', classes: ['footer'], parent });
-  const footerContainer = createEl({
+  const footer = createElement({ tag: 'footer', classes: ['footer'], parent });
+  const footerContainer = createElement({
     classes: ['footer-container'],
     parent: footer,
   });
-  const footerLinkGithub = createEl({
+  const footerLinkGithub = createElement({
     tag: 'a',
     classes: ['footer-link', 'footer-container__github'],
     attributes: {
@@ -20,14 +23,14 @@ const createFooter = (parent: HTMLElement) => {
   const svgGithub = createSvgUse('#github', 'footer-svg_github');
   footerLinkGithub.append(svgGithub);
 
-  createEl({
+  createElement({
     tag: 'p',
     text: "2025 Kat's Cats",
     classes: ['copyright'],
     parent: footerContainer,
   });
 
-  const footerLinkRSS = createEl({
+  const footerLinkRSS = createElement({
     tag: 'a',
     classes: ['footer-link', 'footer-container__rss'],
     attributes: {

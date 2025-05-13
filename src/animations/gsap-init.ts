@@ -12,7 +12,7 @@ function setupBackgroundAnimations() {
     { id: '#bg-circle-1', rotation: '-=10' }, // slow, CCW
   ];
 
-  circles.forEach((circle) => {
+  for (const circle of circles) {
     const element = document.querySelector(circle.id);
     if (element) {
       gsap.set(element, { transformOrigin: 'center center' });
@@ -32,9 +32,13 @@ function setupBackgroundAnimations() {
         `Background circle element ${circle.id} not found for animation.`
       );
     }
-  });
+  }
 }
 
-export { gsap, ScrollTrigger, setupBackgroundAnimations };
+export { setupBackgroundAnimations };
 
 // console.log('GSAP and ScrollTrigger initialized'); // Optional: remove or keep for debugging
+
+export { gsap } from 'gsap';
+
+export { ScrollTrigger } from 'gsap/ScrollTrigger';

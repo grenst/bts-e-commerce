@@ -1,5 +1,5 @@
 import './button.scss';
-import { createEl } from '../../../utils/elementUtils';
+import { createEl as createElement } from '../../../utils/element-utils';
 
 function createButton(
   text: string,
@@ -7,7 +7,7 @@ function createButton(
   addClasses: string[] = [],
   type = 'button'
 ): HTMLButtonElement {
-  return createEl({
+  return createElement({
     tag: 'button',
     parent,
     text,

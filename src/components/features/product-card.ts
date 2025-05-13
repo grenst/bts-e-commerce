@@ -34,7 +34,7 @@ export function createProductCardElement(product: Product): HTMLElement {
     'bg-gray-100',
     'overflow-hidden'
   );
-  card.appendChild(imageContainer);
+  card.append(imageContainer);
 
   const productImage = document.createElement('img');
   const imageUrl = product.masterVariant.images?.[0]?.url;
@@ -52,12 +52,12 @@ export function createProductCardElement(product: Product): HTMLElement {
       'text-gray-400'
     );
   }
-  imageContainer.appendChild(productImage);
+  imageContainer.append(productImage);
 
   // Content container
   const contentContainer = document.createElement('div');
   contentContainer.classList.add('p-5', 'flex', 'flex-col', 'flex-grow');
-  card.appendChild(contentContainer);
+  card.append(contentContainer);
 
   const nameElement = document.createElement('h3');
   nameElement.textContent = product.name['en-US'] || 'N/A';
@@ -68,7 +68,7 @@ export function createProductCardElement(product: Product): HTMLElement {
     'text-gray-800',
     'truncate' // Keep truncate if names can be long
   );
-  contentContainer.appendChild(nameElement);
+  contentContainer.append(nameElement);
 
   if (product.description && product.description['en-US']) {
     const descriptionElement = document.createElement('p');
@@ -80,23 +80,23 @@ export function createProductCardElement(product: Product): HTMLElement {
       'line-clamp-3'
     );
 
-    contentContainer.appendChild(descriptionElement);
+    contentContainer.append(descriptionElement);
   }
 
   const priceContainer = document.createElement('div');
   priceContainer.classList.add('mt-auto', 'pt-3', 'relative', '-z-0');
-  contentContainer.appendChild(priceContainer);
+  contentContainer.append(priceContainer);
 
   const priceElement = document.createElement('p');
   const firstPrice = product.masterVariant.prices?.[0];
   if (firstPrice) {
     const pr = `${(firstPrice.value.centAmount / 100).toFixed(2)} ${firstPrice.value.currencyCode}`;
 
-    priceElement.setAttribute('data-price', pr); // only for ::after
+    priceElement.dataset.price = pr; // only for ::after
 
     const priceSpan = document.createElement('span'); // ★
     priceSpan.textContent = pr;
-    priceElement.appendChild(priceSpan); // ★
+    priceElement.append(priceSpan); // ★
   } else {
     priceElement.textContent = 'Price not available';
   }
@@ -121,7 +121,7 @@ export function createProductCardElement(product: Product): HTMLElement {
     'group-hover:border-white',
     'group-hover:before:border-gray-100'
   );
-  priceContainer.appendChild(priceElement);
+  priceContainer.append(priceElement);
 
   // TODO: Add "Add to Cart" button or other CTAs here later
 

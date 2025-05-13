@@ -1,1 +1,1 @@
-// заказы
+export function orders() {}

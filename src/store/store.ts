@@ -97,36 +97,39 @@ export function createNotificationsContainer(parent: HTMLElement): HTMLElement {
   const container = document.createElement('div');
   container.className =
     'notifications-container fixed top-4 right-4 z-50 flex flex-col gap-2';
-  parent.appendChild(container);
+  parent.append(container);
 
   uiStore.subscribe((state) => {
     container.innerHTML = '';
 
-    state.notifications.forEach((notification) => {
-      const notificationEl = document.createElement('div');
+    for (const notification of state.notifications) {
+      const notificationElement = document.createElement('div');
 
       let typeClasses = '';
       switch (notification.type) {
-        case 'success':
+        case 'success': {
           typeClasses = 'bg-green-100 border-green-500 text-green-700';
           break;
-        case 'error':
+        }
+        case 'error': {
           typeClasses = 'bg-red-100 border-red-500 text-red-700';
           break;
-        case 'warning':
+        }
+        case 'warning': {
           typeClasses = 'bg-yellow-100 border-yellow-500 text-yellow-700';
           break;
-        case 'info':
-        default:
+        }
+        case 'info': {
           typeClasses = 'bg-blue-100 border-blue-500 text-blue-700';
           break;
+        }
       }
 
-      notificationEl.className = `notification p-3 rounded border-l-4 ${typeClasses} flex justify-between items-center`;
+      notificationElement.className = `notification p-3 rounded border-l-4 ${typeClasses} flex justify-between items-center`;
 
       const messageSpan = document.createElement('span');
       messageSpan.textContent = notification.message;
-      notificationEl.appendChild(messageSpan);
+      notificationElement.append(messageSpan);
 
       const closeButton = document.createElement('button');
       closeButton.innerHTML = '&times;';
@@ -134,10 +137,10 @@ export function createNotificationsContainer(parent: HTMLElement): HTMLElement {
       closeButton.addEventListener('click', () => {
         uiStore.getState().removeNotification(notification.id);
       });
-      notificationEl.appendChild(closeButton);
+      notificationElement.append(closeButton);
 
-      container.appendChild(notificationEl);
-    });
+      container.append(notificationElement);
+    }
   });
 
   return container;
@@ -151,9 +154,9 @@ export function createLoadingIndicator(parent: HTMLElement): HTMLElement {
   const spinner = document.createElement('div');
   spinner.className =
     'spinner w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin';
-  loadingContainer.appendChild(spinner);
+  loadingContainer.append(spinner);
 
-  parent.appendChild(loadingContainer);
+  parent.append(loadingContainer);
 
   uiStore.subscribe((state) => {
     if (state.isLoading) {

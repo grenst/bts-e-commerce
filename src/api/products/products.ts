@@ -1,1 +1,1 @@
-// товары
+export function products() {}
