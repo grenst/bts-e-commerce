@@ -3,16 +3,27 @@ import { createEl, removeAllChild } from '../utils/elementUtils';
 export interface Route {
   path: string;
   component: (container: HTMLElement) => void;
+  preserveState?: boolean; // Флаг, нужно ли сохранять состояние для этого маршрута
 }
 
 export class Router {
   private routes: Route[] = [];
   private container: HTMLElement;
   private currentPath: string = '';
+  private pageStates: Map<string, HTMLElement> = new Map(); // cохранение состояния страницы
+  private scrollPositions: Map<string, number> = new Map();
 
   constructor(container: HTMLElement) {
     this.container = container;
+    // window.addEventListener('popstate', () => this.handleRouteChange());
+    this.setupEventListeners();
+  }
+
+  private setupEventListeners(): void {
     window.addEventListener('popstate', () => this.handleRouteChange());
+    window.addEventListener('beforeunload', () =>
+      this.saveCurrentScrollPosition()
+    );
   }
 
   addRoute(route: Route): void {
@@ -20,14 +31,50 @@ export class Router {
   }
 
   navigateTo(path: string): void {
+    if (this.currentPath === path) return;
+
+    this.saveCurrentState();
     window.history.pushState({}, '', path);
     this.handleRouteChange();
+  }
+
+  private saveCurrentState(): void {
+    if (this.currentPath && this.container.children.length > 0) {
+      const currentRoute = this.routes.find((r) => r.path === this.currentPath);
+      if (currentRoute?.preserveState) {
+        this.pageStates.set(
+          this.currentPath,
+          this.container.cloneNode(true) as HTMLElement
+        );
+        this.saveCurrentScrollPosition();
+      }
+    }
+  }
+
+  private saveCurrentScrollPosition(): void {
+    if (this.currentPath) {
+      this.scrollPositions.set(this.currentPath, window.scrollY);
+    }
   }
 
   private handleRouteChange(): void {
     const path = window.location.pathname;
 
     if (this.currentPath === path) return;
+
+    // Сохраняем текущее состояние перед переходом
+    // if (this.currentPath && this.container.children.length > 0) {
+    //   const currentRoute = this.routes.find((r) => r.path === this.currentPath);
+    //   if (currentRoute?.preserveState) {
+    //     this.pageStates.set(
+    //       this.currentPath,
+    //       this.container.cloneNode(true) as HTMLElement
+    //     );
+    //   }
+    // }
+
+    this.saveCurrentState();
+
     this.currentPath = path;
 
     if (path === '/') {
@@ -38,17 +85,64 @@ export class Router {
     const route = this.routes.find((r) => r.path === path);
 
     if (route) {
-      removeAllChild(this.container);
-      route.component(this.container);
+      // if (route.preserveState && this.pageStates.has(path)) {
+      //   removeAllChild(this.container);
+      //   this.container.appendChild(this.pageStates.get(path)!);
+      //   console.log('Страница из состояния');
+      // } else {
+      //   removeAllChild(this.container);
+      //   route.component(this.container);
+      // }
+      this.renderRoute(route);
       return;
     }
 
     // Error Page if route not found
+    // const wildcardRoute = this.routes.find((r) => r.path === '*');
+    // if (wildcardRoute) {
+    //   removeAllChild(this.container);
+    //   wildcardRoute.component(this.container);
+    //   return;
+    // }
+
+    this.renderWildcardRoute();
+  }
+
+  private renderRoute(route: Route): void {
+    removeAllChild(this.container);
+
+    if (route.preserveState && this.pageStates.has(route.path)) {
+      this.restoreState(route.path);
+    } else {
+      route.component(this.container);
+      window.scrollTo(0, 0);
+      console.log(`Первая отрисовка ${route.path}`);
+    }
+  }
+
+  private restoreState(path: string): void {
+    const savedState = this.pageStates.get(path);
+    if (savedState) {
+      this.container.appendChild(savedState);
+      this.restoreScrollPosition(path);
+      console.log(`Страница из сохранённого состояния ${path}`);
+    }
+  }
+
+  private restoreScrollPosition(path: string): void {
+    requestAnimationFrame(() => {
+      const savedPosition = this.scrollPositions.get(path) || 0;
+      window.scrollTo(0, savedPosition);
+    });
+  }
+
+  // Error Page if route not found
+  private renderWildcardRoute(): void {
     const wildcardRoute = this.routes.find((r) => r.path === '*');
     if (wildcardRoute) {
       removeAllChild(this.container);
       wildcardRoute.component(this.container);
-      return;
+      window.scrollTo(0, 0);
     }
   }
 
@@ -58,6 +152,15 @@ export class Router {
     } else {
       this.handleRouteChange(); // Обычная обработка
     }
+  }
+
+  // методы очистки состояний (на всякий случай)
+  clearStates(): void {
+    this.pageStates.clear();
+  }
+
+  clearStateForPath(path: string): void {
+    this.pageStates.delete(path);
   }
 }
 

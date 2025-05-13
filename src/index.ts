@@ -51,27 +51,31 @@ const routes: Route[] = [
     // path: '/',
     path: '/main',
     component: createHomePage,
+    preserveState: true,
   },
   {
     path: '/login',
     component: createLoginPage,
+    preserveState: false, // можно и не ставить (форму всё равно надо очищать)
   },
   {
     path: '/cart',
     component: () => {
       // Placeholder for cart page
       const cartPage = createEl({
-        tag: 'div',
+        // tag: 'div',
         text: 'Cart Page - Coming Soon!',
         parent: contentContainer,
       });
       // contentContainer.append(cartPage);
       return cartPage;
     },
+    preserveState: true,
   },
   {
     path: '/profile',
     component: createProfilePage,
+    preserveState: true,
   },
   {
     path: '*',
