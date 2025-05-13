@@ -1,6 +1,6 @@
 import { gsap } from '../../animations/gsap-init';
 import menuArrowImagePath from '../../assets/images/menu-arrow.svg';
-import { createEl } from '../../utils/elementUtils';
+import { createEl as createElement } from '../../utils/elementUtils';
 import { Router } from '../../router/router';
 import { AuthService } from '../../services/auth.service';
 import { Customer } from '../../store/customer-store';
@@ -20,7 +20,7 @@ export function createUserDropdown(
   userNavForLogout: HTMLElement,
   updateUserNavOnHeaderCallback: (userNav: HTMLElement, router: Router) => void
 ): UserMenuElements {
-  const dropdownMenu = createEl({
+  const dropdownMenu = createElement({
     tag: 'div',
     classes: [
       'absolute',
@@ -37,7 +37,7 @@ export function createUserDropdown(
     parent: dropdownContainer,
   });
 
-  const greetingContainer = createEl({
+  const greetingContainer = createElement({
     tag: 'p',
     classes: [
       'block',
@@ -52,28 +52,28 @@ export function createUserDropdown(
     parent: dropdownMenu,
   });
 
-  createEl({
+  createElement({
     tag: 'span',
     text: 'Hi, ',
     classes: ['font-nexa-light'], // Nexa Light
     parent: greetingContainer,
   });
 
-  createEl({
+  createElement({
     tag: 'span',
     text: `${customer.firstName || customer.email}`,
     classes: ['name-usr-bold'], // Nexa Bold
     parent: greetingContainer,
   });
 
-  createEl({
+  createElement({
     tag: 'span',
     text: '!',
     classes: ['font-nexa-light'], // Nexa Light
     parent: greetingContainer,
   });
 
-  createEl({
+  createElement({
     tag: 'hr',
     classes: ['my-1', 'border-gray-400'],
     parent: dropdownMenu,
@@ -83,7 +83,7 @@ export function createUserDropdown(
     text: string,
     onClick: () => void
   ): { wrapper: HTMLElement; link: HTMLElement } => {
-    const itemWrapper = createEl({
+    const itemWrapper = createElement({
       tag: 'div',
       classes: [
         'relative',
@@ -97,7 +97,7 @@ export function createUserDropdown(
     });
     itemWrapper.addEventListener('click', onClick);
 
-    const contentContainer = createEl({
+    const contentContainer = createElement({
       tag: 'div',
       classes: [
         'relative',
@@ -112,14 +112,14 @@ export function createUserDropdown(
       parent: itemWrapper,
     });
 
-    createEl({
+    createElement({
       tag: 'img',
       attributes: { src: menuArrowImagePath, alt: 'arrow' },
       classes: ['w-8', 'h-8', '-translate-y-1', 'mr-2', 'flex-shrink-0'],
       parent: contentContainer,
     });
 
-    const itemLink = createEl({
+    const itemLink = createElement({
       tag: 'a',
       text,
       classes: [
@@ -146,13 +146,13 @@ export function createUserDropdown(
   const profileLink = profileMenuItem.link;
   const ordersLink = ordersMenuItem.link;
 
-  createEl({
+  createElement({
     tag: 'hr',
     classes: ['my-1', 'border-gray-400'],
     parent: dropdownMenu,
   });
 
-  const logoutButtonWrapper = createEl({
+  const logoutButtonWrapper = createElement({
     tag: 'div',
     classes: [
       'relative',
@@ -164,14 +164,14 @@ export function createUserDropdown(
     ],
     parent: dropdownMenu,
   });
-  logoutButtonWrapper.onclick = async () => {
+  logoutButtonWrapper.addEventListener('click', async () => {
     await AuthService.logout();
     updateUserNavOnHeaderCallback(userNavForLogout, router);
     router.navigateTo('/');
     hideMenuAndRemoveListener();
-  };
+  });
 
-  const logoutContentContainer = createEl({
+  const logoutContentContainer = createElement({
     tag: 'div',
     classes: [
       'relative',
@@ -186,14 +186,14 @@ export function createUserDropdown(
     parent: logoutButtonWrapper,
   });
 
-  createEl({
+  createElement({
     tag: 'img',
     attributes: { src: menuArrowImagePath, alt: 'arrow' },
     classes: ['w-8', 'h-8', '-translate-y-0', 'mr-2', 'flex-shrink-0'],
     parent: logoutContentContainer,
   });
 
-  const logoutButton = createEl({
+  const logoutButton = createElement({
     tag: 'a',
     text: 'Logout',
     classes: [
@@ -235,9 +235,9 @@ export function createUserDropdown(
       dropdownMenu.classList.remove('hidden');
       animateDropdownItems();
 
-      handleOutsideClick = (e: MouseEvent) => {
+      handleOutsideClick = (event_: MouseEvent) => {
         if (
-          !dropdownContainer.contains(e.target as Node) &&
+          !dropdownContainer.contains(event_.target as Node) &&
           !dropdownMenu.classList.contains('hidden')
         ) {
           dropdownMenu.classList.add('hidden');

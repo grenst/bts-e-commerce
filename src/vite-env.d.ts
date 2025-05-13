@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-interface ImportMetaEnv {
+interface ImportMetaEnvironment {
   readonly VITE_CTP_PROJECT_KEY: string;
   readonly VITE_CTP_CLIENT_ID: string;
   readonly VITE_CTP_CLIENT_SECRET: string;
@@ -10,5 +10,5 @@ interface ImportMetaEnv {
 }
 
 interface ImportMeta {
-  readonly env: ImportMetaEnv;
+  readonly env: ImportMetaEnvironment;
 }

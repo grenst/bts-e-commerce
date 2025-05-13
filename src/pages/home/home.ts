@@ -1,4 +1,4 @@
-import { createEl } from '../../utils/elementUtils';
+import { createEl as createElement } from '../../utils/elementUtils';
 import {
   getAllPublishedProducts,
   getAllCategories,
@@ -32,9 +32,9 @@ function getTodaysUTCDateString(): string {
 // Helper function to shuffle an array (Fisher-Yates shuffle)
 function shuffleArray<T>(array: T[]): T[] {
   const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  for (let index = newArray.length - 1; index > 0; index -= 1) {
+    const index_ = Math.floor(Math.random() * (index + 1));
+    [newArray[index], newArray[index_]] = [newArray[index_], newArray[index]];
   }
   return newArray;
 }
@@ -47,14 +47,14 @@ async function generateActualityList(
   const productsByCategory: Record<string, Product[]> = {};
   const categoryNameMap: Record<string, string> = {};
 
-  allCategories.forEach((cat) => {
+  for (const cat of allCategories) {
     categoryNameMap[cat.id] =
       cat.name.en ||
       cat.name[Object.keys(cat.name)[0]] ||
-      `Category ${cat.id.substring(0, 4)}`;
-  });
+      `Category ${cat.id.slice(0, 4)}`;
+  }
 
-  allProducts.forEach((product) => {
+  for (const product of allProducts) {
     if (product.categories && product.categories.length > 0) {
       const categoryId = product.categories[0].id;
       if (!productsByCategory[categoryId]) {
@@ -62,7 +62,7 @@ async function generateActualityList(
       }
       productsByCategory[categoryId].push(product);
     }
-  });
+  }
 
   const actualityCategories: ActualityCategory[] = [];
   for (const categoryId in productsByCategory) {
@@ -75,7 +75,7 @@ async function generateActualityList(
         id: categoryId,
         name:
           categoryNameMap[categoryId] ||
-          `Category ${categoryId.substring(0, 8)}...`, // Use fetched name
+          `Category ${categoryId.slice(0, 8)}...`, // Use fetched name
         products: shuffledProducts.slice(0, 2) as ActualityProduct[],
       });
     }
@@ -120,14 +120,14 @@ async function getActualityData(
 export async function createHomePage(container: HTMLElement): Promise<void> {
   container.innerHTML = '';
 
-  const homeContainer = createEl({
+  const homeContainer = createElement({
     tag: 'div',
     parent: container,
     classes: ['home-page-redesigned', 'w-full'],
   });
 
   // Hero Section
-  const heroSection = createEl({
+  const heroSection = createElement({
     tag: 'section',
     attributes: { id: 'hero-section' },
     classes: [
@@ -145,7 +145,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: homeContainer,
   });
 
-  const heroTitle = createEl({
+  const heroTitle = createElement({
     tag: 'h2',
     attributes: { id: 'hero-title' },
     text: '',
@@ -176,28 +176,28 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       getAllPublishedProducts(),
       getAllCategories(),
     ]);
-  } catch (e) {
+  } catch (error) {
     console.error(
       'Failed to load initial products or categories for home page:',
-      e
+      error
     );
   }
 
   // --- ACTUALITY SECTION ---
-  const actualitySection = createEl({
+  const actualitySection = createElement({
     tag: 'section',
     attributes: { id: 'actuality-section' },
     classes: ['py-8', 'backdrop-blur-sm', 'bg-black/10', 'relative'],
     parent: homeContainer,
   });
 
-  const actualityWrapper = createEl({
+  const actualityWrapper = createElement({
     tag: 'div',
     classes: ['container', 'mx-auto', 'px-4'],
     parent: actualitySection,
   });
 
-  createEl({
+  createElement({
     tag: 'h2',
     text: 'Fresh Picks For You',
     classes: [
@@ -211,7 +211,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   });
 
   // --- Actuality Category Header (Title + Nav Buttons) ---
-  const actualityCategoryHeader = createEl({
+  const actualityCategoryHeader = createElement({
     tag: 'div',
     classes: [
       'actuality-category-header',
@@ -223,14 +223,14 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: actualityWrapper,
   });
 
-  const actualityCategoryTitle = createEl({
+  const actualityCategoryTitle = createElement({
     tag: 'h3',
     text: 'Loading category...',
     classes: ['text-xl', 'font-nexa-light', 'text-gray-700'],
     parent: actualityCategoryHeader,
   });
 
-  const actualityProductsContainer = createEl({
+  const actualityProductsContainer = createElement({
     tag: 'div',
     attributes: { id: 'actuality-products-display' },
     classes: [
@@ -245,13 +245,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: actualityWrapper,
   });
 
-  const actualityNavContainer = createEl({
+  const actualityNavContainer = createElement({
     tag: 'div',
     classes: ['space-x-2'],
     parent: actualityCategoryHeader,
   });
 
-  const prevCategoryButton = createEl({
+  const previousCategoryButton = createElement({
     tag: 'button',
     text: '<-',
     classes: [
@@ -266,7 +266,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: actualityNavContainer,
   }) as HTMLButtonElement;
 
-  const nextCategoryButton = createEl({
+  const nextCategoryButton = createElement({
     tag: 'button',
     text: '->',
     classes: [
@@ -292,13 +292,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       !actualityCategories[currentActualityCategoryIndex]
     ) {
       actualityCategoryTitle.textContent = 'No special picks available today.';
-      createEl({
+      createElement({
         tag: 'p',
         text: 'Please check back later!',
         classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
         parent: actualityProductsContainer,
       });
-      prevCategoryButton.disabled = true;
+      previousCategoryButton.disabled = true;
       nextCategoryButton.disabled = true;
       return;
     }
@@ -307,19 +307,19 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     actualityCategoryTitle.textContent = `-->${currentCategory.name}`;
 
     if (currentCategory.products.length === 0) {
-      createEl({
+      createElement({
         tag: 'p',
         text: `No specific items from ${currentCategory.name} today.`,
         classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
         parent: actualityProductsContainer,
       });
     } else {
-      currentCategory.products.forEach((product, index) => {
+      for (const [index, product] of currentCategory.products.entries()) {
         const card = createProductCardElement(product as Product);
-        actualityProductsContainer.appendChild(card);
+        actualityProductsContainer.append(card);
 
         if (index === 0 && currentCategory.products.length > 1) {
-          const divider = createEl({
+          const divider = createElement({
             tag: 'div',
             classes: [
               'w-px',
@@ -329,17 +329,17 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
               'self-stretch',
             ],
           });
-          actualityProductsContainer.appendChild(divider);
+          actualityProductsContainer.append(divider);
         }
-      });
+      }
     }
 
     const disableButtons = actualityCategories.length <= 1;
-    prevCategoryButton.disabled = disableButtons;
+    previousCategoryButton.disabled = disableButtons;
     nextCategoryButton.disabled = disableButtons;
   }
 
-  prevCategoryButton.addEventListener('click', () => {
+  previousCategoryButton.addEventListener('click', () => {
     if (actualityCategories.length > 0) {
       // Check if there are categories to navigate
       currentActualityCategoryIndex =
@@ -368,34 +368,34 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
         }
         displayActualityProducts();
       })
-      .catch((err) => {
-        console.error('Error initializing actuality section:', err);
+      .catch((error) => {
+        console.error('Error initializing actuality section:', error);
         actualityCategoryTitle.textContent = 'Could not load special picks.';
-        prevCategoryButton.disabled = true;
+        previousCategoryButton.disabled = true;
         nextCategoryButton.disabled = true;
       });
   } else {
     actualityCategoryTitle.textContent =
       'No products or categories available to pick from.';
-    prevCategoryButton.disabled = true;
+    previousCategoryButton.disabled = true;
     nextCategoryButton.disabled = true;
   }
 
   /* ---------- ACTUAL PRODUCTS (Original list of all products) ---------- */
-  const actualSection = createEl({
+  const actualSection = createElement({
     tag: 'section',
     attributes: { id: 'actual-products' },
     classes: ['py-8', 'backdrop-blur-sm', 'bg-white/30'],
     parent: homeContainer,
   });
 
-  const actualWrapper = createEl({
+  const actualWrapper = createElement({
     tag: 'div',
     classes: ['container', 'mx-auto', 'px-4'],
     parent: actualSection,
   });
 
-  createEl({
+  createElement({
     tag: 'h2',
     text: 'All Our Products',
     classes: [
@@ -408,7 +408,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: actualWrapper,
   });
 
-  const actualGrid = createEl({
+  const actualGrid = createElement({
     tag: 'div',
     classes: [
       'grid',
@@ -426,7 +426,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     !document.querySelector('#actual-products .text-red-500')
   ) {
     if (!actualGrid.querySelector('p')) {
-      createEl({
+      createElement({
         tag: 'p',
         text: 'No products found.',
         classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
@@ -434,9 +434,9 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       });
     }
   } else if (allProducts.length > 0) {
-    allProducts.forEach((product, index) => {
+    for (const [index, product] of allProducts.entries()) {
       const card = createProductCardElement(product);
-      actualGrid.appendChild(card);
+      actualGrid.append(card);
 
       gsap.from(card, {
         duration: 0.5,
@@ -451,10 +451,10 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
         },
         delay: index * 0.05,
       });
-    });
+    }
     ScrollTrigger.refresh();
   } else if (!actualGrid.querySelector('p')) {
-    createEl({
+    createElement({
       tag: 'p',
       text: 'Loading products or no products available.',
       classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
@@ -463,7 +463,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   }
 
   // Featured Products/Categories Section
-  const featuredSection = createEl({
+  const featuredSection = createElement({
     tag: 'section',
     attributes: { id: 'featured-products-section' },
     classes: [
@@ -475,12 +475,12 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     ],
     parent: homeContainer,
   });
-  const featuredWrapper = createEl({
+  const featuredWrapper = createElement({
     tag: 'div',
     classes: ['relative', 'overflow-hidden', 'w-full'],
     parent: featuredSection,
   });
-  createEl({
+  createElement({
     tag: 'h2',
     text: 'Our Special Blends',
     classes: [
@@ -493,7 +493,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: featuredWrapper,
   });
 
-  const horizontalTrack = createEl({
+  const horizontalTrack = createElement({
     tag: 'div',
     attributes: { id: 'horizontal-track' },
     classes: ['flex', 'w-max', 'gap-0', 'transform-gpu'],
@@ -506,8 +506,8 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     './src/assets/images/21-bumble.webp',
   ];
 
-  featuredImages.forEach((imgPath, index) => {
-    const panel = createEl({
+  for (const [index, imgPath] of featuredImages.entries()) {
+    const panel = createElement({
       tag: 'div',
       classes: [
         'w-[100vw]',
@@ -519,7 +519,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       ],
       parent: horizontalTrack,
     });
-    createEl({
+    createElement({
       tag: 'img',
       attributes: { src: imgPath, alt: `Featured Blend ${index + 1}` },
       classes: [
@@ -531,7 +531,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       ],
       parent: panel,
     });
-  });
+  }
 
   const scrollDistance = () =>
     horizontalTrack.scrollWidth - featuredWrapper.clientWidth;
@@ -553,18 +553,18 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
 
   window.addEventListener('load', () => ScrollTrigger.refresh());
 
-  const productListingSection = createEl({
+  const productListingSection = createElement({
     tag: 'section',
     attributes: { id: 'product-listing-section' },
     classes: ['py-16', 'backdrop-blur-sm', 'bg-white/30'],
     parent: homeContainer,
   });
-  const productListingWrapper = createEl({
+  const productListingWrapper = createElement({
     tag: 'div',
     classes: ['container', 'mx-auto', 'px-4'],
     parent: productListingSection,
   });
-  createEl({
+  createElement({
     tag: 'h2',
     text: 'Explore Our Drinks',
     classes: [
@@ -577,7 +577,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: productListingWrapper,
   });
 
-  const productsGrid = createEl({
+  const productsGrid = createElement({
     tag: 'div',
     attributes: { id: 'products-grid' },
     classes: [
@@ -593,9 +593,9 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
 
   if (allProducts.length > 0) {
     const displayedProducts = allProducts.slice(0, 4);
-    displayedProducts.forEach((product, index) => {
+    for (const [index, product] of displayedProducts.entries()) {
       const productCard = createProductCardElement(product);
-      productsGrid.appendChild(productCard);
+      productsGrid.append(productCard);
       gsap.from(productCard, {
         duration: 0.5,
         opacity: 0,
@@ -609,10 +609,10 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
         },
         delay: index * 0.1,
       });
-    });
+    }
     if (displayedProducts.length > 0) ScrollTrigger.refresh();
   } else if (!productsGrid.querySelector('p')) {
-    createEl({
+    createElement({
       tag: 'p',
       text: 'No drinks to display in this section.',
       classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],

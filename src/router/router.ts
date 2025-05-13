@@ -1,4 +1,7 @@
-import { createEl, removeAllChild } from '../utils/elementUtils';
+import {
+  createEl as createElement,
+  removeAllChild,
+} from '../utils/elementUtils';
 
 export interface Route {
   path: string;
@@ -12,7 +15,7 @@ export class Router {
 
   constructor(container: HTMLElement) {
     this.container = container;
-    window.addEventListener('popstate', () => this.handleRouteChange());
+    globalThis.addEventListener('popstate', () => this.handleRouteChange());
   }
 
   addRoute(route: Route): void {
@@ -20,12 +23,12 @@ export class Router {
   }
 
   navigateTo(path: string): void {
-    window.history.pushState({}, '', path);
+    globalThis.history.pushState({}, '', path);
     this.handleRouteChange();
   }
 
   private handleRouteChange(): void {
-    const path = window.location.pathname;
+    const path = globalThis.location.pathname;
 
     if (this.currentPath === path) return;
     this.currentPath = path;
@@ -57,7 +60,7 @@ export function createRouterLink(
   router: Router,
   addClasses: string[] = []
 ): HTMLAnchorElement {
-  const link = createEl({
+  const link = createElement({
     tag: 'a',
     text,
     parent,

@@ -1,4 +1,4 @@
-import { createEl } from '../../utils/elementUtils';
+import { createEl as createElement } from '../../utils/elementUtils';
 import { useCustomerStore } from '../../store/customer-store';
 import { AuthService } from '../../services/auth.service';
 import { addNotification } from '../../store/store';
@@ -12,15 +12,15 @@ function createFormField(
   parent: HTMLElement,
   required = true
 ): HTMLInputElement {
-  const wrapper = createEl({ tag: 'div', classes: ['mb-4'], parent });
-  createEl({
+  const wrapper = createElement({ tag: 'div', classes: ['mb-4'], parent });
+  createElement({
     tag: 'label',
     text: labelText,
     attributes: { for: inputId },
     classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
     parent: wrapper,
   });
-  const input = createEl({
+  const input = createElement({
     tag: 'input',
     attributes: {
       type: inputType,
@@ -52,7 +52,7 @@ function createFormField(
 export default function createProfilePage(container: HTMLElement): void {
   container.innerHTML = '';
 
-  const profileContainer = createEl({
+  const profileContainer = createElement({
     tag: 'div',
     classes: [
       'profile-page',
@@ -66,7 +66,7 @@ export default function createProfilePage(container: HTMLElement): void {
     parent: container,
   });
 
-  createEl({
+  createElement({
     tag: 'h1',
     text: 'My Profile',
     classes: [
@@ -82,7 +82,7 @@ export default function createProfilePage(container: HTMLElement): void {
   const { customer } = useCustomerStore.getState();
 
   if (!customer) {
-    createEl({
+    createElement({
       tag: 'p',
       text: 'Please log in to view your profile.',
       classes: ['text-gray-600', 'text-center'],
@@ -92,20 +92,20 @@ export default function createProfilePage(container: HTMLElement): void {
   }
 
   // Personal Information Form
-  const personalInfoForm = createEl({
+  const personalInfoForm = createElement({
     tag: 'form',
     attributes: { id: 'personal-info-form' },
     parent: profileContainer,
   });
 
-  createEl({
+  createElement({
     tag: 'h2',
     text: 'Edit Personal Information',
     classes: ['text-2xl', 'font-nexa-bold', 'mb-6', 'text-gray-700'],
     parent: personalInfoForm,
   });
 
-  const formGrid = createEl({
+  const formGrid = createElement({
     tag: 'div',
     classes: ['grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-x-6', 'gap-y-4'], // Adjusted gap
     parent: personalInfoForm,
@@ -134,7 +134,7 @@ export default function createProfilePage(container: HTMLElement): void {
   );
   emailInput.classList.add('md:col-span-2');
 
-  const savePersonalInfoButton = createEl({
+  const savePersonalInfoButton = createElement({
     tag: 'button',
     text: 'Save Personal Info',
     attributes: { type: 'submit' },
@@ -212,13 +212,13 @@ export default function createProfilePage(container: HTMLElement): void {
   });
 
   // Placeholder for address sections
-  createEl({
+  createElement({
     tag: 'h2',
     text: 'Addresses',
     classes: ['text-2xl', 'font-nexa-bold', 'mt-10', 'mb-6', 'text-gray-700'], // Increased margin top
     parent: profileContainer,
   });
-  createEl({
+  createElement({
     tag: 'p',
     text: 'Address editing functionality coming soon.',
     classes: ['text-gray-600', 'mb-4'],

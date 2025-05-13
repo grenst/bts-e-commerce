@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createEl } from '../../utils/elementUtils';
+import { createEl as createElement } from '../../utils/elementUtils';
 import createButton from '../../components/layout/button/button';
 import { getRouter } from '../../router/router';
 import { uiStore } from '../../store/store';
@@ -45,7 +45,7 @@ type ValidationResult = {
   errors: Record<string, string>;
 };
 
-const inputParams = [
+const inputParameters = [
   'text-3xl',
   'placeholder:text-sm',
   'input-field',
@@ -66,10 +66,10 @@ function validateLoginForm(email: string, password: string): ValidationResult {
   } catch (error) {
     const formattedErrors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
-      error.errors.forEach((err) => {
-        const field = err.path[0] as string;
-        formattedErrors[field] = err.message;
-      });
+      for (const error_ of error.errors) {
+        const field = error_.path[0] as string;
+        formattedErrors[field] = error_.message;
+      }
     }
     return { success: false, errors: formattedErrors };
   }
@@ -87,10 +87,10 @@ function validateRegisterForm(
   } catch (error) {
     const formattedErrors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
-      error.errors.forEach((err) => {
-        const field = err.path[0] as string;
-        formattedErrors[field] = err.message;
-      });
+      for (const error_ of error.errors) {
+        const field = error_.path[0] as string;
+        formattedErrors[field] = error_.message;
+      }
     }
     return { success: false, errors: formattedErrors };
   }
@@ -103,7 +103,7 @@ export function createLoginPage(container: HTMLElement): void {
     return;
   }
 
-  const pageContainer = createEl({
+  const pageContainer = createElement({
     tag: 'div',
     parent: container,
     classes: [
@@ -119,7 +119,7 @@ export function createLoginPage(container: HTMLElement): void {
     ],
   });
 
-  createEl({
+  createElement({
     tag: 'h1',
     text: 'Login',
     parent: pageContainer,
@@ -140,19 +140,19 @@ export function createLoginPage(container: HTMLElement): void {
     ],
   });
 
-  const formContainer = createEl({
+  const formContainer = createElement({
     tag: 'div',
     parent: pageContainer,
     classes: ['space-y-4'],
   });
 
-  const emailContainer = createEl({
+  const emailContainer = createElement({
     tag: 'div',
     parent: formContainer,
     classes: ['mb-4'],
   });
 
-  createEl({
+  createElement({
     tag: 'label',
     text: 'Email',
     parent: emailContainer,
@@ -160,27 +160,27 @@ export function createLoginPage(container: HTMLElement): void {
     attributes: { for: 'email' },
   });
 
-  const emailInput = createEl({
+  const emailInput = createElement({
     tag: 'input',
     parent: emailContainer,
-    classes: inputParams,
+    classes: inputParameters,
     attributes: { type: 'email', id: 'email', placeholder: 'Enter your email' },
   }) as HTMLInputElement;
 
-  const emailError = createEl({
+  const emailError = createElement({
     tag: 'p',
     parent: emailContainer,
     classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
   });
 
   // Password field
-  const passwordContainer = createEl({
+  const passwordContainer = createElement({
     tag: 'div',
     parent: formContainer,
     classes: ['mb-4'],
   });
 
-  createEl({
+  createElement({
     tag: 'label',
     text: 'Password',
     parent: passwordContainer,
@@ -188,7 +188,7 @@ export function createLoginPage(container: HTMLElement): void {
     attributes: { for: 'password' },
   });
 
-  const passwordInput = createEl({
+  const passwordInput = createElement({
     tag: 'input',
     parent: passwordContainer,
     classes: [
@@ -208,19 +208,19 @@ export function createLoginPage(container: HTMLElement): void {
     },
   }) as HTMLInputElement;
 
-  const passwordError = createEl({
+  const passwordError = createElement({
     tag: 'p',
     parent: passwordContainer,
     classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
   });
 
-  const errorContainer = createEl({
+  const errorContainer = createElement({
     tag: 'div',
     parent: formContainer,
     classes: ['mt-4', 'p-3', 'bg-red-100', 'text-red-700', 'hidden'],
   });
 
-  const buttonContainer = createEl({
+  const buttonContainer = createElement({
     tag: 'div',
     parent: formContainer,
     classes: ['mt-6'],
@@ -234,20 +234,20 @@ export function createLoginPage(container: HTMLElement): void {
     'py-2',
   ]);
 
-  const registerContainer = createEl({
+  const registerContainer = createElement({
     tag: 'div',
     parent: pageContainer,
     classes: ['mt-4', 'text-center'],
   });
 
-  createEl({
+  createElement({
     tag: 'p',
     text: "Don't have an account? ",
     parent: registerContainer,
     classes: ['text-sm', 'text-gray-600'],
   });
 
-  const registerLink = createEl({
+  const registerLink = createElement({
     tag: 'a',
     text: 'Register',
     parent: registerContainer,
@@ -293,22 +293,21 @@ export function createLoginPage(container: HTMLElement): void {
       }
     } else {
       if (!firstNameInput) {
-        const firstNameContainer = createEl({
+        const firstNameContainer = createElement({
           tag: 'div',
           classes: ['mb-4'],
         });
 
-        formContainer.insertBefore(firstNameContainer, emailContainer);
+        emailContainer.before(firstNameContainer);
 
         title.classList.add('before:w-29');
-        title.classList.remove('before:w-20');
-        title.classList.remove('login-name::before');
+        title.classList.remove('before:w-20', 'login-name::before');
 
         title.classList.add('reset-animation'); // Reseting animation
         void title.offsetWidth;
         title.classList.remove('reset-animation');
 
-        createEl({
+        createElement({
           tag: 'label',
           text: 'First Name',
           parent: firstNameContainer,
@@ -316,10 +315,10 @@ export function createLoginPage(container: HTMLElement): void {
           attributes: { for: 'firstName' },
         });
 
-        firstNameInput = createEl({
+        firstNameInput = createElement({
           tag: 'input',
           parent: firstNameContainer,
-          classes: inputParams,
+          classes: inputParameters,
           attributes: {
             type: 'text',
             id: 'firstName',
@@ -327,20 +326,20 @@ export function createLoginPage(container: HTMLElement): void {
           },
         }) as HTMLInputElement;
 
-        firstNameError = createEl({
+        firstNameError = createElement({
           tag: 'p',
           parent: firstNameContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
-        const lastNameContainer = createEl({
+        const lastNameContainer = createElement({
           tag: 'div',
           classes: ['mb-4'],
         });
 
-        formContainer.insertBefore(lastNameContainer, emailContainer);
+        emailContainer.before(lastNameContainer);
 
-        createEl({
+        createElement({
           tag: 'label',
           text: 'Last Name',
           parent: lastNameContainer,
@@ -348,10 +347,10 @@ export function createLoginPage(container: HTMLElement): void {
           attributes: { for: 'lastName' },
         });
 
-        lastNameInput = createEl({
+        lastNameInput = createElement({
           tag: 'input',
           parent: lastNameContainer,
-          classes: inputParams,
+          classes: inputParameters,
           attributes: {
             type: 'text',
             id: 'lastName',
@@ -359,7 +358,7 @@ export function createLoginPage(container: HTMLElement): void {
           },
         }) as HTMLInputElement;
 
-        lastNameError = createEl({
+        lastNameError = createElement({
           tag: 'p',
           parent: lastNameContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],

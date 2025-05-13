@@ -1,4 +1,4 @@
-export const envVariables = {
+export const environmentVariables = {
   PROJECT_KEY: import.meta.env.VITE_CTP_PROJECT_KEY,
   CLIENT_ID: import.meta.env.VITE_CTP_CLIENT_ID,
   CLIENT_SECRET: import.meta.env.VITE_CTP_CLIENT_SECRET,

@@ -27,7 +27,7 @@ export function createCommercetoolsClient() {
     !apiUrl ||
     !scopes
   ) {
-    const missingVars = [
+    const missingVariables = [
       !projectKey && 'VITE_CTP_PROJECT_KEY',
       !clientId && 'VITE_CTP_CLIENT_ID',
       !clientSecret && 'VITE_CTP_CLIENT_SECRET',
@@ -38,7 +38,7 @@ export function createCommercetoolsClient() {
       .filter(Boolean)
       .join(', ');
     throw new Error(
-      `Missing required Commercetools environment variables: ${missingVars}. Ensure they are HAVE IT in your .env file.`
+      `Missing required Commercetools environment variables: ${missingVariables}. Ensure they are HAVE IT in your .env file.`
     );
   }
 

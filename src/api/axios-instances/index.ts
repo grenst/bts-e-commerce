@@ -1,19 +1,19 @@
 import axios from 'axios';
-import { envVariables } from '../../config/commerce-tools-api';
+import { environmentVariables } from '../../config/commerce-tools-api';
 import { useTokenStore } from '../../store/token-store';
 import { AuthService } from '../../services/auth.service';
 
 export const authInstance = axios.create({
-  baseURL: envVariables.AUTH_URL,
+  baseURL: environmentVariables.AUTH_URL,
   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   auth: {
-    username: envVariables.CLIENT_ID,
-    password: envVariables.CLIENT_SECRET,
+    username: environmentVariables.CLIENT_ID,
+    password: environmentVariables.CLIENT_SECRET,
   },
 });
 
 export const apiInstance = axios.create({
-  baseURL: `${envVariables.API_URL}/${envVariables.PROJECT_KEY}`,
+  baseURL: `${environmentVariables.API_URL}/${environmentVariables.PROJECT_KEY}`,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -58,16 +58,16 @@ apiInstance.interceptors.response.use(
           console.log(
             'Failed to refresh token, newAccessToken is null. Logging out.'
           );
-          return Promise.reject(error);
+          throw error;
         }
       } catch (refreshError) {
         console.error(
           'Caught error during token refresh attempt or subsequent request retry:',
           refreshError
         );
-        return Promise.reject(refreshError);
+        throw refreshError;
       }
     }
-    return Promise.reject(error);
+    throw error;
   }
 );

@@ -52,8 +52,8 @@ const svgSprite = `
 
 const svgSpriteElement = () => {
   const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(svgSprite, 'image/svg+xml');
-  const svgElement = svgDoc.documentElement;
+  const svgDocument = parser.parseFromString(svgSprite, 'image/svg+xml');
+  const svgElement = svgDocument.documentElement;
   body.append(svgElement);
 };
 

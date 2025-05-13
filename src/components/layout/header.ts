@@ -3,7 +3,7 @@ import logoImagePath from '../../assets/images/logo.webp';
 import usrImagePath from '../../assets/images/person.svg';
 import cartImagePath from '../../assets/images/cart.svg';
 import aboutImagePath from '../../assets/images/help.svg';
-import { body, createEl } from '../../utils/elementUtils';
+import { body, createEl as createElement } from '../../utils/elementUtils';
 import { useTokenStore } from '../../store/token-store';
 import { useCustomerStore } from '../../store/customer-store';
 import { Router } from '../../router/router';
@@ -16,7 +16,7 @@ interface HeaderElements {
 }
 
 export function createHeaderElements(router: Router): HeaderElements {
-  const header = createEl({
+  const header = createElement({
     tag: 'header',
     classes: [
       'fixed',
@@ -37,7 +37,7 @@ export function createHeaderElements(router: Router): HeaderElements {
     parent: body,
   });
 
-  const logoImg = createEl({
+  const logoImg = createElement({
     tag: 'img',
     attributes: {
       src: logoImagePath,
@@ -51,7 +51,7 @@ export function createHeaderElements(router: Router): HeaderElements {
     router.navigateTo('/');
   });
 
-  const mainTitle = createEl({
+  const mainTitle = createElement({
     tag: 'h1',
     attributes: { id: 'main-title' },
     classes: [
@@ -67,12 +67,12 @@ export function createHeaderElements(router: Router): HeaderElements {
   });
 
   const textNodeBefore = document.createTextNode('Bubble ');
-  const spanElement = createEl({ tag: 'span', text: 'Tea' });
+  const spanElement = createElement({ tag: 'span', text: 'Tea' });
   const textNodeAfter = document.createTextNode(' Store');
 
-  mainTitle.appendChild(textNodeBefore);
-  mainTitle.appendChild(spanElement);
-  mainTitle.appendChild(textNodeAfter);
+  mainTitle.append(textNodeBefore);
+  mainTitle.append(spanElement);
+  mainTitle.append(textNodeAfter);
 
   gsap.from(mainTitle, {
     duration: 1,
@@ -82,7 +82,7 @@ export function createHeaderElements(router: Router): HeaderElements {
     delay: 0.5,
   });
 
-  const userNav = createEl({
+  const userNav = createElement({
     tag: 'div',
     attributes: { id: 'user_nav' },
     classes: ['flex', 'items-center', 'gap-4', 'relative', 'flex-shrink-0'],
@@ -101,19 +101,19 @@ export function updateUserNavOnHeader(
   const { customer } = useCustomerStore.getState();
 
   if (accessToken && customer) {
-    const userActionsContainer = createEl({
+    const userActionsContainer = createElement({
       tag: 'div',
       classes: ['flex', 'items-center', 'gap-4'],
       parent: userNav,
     });
 
-    const dropdownContainer = createEl({
+    const dropdownContainer = createElement({
       tag: 'div',
       classes: ['relative'], // Removed 'group'
       parent: userActionsContainer,
     });
 
-    const userIcon = createEl({
+    const userIcon = createElement({
       // Renamed for clarity
       tag: 'img',
       attributes: {
@@ -134,7 +134,7 @@ export function updateUserNavOnHeader(
       updateUserNavOnHeader
     );
 
-    const cartLink = createEl({
+    const cartLink = createElement({
       tag: 'img',
       attributes: {
         src: cartImagePath,
@@ -144,7 +144,7 @@ export function updateUserNavOnHeader(
       parent: userActionsContainer,
     });
 
-    const aboutLink = createEl({
+    const aboutLink = createElement({
       tag: 'img',
       attributes: {
         src: aboutImagePath,
@@ -157,7 +157,7 @@ export function updateUserNavOnHeader(
 
     cartLink.addEventListener('click', () => router.navigateTo('/cart'));
   } else {
-    const loginLink = createEl({
+    const loginLink = createElement({
       tag: 'a',
       text: 'Login',
       classes: [

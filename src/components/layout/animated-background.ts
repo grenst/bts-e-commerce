@@ -3,11 +3,11 @@ import circleBg1Path from '../../assets/images/circle_bg_1.webp';
 import circleBg2Path from '../../assets/images/circle_bg_2.webp';
 import circleBg3Path from '../../assets/images/circle_bg_3.webp';
 import circleBg4Path from '../../assets/images/circle_bg_4.webp';
-import { body, createEl } from '../../utils/elementUtils';
+import { body, createEl as createElement } from '../../utils/elementUtils';
 
 export function createAnimatedBackground(): void {
   // --- Animated Background Container ---
-  const animatedBackgroundContainer = createEl({
+  const animatedBackgroundContainer = createElement({
     tag: 'div',
     attributes: { id: 'animated-background-container' },
     classes: [
@@ -33,8 +33,8 @@ export function createAnimatedBackground(): void {
     { id: 'bg-circle-1', src: circleBg1Path, alt: 'Background Circle 1' },
   ];
 
-  bgCircleImagesData.forEach((imgData) => {
-    createEl({
+  for (const imgData of bgCircleImagesData) {
+    createElement({
       tag: 'img',
       attributes: {
         id: imgData.id,
@@ -43,10 +43,10 @@ export function createAnimatedBackground(): void {
       },
       parent: animatedBackgroundContainer,
     });
-  });
+  }
 
   // --- Losung Text ---
-  const bgLosung = createEl({
+  const bgLosung = createElement({
     tag: 'div',
     attributes: { id: 'bg-losung' },
     classes: [
@@ -69,21 +69,21 @@ export function createAnimatedBackground(): void {
   ];
   const animatedLineElements: HTMLElement[] = [];
 
-  losungTextLines.forEach((text) => {
-    const lineContainer = createEl({
+  for (const text of losungTextLines) {
+    const lineContainer = createElement({
       tag: 'div',
       classes: ['overflow-hidden', 'relative', 'leading-8'],
       parent: bgLosung,
     });
 
-    const textElement = createEl({
+    const textElement = createElement({
       tag: 'span',
       text,
       classes: ['text-black', 'inline-block', 'whitespace-nowrap'],
       parent: lineContainer,
     });
     animatedLineElements.push(textElement);
-  });
+  }
 
   if (animatedLineElements.length > 0) {
     gsap.fromTo(

@@ -32,7 +32,7 @@ export async function createCommerceTestComponent(
     'text-gray-500',
     'text-center'
   );
-  componentDiv.appendChild(title);
+  componentDiv.append(title);
 
   const productsGrid = document.createElement('div');
   productsGrid.classList.add(
@@ -44,38 +44,38 @@ export async function createCommerceTestComponent(
     'gap-4', // Gap between cards
     'p-4'
   );
-  componentDiv.appendChild(productsGrid);
+  componentDiv.append(productsGrid);
 
   const loadingMessage = document.createElement('p');
   loadingMessage.textContent = 'Loading products...';
   loadingMessage.classList.add('text-center', 'text-gray-500', 'my-4');
-  productsGrid.appendChild(loadingMessage);
+  productsGrid.append(loadingMessage);
 
-  container.appendChild(componentDiv);
+  container.append(componentDiv);
 
   try {
     const products: Product[] = await getAllPublishedProducts();
-    productsGrid.removeChild(loadingMessage); // Remove loading message
+    loadingMessage.remove(); // Remove loading message
 
     if (products.length === 0) {
       const noProductsMessage = document.createElement('p');
       noProductsMessage.textContent = 'No products found.';
       noProductsMessage.classList.add('text-center', 'text-gray-500', 'my-4');
-      productsGrid.appendChild(noProductsMessage);
+      productsGrid.append(noProductsMessage);
       return;
     }
 
-    products.forEach((product) => {
+    for (const product of products) {
       const productCard = createProductCardElement(product);
-      productsGrid.appendChild(productCard);
-    });
+      productsGrid.append(productCard);
+    }
   } catch (error) {
-    productsGrid.removeChild(loadingMessage); // Remove loading message
+    loadingMessage.remove(); // Remove loading message
     console.error('Failed to load products for CommerceTestComponent:', error);
     const errorMessage = document.createElement('p');
     errorMessage.textContent =
       'Failed to load products. Please try again later.';
     errorMessage.classList.add('text-center', 'text-red-500', 'my-4');
-    productsGrid.appendChild(errorMessage);
+    productsGrid.append(errorMessage);
   }
 }

@@ -23,8 +23,8 @@ function persistTokens(token: OAuthTokenResponse) {
     .setTokens(access_token, refresh_token ?? null, expires_in);
 }
 
-export class AuthService {
-  static async register(
+export const AuthService = {
+  async register(
     email: string,
     password: string,
     firstName?: string,
@@ -51,10 +51,10 @@ export class AuthService {
         );
       return false;
     }
-  }
+  },
 
   //  Login
-  static async login(email: string, password: string): Promise<boolean> {
+  async login(email: string, password: string): Promise<boolean> {
     try {
       const token = await getPasswordToken(email, password);
       persistTokens(token);
@@ -64,7 +64,11 @@ export class AuthService {
 
       useUIStore
         .getState()
-        .addNotification('info', `Access‑token:\n${token.access_token}`, 10000);
+        .addNotification(
+          'info',
+          `Access‑token:\n${token.access_token}`,
+          10_000
+        );
 
       return true;
     } catch (error) {
@@ -75,16 +79,16 @@ export class AuthService {
         .addNotification('error', 'Login failed. Check credentials.');
       return false;
     }
-  }
+  },
 
   //  Logout
-  static async logout(): Promise<void> {
+  async logout(): Promise<void> {
     useTokenStore.getState().clearTokens();
     useCustomerStore.getState().clearCustomer();
-  }
+  },
 
   //  Refresh
-  static async refreshToken(): Promise<string | null> {
+  async refreshToken(): Promise<string | null> {
     const { refreshToken } = useTokenStore.getState();
     if (!refreshToken) {
       debug('No refreshToken, skip refresh');
@@ -99,9 +103,9 @@ export class AuthService {
       await this.logout();
       return null;
     }
-  }
+  },
 
-  static async updateCurrentCustomer(
+  async updateCurrentCustomer(
     version: number,
     actions: { action: string; [key: string]: unknown }[]
   ): Promise<CommercetoolsCustomer> {
@@ -131,5 +135,5 @@ export class AuthService {
         );
       throw error;
     }
-  }
-}
+  },
+};

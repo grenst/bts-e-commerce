@@ -1,6 +1,6 @@
 export const { body } = document;
 
-interface CreateElOptions {
+interface CreateElementOptions {
   tag?: string;
   text?: string;
   classes?: string[];
@@ -10,7 +10,7 @@ interface CreateElOptions {
   children?: HTMLElement[];
 }
 
-function createEl(options: CreateElOptions): HTMLElement {
+function createElement(options: CreateElementOptions): HTMLElement {
   const {
     tag = 'div',
     text = '',
@@ -27,9 +27,9 @@ function createEl(options: CreateElOptions): HTMLElement {
   element.classList.add(...classes);
 
   if (attributes) {
-    Object.keys(attributes).forEach((key) => {
+    for (const key of Object.keys(attributes)) {
       element.setAttribute(key, attributes[key]);
-    });
+    }
   }
 
   if (parent) parent.append(element);
@@ -41,12 +41,12 @@ function createEl(options: CreateElOptions): HTMLElement {
 
 /* *************************************** */
 
-function createSvgUse(idSvgSymbol: string, elClass: string): SVGElement {
+function createSvgUse(idSvgSymbol: string, elementClass: string): SVGElement {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', elClass);
+  svg.setAttribute('class', elementClass);
   const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
   use.setAttribute('href', `${idSvgSymbol}`);
-  svg.appendChild(use);
+  svg.append(use);
   return svg;
 }
 
@@ -54,7 +54,7 @@ function createSvgUse(idSvgSymbol: string, elClass: string): SVGElement {
 
 function removeAllChild(element: HTMLElement): void {
   while (element.firstElementChild) {
-    element.removeChild(element.firstElementChild);
+    element.firstElementChild.remove();
   }
 }
 
@@ -62,9 +62,9 @@ function removeAllChild(element: HTMLElement): void {
 
 function shuffleArray<T>(baseArray: T[]): T[] {
   const array = [...baseArray];
-  for (let i = array.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+  for (let index = array.length - 1; index > 0; index -= 1) {
+    const index_ = Math.floor(Math.random() * (index + 1));
+    [array[index], array[index_]] = [array[index_], array[index]];
   }
   return array;
 }
@@ -100,7 +100,7 @@ function getMaxID<T extends { id: string | number }>(initialData: T[]): number {
 
 /* *************************************** */
 
-const getUUID = (): string => self.crypto.randomUUID();
+const getUUID = (): string => globalThis.crypto.randomUUID();
 
 /* *************************************** */
 
@@ -127,7 +127,7 @@ const getUUID = (): string => self.crypto.randomUUID();
 /* *************************************** */
 
 export {
-  createEl,
+  createElement as createEl,
   createSvgUse,
   removeAllChild,
   shuffleArray,

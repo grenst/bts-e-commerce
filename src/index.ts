@@ -3,7 +3,7 @@ interface WindowWithBuffer extends Window {
   Buffer: typeof Buffer;
 }
 
-(window as unknown as WindowWithBuffer).Buffer = Buffer;
+(globalThis as unknown as WindowWithBuffer).Buffer = Buffer;
 import '@styles/global.scss';
 import '@styles/tailwind.css';
 import './animations/gsap-init'; // Initialize GSAP and plugins
@@ -15,7 +15,7 @@ import {
 
 import svgSpriteElement from './sources/svg-sprite';
 import createFooter from './components/layout/footer/footer';
-import { body, createEl } from './utils/elementUtils';
+import { body, createEl as createElement } from './utils/elementUtils';
 import { createRouter, Route } from './router/router';
 import createHomePage from './pages/home/home';
 import createLoginPage from './pages/auth/auth-page';
@@ -28,7 +28,7 @@ import {
 
 createAnimatedBackground();
 
-const contentContainer = createEl({
+const contentContainer = createElement({
   tag: 'main',
   classes: ['min-h-[60vh]'],
 });
@@ -36,7 +36,7 @@ const contentContainer = createEl({
 const router = createRouter(contentContainer);
 const { header, mainTitle, userNav } = createHeaderElements(router);
 
-createEl({
+createElement({
   tag: 'div',
   classes: ['max-w-4xl', 'py-4', 'mx-auto', 'relative', 'z-[1]', 'mt-[80px]'],
   parent: body,
@@ -56,7 +56,7 @@ const routes: Route[] = [
     path: '/cart',
     component: () => {
       // Placeholder for cart page
-      const cartPage = createEl({
+      const cartPage = createElement({
         tag: 'div',
         text: 'Cart Page - Coming Soon!',
       });
@@ -71,7 +71,7 @@ const routes: Route[] = [
   },
 ];
 
-routes.forEach((route) => router.addRoute(route));
+for (const route of routes) router.addRoute(route);
 
 updateUserNavOnHeader(userNav, router);
 

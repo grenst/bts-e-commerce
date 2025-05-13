@@ -1,3 +1,3 @@
-export const debug = (...args: unknown[]): void => {
-  console.debug('[Auth]', ...args);
+export const debug = (...arguments_: unknown[]): void => {
+  console.debug('[Auth]', ...arguments_);
 };
