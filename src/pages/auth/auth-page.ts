@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createEl as createElement } from '../../utils/elementUtils';
+import { createEl as createElement } from '../../utils/element-utils';
 import createButton from '../../components/layout/button/button';
 import { getRouter } from '../../router/router';
 import { uiStore } from '../../store/store';

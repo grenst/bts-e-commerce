@@ -1,1 +1,1 @@
-// Страница напитка
+export function product() {}

@@ -1,19 +1,17 @@
-import { createEl as createElement } from '../../utils/elementUtils';
+import { createEl as createElement } from '../../utils/element-utils';
 import {
   getAllPublishedProducts,
   getAllCategories,
-} from '../../api/products/productService';
-import type { Product, Category } from '../../api/products/productService'; // Import Product and Category types
+} from '../../api/products/product-service';
+import type { Product, Category } from '../../api/products/product-service'; // Import Product and Category types
 import { createProductCardElement } from '../../components/features/product-card';
 import { gsap, ScrollTrigger } from '../../animations/gsap-init';
 
 // Interfaces for Actuality List
-interface ActualityProduct extends Product {}
-
 interface ActualityCategory {
   id: string;
   name: string;
-  products: ActualityProduct[];
+  products: Product[];
 }
 
 interface ActualityCache {
@@ -76,7 +74,7 @@ async function generateActualityList(
         name:
           categoryNameMap[categoryId] ||
           `Category ${categoryId.slice(0, 8)}...`, // Use fetched name
-        products: shuffledProducts.slice(0, 2) as ActualityProduct[],
+        products: shuffledProducts.slice(0, 2) as Product[],
       });
     }
   }

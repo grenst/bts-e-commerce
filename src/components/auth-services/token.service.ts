@@ -1,5 +1,5 @@
 import { authInstance } from '../../api/axios-instances';
-import { envVariables as environmentVariables } from '../../config/commerce-tools-api';
+import { environmentVariables } from '../../config/commerce-tools-api';
 import { buildScopes } from './scopes';
 import { debug } from './logger';
 

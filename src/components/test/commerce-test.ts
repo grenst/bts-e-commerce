@@ -1,4 +1,4 @@
-import { getAllPublishedProducts } from '../../api/products/productService';
+import { getAllPublishedProducts } from '../../api/products/product-service';
 import { createProductCardElement } from '../features/product-card';
 
 interface Product {

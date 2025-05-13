@@ -1,4 +1,4 @@
-import { createEl as createElement } from '../../utils/elementUtils';
+import { createEl as createElement } from '../../utils/element-utils';
 import { useCustomerStore } from '../../store/customer-store';
 import { AuthService } from '../../services/auth.service';
 import { addNotification } from '../../store/store';

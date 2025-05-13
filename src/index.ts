@@ -7,7 +7,7 @@ interface WindowWithBuffer extends Window {
 import '@styles/global.scss';
 import '@styles/tailwind.css';
 import './animations/gsap-init'; // Initialize GSAP and plugins
-import { createAnimatedBackground } from './components/layout/animatedBackground'; // Import createAnimatedBackground
+import { createAnimatedBackground } from './components/layout/animated-background'; // Import createAnimatedBackground
 import {
   createHeaderElements,
   updateUserNavOnHeader,
@@ -15,7 +15,7 @@ import {
 
 import svgSpriteElement from './sources/svg-sprite';
 import createFooter from './components/layout/footer/footer';
-import { body, createEl as createElement } from './utils/elementUtils';
+import { body, createEl as createElement } from './utils/element-utils';
 import { createRouter, Route } from './router/router';
 import createHomePage from './pages/home/home';
 import createLoginPage from './pages/auth/auth-page';

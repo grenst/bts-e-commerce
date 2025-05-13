@@ -1,7 +1,7 @@
 import {
   createEl as createElement,
   removeAllChild,
-} from '../utils/elementUtils';
+} from '../utils/element-utils';
 
 export interface Route {
   path: string;
@@ -68,8 +68,8 @@ export function createRouterLink(
     attributes: { href: path },
   }) as HTMLAnchorElement;
 
-  link.addEventListener('click', (e) => {
-    e.preventDefault();
+  link.addEventListener('click', (event_) => {
+    event_.preventDefault();
     router.navigateTo(path);
   });
 

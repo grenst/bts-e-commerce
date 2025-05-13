@@ -3,7 +3,7 @@ import circleBg1Path from '../../assets/images/circle_bg_1.webp';
 import circleBg2Path from '../../assets/images/circle_bg_2.webp';
 import circleBg3Path from '../../assets/images/circle_bg_3.webp';
 import circleBg4Path from '../../assets/images/circle_bg_4.webp';
-import { body, createEl as createElement } from '../../utils/elementUtils';
+import { body, createEl as createElement } from '../../utils/element-utils';
 
 export function createAnimatedBackground(): void {
   // --- Animated Background Container ---

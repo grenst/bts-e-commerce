@@ -8,9 +8,9 @@ import {
   signupCustomer,
   fetchMyCustomer,
   CustomerDraft,
-  CommercetoolsCustomer, // Import CommercetoolsCustomer for return type
+  CommercetoolsCustomer,
 } from '../components/auth-services/customer.service';
-import { apiInstance } from '../api/axios-instances'; // Import apiInstance for direct calls
+import { apiInstance } from '../api/axios-instances';
 import { useTokenStore } from '../store/token-store';
 import { useCustomerStore } from '../store/customer-store';
 import { uiStore as useUIStore } from '../store/store';
@@ -20,7 +20,7 @@ function persistTokens(token: OAuthTokenResponse) {
   const { access_token, refresh_token, expires_in } = token;
   useTokenStore
     .getState()
-    .setTokens(access_token, refresh_token ?? null, expires_in);
+    .setTokens(access_token, refresh_token ?? undefined, expires_in);
 }
 
 export const AuthService = {
@@ -88,11 +88,11 @@ export const AuthService = {
   },
 
   //  Refresh
-  async refreshToken(): Promise<string | null> {
+  async refreshToken(): Promise<string | undefined> {
     const { refreshToken } = useTokenStore.getState();
     if (!refreshToken) {
       debug('No refreshToken, skip refresh');
-      return null;
+      return undefined;
     }
     try {
       const token = await refreshAccessToken(refreshToken);
@@ -101,7 +101,7 @@ export const AuthService = {
     } catch (error) {
       debug('Refresh error', error);
       await this.logout();
-      return null;
+      return undefined;
     }
   },
 
