@@ -19,3 +19,15 @@
   transform: scale(0.9);
   transition: all 0.4s;
 }
+
+.header-color {
+  background-color: var(--color-background-light);
+}
+
+.header-logo {
+  height: 35px;
+  width: 30px;
+  cursor: pointer;
+  color: var(--color-primary-light);
+  flex-shrink: 0;
+}
