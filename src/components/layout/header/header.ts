@@ -1,7 +1,7 @@
 
 import './header.scss';
 import { gsap } from '../../../animations/gsap-init';
-import logoImagePath from '../../../assets/images/logo.webp';
+// import logoImagePath from '../../../assets/images/logo.webp';
 import {
   body,
   createEl as createElement,
@@ -30,26 +30,30 @@ export function createHeaderElements(router: Router): HeaderElements {
       'flex',
       'justify-between',
       'items-center',
-      'h-10',
+      'min-h-10',
       'px-10',
       'bg-white/50',
       'w-full',
       'transition-colors',
       'duration-300',
       'z-10',
+      'header-color',
     ],
     parent: body,
   });
 
-  const logoImg = createElement({
-    tag: 'img',
-    attributes: {
-      src: logoImagePath,
-      alt: 'Bubble Tee Shop Logo',
-    },
-    classes: ['h-[28px]', 'w-[30px]', 'flex-shrink-0', 'cursor-pointer'],
-    parent: header,
-  });
+  // const logoImg = createElement({
+  //   tag: 'img',
+  //   attributes: {
+  //     src: logoImagePath,
+  //     alt: 'Bubble Tee Shop Logo',
+  //   },
+  //   classes: ['h-[28px]', 'w-[30px]', 'flex-shrink-0', 'cursor-pointer'],
+  //   parent: header,
+  // });
+
+  const logoImg = createSvgUse('#logo', 'header-logo');
+  header.append(logoImg);
 
   logoImg.addEventListener('click', () => {
     router.navigateTo('/');
@@ -69,6 +73,7 @@ export function createHeaderElements(router: Router): HeaderElements {
     ],
     parent: header,
   });
+
 
   const textNodeBefore = document.createTextNode('Bubble ');
   const spanElement = createElement({ tag: 'span', text: 'Tea' });
