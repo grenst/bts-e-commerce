@@ -50,7 +50,7 @@ const routes: Route[] = [
   {
     // path: '/',
     path: '/main',
-    component: (container: HTMLElement) => createHomePage(container),
+    component: createHomePage,
     preserveState: true,
   },
   {
