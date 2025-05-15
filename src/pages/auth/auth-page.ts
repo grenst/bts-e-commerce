@@ -551,6 +551,18 @@ export function createLoginPage(container: HTMLElement): void {
       }
     }
   });
+
+  // Функция для обработки нажатия Enter
+  const handleEnterKey = (event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      loginButton.click();
+    }
+  };
+
+  // Oбработчики на оба поля Инпутов
+  emailInput.addEventListener('keydown', handleEnterKey);
+  passwordInput.addEventListener('keydown', handleEnterKey);
 }
 
 export default createLoginPage;

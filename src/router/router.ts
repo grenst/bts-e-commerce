@@ -132,7 +132,7 @@ export class Router {
   private restoreState(path: string): void {
     const savedState = this.pageStates.get(path);
     if (savedState) {
-      this.container.appendChild(savedState);
+      this.container.append(savedState);
       this.restoreScrollPosition(path);
       console.log(`Страница из сохранённого состояния ${path}`);
     }
@@ -156,7 +156,7 @@ export class Router {
   }
 
   init(): void {
-    if (window.location.pathname === '/') {
+    if (globalThis.location.pathname === '/') {
       this.navigateTo('/main'); // Редирект на /main при загрузке
     } else {
       this.handleRouteChange(); // Обычная обработка
