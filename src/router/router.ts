@@ -5,7 +5,7 @@ import {
 
 export interface Route {
   path: string;
-  component: (container: HTMLElement) => void;
+  component: (container: HTMLElement, router: Router) => void;
   preserveState?: boolean; // Флаг, нужно ли сохранять состояние для этого маршрута
 }
 
@@ -123,7 +123,7 @@ export class Router {
     if (route.preserveState && this.pageStates.has(route.path)) {
       this.restoreState(route.path);
     } else {
-      route.component(this.container);
+      route.component(this.container, this);
       window.scrollTo(0, 0);
       console.log(`Первая отрисовка ${route.path}`);
     }
@@ -150,7 +150,7 @@ export class Router {
     const wildcardRoute = this.routes.find((r) => r.path === '*');
     if (wildcardRoute) {
       removeAllChild(this.container);
-      wildcardRoute.component(this.container);
+      wildcardRoute.component(this.container, this);
       window.scrollTo(0, 0);
     }
   }
