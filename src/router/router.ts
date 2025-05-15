@@ -213,4 +213,3 @@ export function getRouter(): Router {
   }
   return routerInstance;
 }
-

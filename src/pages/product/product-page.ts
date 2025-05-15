@@ -208,12 +208,13 @@ export function createProductModal(): ProductModal {
     const plus = button('+');
 
     // TODO next logic
-    const cart = h({
+    h({
       tag: 'button',
       parent: submitOrder,
       text: 'ADD TO CART',
       classes: ['order-cart', 'w-60'],
     });
+
     const price = h({
       tag: 'span',
       parent: submitOrder,

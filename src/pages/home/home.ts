@@ -117,9 +117,7 @@ async function getActualityData(
   return newActualityCategories;
 }
 
-export async function createHomePage(
-  container: HTMLElement
-): Promise<void> {
+export async function createHomePage(container: HTMLElement): Promise<void> {
   container.innerHTML = '';
 
   const productModal: ProductModal = createProductModal();
