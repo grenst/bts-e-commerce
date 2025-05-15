@@ -32,6 +32,7 @@ export default defineConfig({
     sourcemap: true
   },
   assetsInclude: ['**/*.otf', '**/*.ttf', '**/*.woff', '**/*.woff2'],
+  base: '/',
   publicDir: 'public'
 })
 
