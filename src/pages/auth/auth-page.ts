@@ -1,12 +1,16 @@
 import { z } from 'zod';
-import './auth-page.scss'
-import { createEl as createElement, createSvgUse } from '../../utils/element-utilities';
+import './auth-page.scss';
+import {
+  createEl as createElement,
+  createSvgUse,
+} from '../../utils/element-utilities';
 import createButton from '../../components/layout/button/button';
 import { getRouter } from '../../router/router';
 import { uiStore } from '../../store/store';
 import { AuthService } from '../../services/auth.service';
 import { useCustomerStore } from '../../store/customer-store';
 import { triggerHeaderUpdate } from '../../index';
+import createModalContainer from '../../components/layout/modal/modal-container';
 
 const emailSchema = z
   .string()
@@ -192,7 +196,7 @@ export function createLoginPage(container: HTMLElement): void {
   const passwordInputContainer = createElement({
     parent: passwordContainer,
     classes: ['relative'],
-  })
+  });
 
   const passwordInput = createElement({
     tag: 'input',
@@ -214,18 +218,15 @@ export function createLoginPage(container: HTMLElement): void {
     },
   }) as HTMLInputElement;
 
-
   const eyeButton = createElement({
     tag: 'button',
     parent: passwordInputContainer,
     classes: ['button-eye'],
-    attributes: { type: 'button',
-      'aria-label': 'Toggle password visibility'
-     },
-  })
+    attributes: { type: 'button', 'aria-label': 'Toggle password visibility' },
+  });
 
-  const eyeInvisible = createSvgUse('#eye-invisible', 'eye')
-  const eyeVisible = createSvgUse('#eye-visible', 'eye')
+  const eyeInvisible = createSvgUse('#eye-invisible', 'eye');
+  const eyeVisible = createSvgUse('#eye-visible', 'eye');
 
   eyeButton.append(eyeInvisible, eyeVisible);
   eyeInvisible.classList.add('eye_active');
@@ -236,7 +237,6 @@ export function createLoginPage(container: HTMLElement): void {
 
     eyeInvisible.classList.toggle('eye_active');
     eyeVisible.classList.toggle('eye_active');
-
   });
 
   const passwordError = createElement({
@@ -263,7 +263,13 @@ export function createLoginPage(container: HTMLElement): void {
     'text-white',
     'hover:bg-gray-900',
     'py-2',
+    'cursor-pointer',
+    'relative',
   ]);
+
+  const svgSpinner = createSvgUse('#spinner', 'spinner');
+  svgSpinner.classList.add('animate-spin');
+  loginButton.prepend(svgSpinner);
 
   const registerContainer = createElement({
     tag: 'div',
@@ -455,7 +461,10 @@ export function createLoginPage(container: HTMLElement): void {
       hideFieldError(emailError);
       hideFieldError(passwordError);
 
-      setLoading(true);
+      // setLoading(true);
+      svgSpinner.classList.add('spinner_active');
+      const modalContainer = createModalContainer();
+
       try {
         const success = await AuthService.login(email, password);
         if (success) {
@@ -469,7 +478,9 @@ export function createLoginPage(container: HTMLElement): void {
         console.error('Login error:', error);
         showFormError('Login failed. Please try again.');
       } finally {
-        setLoading(false);
+        // setLoading(false);
+        svgSpinner.classList.remove('spinner_active');
+        modalContainer.remove();
       }
     } else {
       // Registration form
