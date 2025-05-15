@@ -12,7 +12,8 @@ interface Product {
 }
 
 export async function createCommerceTestComponent(
-  container: HTMLElement
+  container: HTMLElement,
+  showModal: (productId: string) => Promise<void>
 ): Promise<void> {
   const componentDiv = document.createElement('div');
   componentDiv.classList.add(
@@ -66,7 +67,7 @@ export async function createCommerceTestComponent(
     }
 
     for (const product of products) {
-      const productCard = createProductCardElement(product);
+      const productCard = createProductCardElement(product, showModal);
       productsGrid.append(productCard);
     }
   } catch (error) {

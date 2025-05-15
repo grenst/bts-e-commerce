@@ -8,7 +8,10 @@ interface Product {
   };
 }
 
-export function createProductCardElement(product: Product): HTMLElement {
+export function createProductCardElement(
+  product: Product,
+  showModal: (productId: string) => Promise<void>
+): HTMLElement {
   const card = document.createElement('div');
   card.classList.add(
     'product-card-redesigned',
@@ -124,6 +127,10 @@ export function createProductCardElement(product: Product): HTMLElement {
   priceContainer.append(priceElement);
 
   // TODO: Add "Add to Cart" button or other CTAs here later
+
+  card.addEventListener('click', () => {
+    showModal(product.id);
+  });
 
   return card;
 }

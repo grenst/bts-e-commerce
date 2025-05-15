@@ -12,7 +12,8 @@ export interface Product {
     images?: { url: string }[];
     prices?: { value: { centAmount: number; currencyCode: string } }[];
   };
-  categories: Array<{ id: string; typeId: 'category' }>; // Added categories
+  categories: Array<{ id: string; typeId: 'category' }>;
+  key?: string;
 }
 
 // Interface for Category
@@ -108,6 +109,55 @@ export async function getAllCategories(): Promise<Category[]> {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 403) {
         console.error("Forbidden: token lacks the 'view_categories' scope.");
+      }
+    }
+    throw error;
+  }
+}
+
+export async function getProductById(
+  productId: string
+): Promise<Product | undefined> {
+  try {
+    let { accessToken } = useTokenStore.getState();
+
+    if (!accessToken) {
+      const anon = await getAnonymousToken();
+      useTokenStore
+        .getState()
+        .setTokens(
+          anon.access_token,
+          anon.refresh_token ?? undefined,
+          anon.expires_in
+        );
+      accessToken = anon.access_token;
+    }
+
+    const response = await apiInstance.get<Product>(
+      `/product-projections/${productId}`,
+      {
+        params: { staged: 'false' },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
+
+    return response.data;
+  } catch (error_) {
+    const error = error_ as AxiosError | Error;
+    console.error(
+      `Error fetching product with ID ${productId}:`,
+      error.message
+    );
+    if ('isAxiosError' in error && (error as AxiosError).isAxiosError) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 404) {
+        console.warn(`Product with ID ${productId} not found.`);
+        return undefined; // for not found
+      }
+      if (axiosError.response?.status === 403) {
+        console.error(
+          "Forbidden: token lacks the 'view_published_products' scope."
+        );
       }
     }
     throw error;

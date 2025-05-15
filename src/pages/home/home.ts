@@ -3,9 +3,11 @@ import {
   getAllPublishedProducts,
   getAllCategories,
 } from '../../api/products/product-service';
-import type { Product, Category } from '../../api/products/product-service'; // Import Product and Category types
+import type { Product, Category } from '../../api/products/product-service';
 import { createProductCardElement } from '../../components/features/product-card';
 import { gsap, ScrollTrigger } from '../../animations/gsap-init';
+// import { Router } from '../../router/router';
+import { createProductModal, ProductModal } from '../product/product-page';
 
 // Interfaces for Actuality List
 interface ActualityCategory {
@@ -115,8 +117,13 @@ async function getActualityData(
   return newActualityCategories;
 }
 
-export async function createHomePage(container: HTMLElement): Promise<void> {
+export async function createHomePage(
+  container: HTMLElement
+): Promise<void> {
   container.innerHTML = '';
+
+  const productModal: ProductModal = createProductModal();
+  container.append(productModal.modalElement);
 
   const homeContainer = createElement({
     tag: 'div',
@@ -139,6 +146,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       'text-center',
       'relative',
       'overflow-hidden',
+      '-z-100',
     ],
     parent: homeContainer,
   });
@@ -313,7 +321,10 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       });
     } else {
       for (const [index, product] of currentCategory.products.entries()) {
-        const card = createProductCardElement(product as Product);
+        const card = createProductCardElement(
+          product as Product,
+          productModal.showModal
+        );
         actualityProductsContainer.append(card);
 
         if (index === 0 && currentCategory.products.length > 1) {
@@ -332,14 +343,14 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       }
     }
 
-    const disableButtons = actualityCategories.length <= 1;
+    const disableButtons =
+      !actualityCategories || actualityCategories.length <= 1;
     previousCategoryButton.disabled = disableButtons;
     nextCategoryButton.disabled = disableButtons;
   }
 
   previousCategoryButton.addEventListener('click', () => {
-    if (actualityCategories.length > 0) {
-      // Check if there are categories to navigate
+    if (actualityCategories && actualityCategories.length > 0) {
       currentActualityCategoryIndex =
         (currentActualityCategoryIndex - 1 + actualityCategories.length) %
         actualityCategories.length;
@@ -348,8 +359,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   });
 
   nextCategoryButton.addEventListener('click', () => {
-    if (actualityCategories.length > 0) {
-      // Check if there are categories to navigate
+    if (actualityCategories && actualityCategories.length > 0) {
       currentActualityCategoryIndex =
         (currentActualityCategoryIndex + 1) % actualityCategories.length;
       displayActualityProducts();
@@ -433,7 +443,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     }
   } else if (allProducts.length > 0) {
     for (const [index, product] of allProducts.entries()) {
-      const card = createProductCardElement(product);
+      const card = createProductCardElement(product, productModal.showModal);
       actualGrid.append(card);
 
       gsap.from(card, {
@@ -592,7 +602,10 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   if (allProducts.length > 0) {
     const displayedProducts = allProducts.slice(0, 4);
     for (const [index, product] of displayedProducts.entries()) {
-      const productCard = createProductCardElement(product);
+      const productCard = createProductCardElement(
+        product,
+        productModal.showModal
+      );
       productsGrid.append(productCard);
       gsap.from(productCard, {
         duration: 0.5,
