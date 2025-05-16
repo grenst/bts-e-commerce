@@ -1,4 +1,3 @@
-
 import './header.scss';
 import { gsap } from '../../../animations/gsap-init';
 // import logoImagePath from '../../../assets/images/logo.webp';
@@ -74,7 +73,6 @@ export function createHeaderElements(router: Router): HeaderElements {
     parent: header,
   });
 
-
   const textNodeBefore = document.createTextNode('Bubble ');
   const spanElement = createElement({ tag: 'span', text: 'Tea' });
   const textNodeAfter = document.createTextNode(' Store');
@@ -111,12 +109,10 @@ export function updateUserNavOnHeader(
   const { customer } = useCustomerStore.getState();
 
   if (accessToken && customer) {
-
     const userActionsContainer = createElement({
       classes: ['flex', 'items-center', 'gap-4'],
       parent: userNav,
     });
-
 
     const dropdownContainer = createElement({
       classes: ['relative'], // Removed 'group'

@@ -38,8 +38,8 @@ const createFooter = (parent: HTMLElement) => {
     tag: 'h3',
     text: 'Информация',
     classes: ['h3-title-info'],
-    parent: liContainerTitleInfo,
   });
+  liContainerTitleInfo.append(h3TitleInfo);
 
   const ulContainerInfo = createElement({
     tag: 'ul',
@@ -61,8 +61,8 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: '#',
     },
-    parent: liCompany,
   });
+  liCompany.append(aLinkCompany);
 
   const liAkcia = createElement({
     tag: 'li',
@@ -78,8 +78,8 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: '#',
     },
-    parent: liAkcia,
   });
+  liAkcia.append(aLinkAkcia);
 
   const liNyws = createElement({
     tag: 'li',
@@ -95,8 +95,8 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: '#',
     },
-    parent: liNyws,
   });
+  liNyws.append(aLinkNyws);
 
   const liPayment = createElement({
     tag: 'li',
@@ -112,8 +112,8 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: '#',
     },
-    parent: liPayment,
   });
+  liPayment.append(aLinkPayment);
   // one section
 
   // two section
@@ -127,8 +127,8 @@ const createFooter = (parent: HTMLElement) => {
     tag: 'h3',
     text: 'Навигация',
     classes: ['h3-title-info'],
-    parent: liContainerAnchorLink,
   });
+  liContainerAnchorLink.append(h3TitleAncher);
 
   const ulContainerAnchor = createElement({
     tag: 'ul',
@@ -150,8 +150,8 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: '#',
     },
-    parent: liLogin,
   });
+  liLogin.append(aLinkLogin);
 
   const liProfile = createElement({
     tag: 'li',
@@ -167,8 +167,8 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: '#',
     },
-    parent: liProfile,
   });
+  liProfile.append(aLinkProfile);
 
   const liBasket = createElement({
     tag: 'li',
@@ -184,8 +184,8 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: '#',
     },
-    parent: liBasket,
   });
+  liBasket.append(aLinkBasket);
   // two section
 
   // three section
@@ -199,8 +199,8 @@ const createFooter = (parent: HTMLElement) => {
     tag: 'h3',
     text: 'Приложение',
     classes: ['h3-title-info'],
-    parent: liContainerRep,
   });
+  liContainerRep.append(h3TitleContactRep);
 
   const footerLinkGithub = createElement({
     tag: 'a',
@@ -212,6 +212,7 @@ const createFooter = (parent: HTMLElement) => {
     parent: liContainerRep,
   });
   const svgGithub = createSvgUse('#github', 'footer-svg_github');
+  svgGithub.classList.add('kets');
   footerLinkGithub.append(svgGithub);
   // three section
 
@@ -226,19 +227,19 @@ const createFooter = (parent: HTMLElement) => {
     tag: 'h3',
     text: 'Спонсоры',
     classes: ['h3-title-info'],
-    parent: liContainerSponsor,
   });
+  liContainerSponsor.append(h3TitleSponsor);
 
   const footerLinkGithubKate = createElement({
     tag: 'a',
-    classes: ['footer-link', 'footer-container__github'],
+    classes: ['footer-link', 'footer-container__github', 'Kate-git'],
     attributes: {
       target: '_blank',
       href: 'https://github.com/KateGoncharik',
     },
     text: 'Motivation-leader',
-    parent: liContainerSponsor,
   });
+  liContainerSponsor.append(footerLinkGithubKate);
   // const svgGithubKate = createSvgUse('#github', 'footer-svg_github');
   // footerLinkGithubKate.append(svgGithubKate);
 
@@ -252,6 +253,7 @@ const createFooter = (parent: HTMLElement) => {
     parent: liContainerSponsor,
   });
   const svgRSS = createSvgUse('#rss', 'footer-svg_rss');
+  svgRSS.classList.add('background-RSS');
   footerLinkRSS.append(svgRSS);
   // four section
 
@@ -266,8 +268,8 @@ const createFooter = (parent: HTMLElement) => {
     tag: 'h3',
     text: 'Связь с разработчиками',
     classes: ['h3-title-info'],
-    parent: liContainerDevelopers,
   });
+  liContainerDevelopers.append(h3TitleDevelopers);
 
   const footerLinkGithubAndrei = createElement({
     tag: 'a',

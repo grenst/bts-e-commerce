@@ -1,6 +1,9 @@
 import { z } from 'zod';
-import './auth-page.scss'
-import { createEl as createElement, createSvgUse } from '../../utils/element-utilities';
+import './auth-page.scss';
+import {
+  createEl as createElement,
+  createSvgUse,
+} from '../../utils/element-utilities';
 import createButton from '../../components/layout/button/button';
 import { getRouter } from '../../router/router';
 import { uiStore } from '../../store/store';
@@ -192,7 +195,7 @@ export function createLoginPage(container: HTMLElement): void {
   const passwordInputContainer = createElement({
     parent: passwordContainer,
     classes: ['relative'],
-  })
+  });
 
   const passwordInput = createElement({
     tag: 'input',
@@ -214,18 +217,15 @@ export function createLoginPage(container: HTMLElement): void {
     },
   }) as HTMLInputElement;
 
-
   const eyeButton = createElement({
     tag: 'button',
     parent: passwordInputContainer,
     classes: ['button-eye'],
-    attributes: { type: 'button',
-      'aria-label': 'Toggle password visibility'
-     },
-  })
+    attributes: { type: 'button', 'aria-label': 'Toggle password visibility' },
+  });
 
-  const eyeInvisible = createSvgUse('#eye-invisible', 'eye')
-  const eyeVisible = createSvgUse('#eye-visible', 'eye')
+  const eyeInvisible = createSvgUse('#eye-invisible', 'eye');
+  const eyeVisible = createSvgUse('#eye-visible', 'eye');
 
   eyeButton.append(eyeInvisible, eyeVisible);
   eyeInvisible.classList.add('eye_active');
@@ -236,7 +236,6 @@ export function createLoginPage(container: HTMLElement): void {
 
     eyeInvisible.classList.toggle('eye_active');
     eyeVisible.classList.toggle('eye_active');
-
   });
 
   const passwordError = createElement({
