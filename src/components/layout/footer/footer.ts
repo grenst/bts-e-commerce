@@ -36,7 +36,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const h3TitleInfo = createElement({
     tag: 'h3',
-    text: 'Информация',
+    text: 'Information',
     classes: ['h3-title-info'],
   });
   liContainerTitleInfo.append(h3TitleInfo);
@@ -55,7 +55,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const aLinkCompany = createElement({
     tag: 'a',
-    text: 'О Компании',
+    text: 'About the Company',
     classes: ['yellow-lane'],
     attributes: {
       target: '_blank',
@@ -64,39 +64,39 @@ const createFooter = (parent: HTMLElement) => {
   });
   liCompany.append(aLinkCompany);
 
-  const liAkcia = createElement({
+  const liStocks = createElement({
     tag: 'li',
     classes: ['li-Company'],
     parent: ulContainerInfo,
   });
 
-  const aLinkAkcia = createElement({
+  const aLinkStocks = createElement({
     tag: 'a',
-    text: 'Акции',
+    text: 'Stocks',
     classes: ['yellow-lane'],
     attributes: {
       target: '_blank',
       href: '#',
     },
   });
-  liAkcia.append(aLinkAkcia);
+  liStocks.append(aLinkStocks);
 
-  const liNyws = createElement({
+  const liNew = createElement({
     tag: 'li',
     classes: ['li-Company'],
     parent: ulContainerInfo,
   });
 
-  const aLinkNyws = createElement({
+  const aLinkNew = createElement({
     tag: 'a',
-    text: 'Новинки',
+    text: 'New products',
     classes: ['yellow-lane'],
     attributes: {
       target: '_blank',
       href: '#',
     },
   });
-  liNyws.append(aLinkNyws);
+  liNew.append(aLinkNew);
 
   const liPayment = createElement({
     tag: 'li',
@@ -106,7 +106,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const aLinkPayment = createElement({
     tag: 'a',
-    text: 'Оплата',
+    text: 'Payment',
     classes: ['yellow-lane'],
     attributes: {
       target: '_blank',
@@ -123,12 +123,12 @@ const createFooter = (parent: HTMLElement) => {
     parent: ulContainerFooter,
   });
 
-  const h3TitleAncher = createElement({
+  const h3TitleAnchor = createElement({
     tag: 'h3',
-    text: 'Навигация',
+    text: 'Navigation',
     classes: ['h3-title-info'],
   });
-  liContainerAnchorLink.append(h3TitleAncher);
+  liContainerAnchorLink.append(h3TitleAnchor);
 
   const ulContainerAnchor = createElement({
     tag: 'ul',
@@ -144,7 +144,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const aLinkLogin = createElement({
     tag: 'a',
-    text: 'Логин',
+    text: 'Login',
     classes: ['yellow-lane'],
     attributes: {
       target: '_blank',
@@ -161,7 +161,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const aLinkProfile = createElement({
     tag: 'a',
-    text: 'Профиль',
+    text: 'Profile',
     classes: ['yellow-lane'],
     attributes: {
       target: '_blank',
@@ -178,7 +178,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const aLinkBasket = createElement({
     tag: 'a',
-    text: 'Корзина',
+    text: 'Baskets',
     classes: ['yellow-lane'],
     attributes: {
       target: '_blank',
@@ -197,7 +197,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const h3TitleContactRep = createElement({
     tag: 'h3',
-    text: 'Приложение',
+    text: 'Application',
     classes: ['h3-title-info'],
   });
   liContainerRep.append(h3TitleContactRep);
@@ -225,7 +225,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const h3TitleSponsor = createElement({
     tag: 'h3',
-    text: 'Спонсоры',
+    text: 'Sponsors',
     classes: ['h3-title-info'],
   });
   liContainerSponsor.append(h3TitleSponsor);
@@ -266,7 +266,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const h3TitleDevelopers = createElement({
     tag: 'h3',
-    text: 'Связь с разработчиками',
+    text: 'Communication with developers',
     classes: ['h3-title-info'],
   });
   liContainerDevelopers.append(h3TitleDevelopers);
@@ -278,11 +278,11 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: 'https://github.com/grenst',
     },
-    text: ' Team leader Андрей -',
+    text: ' - Team leader Andrey -',
     parent: liContainerDevelopers,
   });
   const svgGithubAndrei = createSvgUse('#github', 'footer-svg_github');
-  footerLinkGithubAndrei.append(svgGithubAndrei);
+  footerLinkGithubAndrei.prepend(svgGithubAndrei);
 
   const footerLinkGithubVitaly = createElement({
     tag: 'a',
@@ -291,11 +291,11 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: 'https://github.com/VitaliMay',
     },
-    text: ' Main Developer Виталий -',
+    text: ' - Main Developer Vitaly -',
     parent: liContainerDevelopers,
   });
   const svgGithubVitaly = createSvgUse('#github', 'footer-svg_github');
-  footerLinkGithubVitaly.append(svgGithubVitaly);
+  footerLinkGithubVitaly.prepend(svgGithubVitaly);
 
   const footerLinkGithubSergei = createElement({
     tag: 'a',
@@ -304,11 +304,11 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: 'https://github.com/SeregaSimba',
     },
-    text: ' Some kind of finishing developer Сергей -',
+    text: ' - Some kind of finishing developer Sergei -',
     parent: liContainerDevelopers,
   });
   const svgGithubSergei = createSvgUse('#github', 'footer-svg_github');
-  footerLinkGithubSergei.append(svgGithubSergei);
+  footerLinkGithubSergei.prepend(svgGithubSergei);
   // five section
 
   createElement({
