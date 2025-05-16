@@ -58,7 +58,6 @@ const createFooter = (parent: HTMLElement) => {
     text: 'About the Company',
     classes: ['yellow-lane'],
     attributes: {
-      target: '_blank',
       href: '#',
     },
   });
@@ -75,7 +74,6 @@ const createFooter = (parent: HTMLElement) => {
     text: 'Stocks',
     classes: ['yellow-lane'],
     attributes: {
-      target: '_blank',
       href: '#',
     },
   });
@@ -92,7 +90,6 @@ const createFooter = (parent: HTMLElement) => {
     text: 'New products',
     classes: ['yellow-lane'],
     attributes: {
-      target: '_blank',
       href: '#',
     },
   });
@@ -109,7 +106,6 @@ const createFooter = (parent: HTMLElement) => {
     text: 'Payment',
     classes: ['yellow-lane'],
     attributes: {
-      target: '_blank',
       href: '#',
     },
   });
@@ -147,10 +143,10 @@ const createFooter = (parent: HTMLElement) => {
     text: 'Login',
     classes: ['yellow-lane'],
     attributes: {
-      target: '_blank',
-      href: '#',
+      href: '/login',
     },
   });
+
   liLogin.append(aLinkLogin);
 
   const liProfile = createElement({
@@ -164,8 +160,7 @@ const createFooter = (parent: HTMLElement) => {
     text: 'Profile',
     classes: ['yellow-lane'],
     attributes: {
-      target: '_blank',
-      href: '#',
+      href: '/profile',
     },
   });
   liProfile.append(aLinkProfile);
@@ -181,8 +176,7 @@ const createFooter = (parent: HTMLElement) => {
     text: 'Baskets',
     classes: ['yellow-lane'],
     attributes: {
-      target: '_blank',
-      href: '#',
+      href: '/cart',
     },
   });
   liBasket.append(aLinkBasket);
