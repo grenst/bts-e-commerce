@@ -2,6 +2,7 @@ import { createEl as createElement } from '../../utils/element-utilities';
 import { useCustomerStore } from '../../store/customer-store';
 import { AuthService } from '../../services/auth.service';
 import { addNotification } from '../../store/store';
+import './profile-page.scss';
 
 // Helper function to create form fields
 function createFormField(
