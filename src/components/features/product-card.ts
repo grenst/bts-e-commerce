@@ -44,7 +44,7 @@ export function createProductCardElement(
   if (imageUrl) {
     productImage.src = imageUrl;
     productImage.alt = product.name['en-US'] || 'Product Image';
-    productImage.classList.add('w-full', 'h-full', 'object-cover'); // Cover the container
+    productImage.classList.add('object-cover', 'object-top', 'h-[140%]'); // Cover the container
   } else {
     // Placeholder if no image is available
     imageContainer.textContent = 'No Image ;(';
