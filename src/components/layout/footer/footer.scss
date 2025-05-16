@@ -4,6 +4,45 @@
   font-size: 12px;
   font-weight: 700;
   opacity: 0.8;
+  background-color: white;
+}
+
+.infoDivFooterContainer {
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.ul-footer-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.li-container-Contact-info {
+  margin: 0px auto;
+}
+
+.li-Company {
+  margin-bottom: 0.5rem;
+}
+
+.Kate-git {
+  margin-bottom: 0.5rem;
+}
+
+.li-Company:hover {
+  color: rgba(0, 0, 0, 0.62);
+}
+
+.h3-title-info {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
 }
 
 .footer-container {
@@ -34,18 +73,18 @@
 }
 
 .footer-link {
-  opacity: 70%;
+  // opacity: 70%;
   transform: scale(1);
   transition: all 0.4s;
 }
 
 .footer-link:hover {
-  transform: scale(1.2);
   transition: all 0.4s;
   opacity: 100%;
 
   // color:#04ecec
-  color: var(--color-primary-light);
+  color: rgba(0, 0, 0, 0.62);
+  // color: var(--color-primary-light);
 }
 
 .footer-link:active {
@@ -58,6 +97,16 @@
 }
 
 .footer-svg_github {
+  width: 20px;
+  height: 35px;
+}
+
+.background-RSS {
+  opacity: 100;
+  background-color: #fdc800;
+}
+
+.kets {
   width: 35px;
   height: 35px;
 }
