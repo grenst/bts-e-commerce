@@ -1,6 +1,7 @@
 import { createEl as createElement } from '../../utils/element-utilities';
 import { useCustomerStore } from '../../store/customer-store';
 import { AuthService } from '../../services/auth.service';
+import type { Address } from '../../types/commercetools';
 import { addNotification } from '../../store/store';
 import './profile-page.scss';
 
@@ -223,22 +224,130 @@ export default function createProfilePage(container: HTMLElement): void {
     }
   });
 
-  // Placeholder for address sections
+  // Address sections
   createElement({
     tag: 'h2',
     text: 'Addresses',
     classes: ['text-2xl', 'font-nexa-bold', 'mt-10', 'mb-6', 'text-gray-700'], // Increased margin top
     parent: profileContainer,
   });
+
+  const addressesContainer = createElement({
+    tag: 'div',
+    classes: ['addresses-container', 'mb-4'],
+    parent: profileContainer,
+  });
+
+  if (customer.addresses && customer.addresses.length > 0) {
+    let addressIndex = 0;
+    for (const address of customer.addresses) {
+      const addressCard = createElement({
+        tag: 'div',
+        classes: [
+          'address-card',
+          'p-4',
+          'border',
+          'border-gray-200',
+          'rounded-md',
+          'mb-4',
+          'font-nexa-light',
+        ],
+        parent: addressesContainer,
+      });
+
+      createElement({
+        tag: 'h3',
+        text: `Address ${addressIndex + 1}`,
+        classes: ['text-lg', 'font-nexa-bold', 'mb-2', 'text-gray-700'],
+        parent: addressCard,
+      });
+
+      const addressDetails = [
+        `Country: ${address.country || 'N/A'}`,
+        `City: ${address.city || 'N/A'}`,
+        `Street: ${address.streetName || 'N/A'} ${address.streetNumber || ''}`,
+        `Postal Code: ${address.postalCode || 'N/A'}`,
+      ];
+
+      if (address.firstName || address.lastName) {
+        addressDetails.unshift(
+          `Name: ${address.firstName || ''} ${address.lastName || ''}`.trim()
+        );
+      }
+      if (address.company) {
+        addressDetails.push(`Company: ${address.company}`);
+      }
+      if (address.phone) {
+        addressDetails.push(`Phone: ${address.phone}`);
+      }
+      if (address.email) {
+        addressDetails.push(`Email: ${address.email}`);
+      }
+
+      for (const detail of addressDetails) {
+        createElement({
+          tag: 'p',
+          text: detail,
+          classes: ['text-sm', 'text-gray-600'],
+          parent: addressCard,
+        });
+      }
+
+      // Add indicators for default addresses
+      if (address.id === customer.defaultShippingAddressId) {
+        createElement({
+          tag: 'span',
+          text: 'Default Shipping',
+          classes: [
+            'text-xs',
+            'font-semibold',
+            'bg-blue-100',
+            'text-blue-800',
+            'px-2',
+            'py-1',
+            'rounded-full',
+            'ml-2',
+          ],
+          parent: addressCard.querySelector('h3') as HTMLElement,
+        });
+      }
+      if (address.id === customer.defaultBillingAddressId) {
+        createElement({
+          tag: 'span',
+          text: 'Default Billing',
+          classes: [
+            'text-xs',
+            'font-semibold',
+            'bg-green-100',
+            'text-green-800',
+            'px-2',
+            'py-1',
+            'rounded-full',
+            'ml-2',
+          ],
+          parent: addressCard.querySelector('h3') as HTMLElement,
+        });
+      }
+      addressIndex += 1;
+    }
+  } else {
+    createElement({
+      tag: 'p',
+      text: 'No addresses found.',
+      classes: ['text-gray-600', 'font-nexa-light'],
+      parent: addressesContainer,
+    });
+  }
+
   createElement({
     tag: 'p',
     text: 'Address editing functionality coming soon.',
-    classes: ['text-gray-600', 'mb-4'],
+    classes: ['text-gray-600', 'mb-4', 'mt-4', 'font-nexa-light'],
     parent: profileContainer,
   });
 
   // TODO:
-  // 1. Implement address management (display, add, edit, remove for shipping & billing).
+  // 1. Implement address management (add, edit, remove for shipping & billing).
   // 2. Connect to CustomerService to update details via Commercetools API (partially done for personal info).
   // 3. Add proper form validation (client-side and server-side ideally).
 }

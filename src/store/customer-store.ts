@@ -1,12 +1,16 @@
 import { createStore } from 'zustand/vanilla';
 import { persist } from 'zustand/middleware';
+import type { Address } from '../types/commercetools'; // Import Address type
 
 export interface Customer {
   id: string;
   email: string;
   firstName?: string;
   lastName?: string;
-  version: number; // Added version to match CommercetoolsCustomer
+  version: number;
+  addresses: Address[];
+  defaultShippingAddressId?: string;
+  defaultBillingAddressId?: string;
 }
 
 interface CustomerState {
