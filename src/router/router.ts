@@ -11,22 +11,18 @@ export interface Route {
 
 export class Router {
   private routes: Route[] = [];
-  private container: HTMLElement;
+  private mainContainer: HTMLElement; // Основной контейнер приложения
+  private pageContainers: Map<string, HTMLElement> = new Map(); // Хранилище контейнеров страниц
   private currentPath: string = '';
-  private pageStates: Map<string, HTMLElement> = new Map(); // cохранение состояния страницы
   private scrollPositions: Map<string, number> = new Map();
 
   constructor(container: HTMLElement) {
-    this.container = container;
-    // globalThis.addEventListener('popstate', () => this.handleRouteChange());
-    // window.addEventListener('popstate', () => this.handleRouteChange());
+    this.mainContainer = container;
     this.setupEventListeners();
   }
 
   private setupEventListeners(): void {
     globalThis.addEventListener('popstate', () => this.handleRouteChange());
-    // window.addEventListener('popstate', () => this.handleRouteChange());
-    // window.addEventListener('beforeunload', () =>
     globalThis.addEventListener('beforeunload', () =>
       this.saveCurrentScrollPosition()
     );
@@ -37,26 +33,79 @@ export class Router {
   }
 
   navigateTo(path: string): void {
-    // globalThis.history.pushState({}, '', path);
     if (this.currentPath === path) return;
 
-    this.saveCurrentState();
     globalThis.history.pushState({}, '', path);
-    // window.history.pushState({}, '', path);
     this.handleRouteChange();
   }
 
-  private saveCurrentState(): void {
-    if (this.currentPath && this.container.children.length > 0) {
-      const currentRoute = this.routes.find((r) => r.path === this.currentPath);
-      if (currentRoute?.preserveState) {
-        this.pageStates.set(
-          this.currentPath,
-          this.container.cloneNode(true) as HTMLElement
-        );
-        this.saveCurrentScrollPosition();
-      }
+  private handleRouteChange(): void {
+    const path = globalThis.location.pathname;
+    if (this.currentPath === path) return;
+
+    // Сохраняем текущую позицию скролла
+    this.saveCurrentScrollPosition();
+    this.currentPath = path;
+
+    if (path === '/') {
+      this.navigateTo('/main'); // редирект
+      return;
     }
+
+    const route = this.findRoute(path);
+    // if (!route) return;
+
+    if (route) {
+      this.processRoute(route, path);
+    }
+  }
+
+  private findRoute(path: string): Route | undefined {
+    return (
+      this.routes.find((r) => r.path === path) ||
+      this.routes.find((r) => r.path === '*')
+    );
+  }
+
+  private processRoute(route: Route, path: string): void {
+    // Проверяем, есть ли сохраненный контейнер и разрешено ли сохранение состояния
+    const hasSavedContainer =
+      this.pageContainers.has(path) && route.preserveState;
+
+    let pageContainer = this.pageContainers.get(path);
+
+    // Если контейнера нет или маршрут не сохраняет состояние
+    if (!pageContainer) {
+      pageContainer = this.createPageContainer(route);
+      this.pageContainers.set(path, pageContainer);
+      console.log(`Создали новый контейнер для ${path}`);
+    }
+
+    // Очищаем основной контейнер
+    removeAllChild(this.mainContainer);
+
+    if (hasSavedContainer) {
+      // Случай 1: Восстановление сохраненного состояния
+      this.mainContainer.append(pageContainer);
+      this.restoreScrollPosition(path);
+      console.log(`Восстановили сохраненное состояние для ${path}`);
+    } else {
+      // Случай 2: Первая отрисовка или страница без сохранения состояния
+      // if (route.preserveState) {
+      route.component(this.mainContainer, this);
+      window.scrollTo(0, 0);
+      console.log(`Первая отрисовка ${path}`);
+    }
+  }
+
+  private createPageContainer(route: Route): HTMLElement {
+    const pageContainer = createElement({
+      tag: 'div',
+      classes: ['page-container'],
+    });
+    route.component(pageContainer, this);
+
+    return pageContainer;
   }
 
   private saveCurrentScrollPosition(): void {
@@ -65,94 +114,11 @@ export class Router {
     }
   }
 
-  private handleRouteChange(): void {
-    const path = globalThis.location.pathname;
-    // const path = window.location.pathname;
-
-    if (this.currentPath === path) return;
-
-    // Сохраняем текущее состояние перед переходом
-    // if (this.currentPath && this.container.children.length > 0) {
-    //   const currentRoute = this.routes.find((r) => r.path === this.currentPath);
-    //   if (currentRoute?.preserveState) {
-    //     this.pageStates.set(
-    //       this.currentPath,
-    //       this.container.cloneNode(true) as HTMLElement
-    //     );
-    //   }
-    // }
-
-    this.saveCurrentState();
-
-    this.currentPath = path;
-
-    if (path === '/') {
-      this.navigateTo('/main'); // редирект
-      return;
-    }
-
-    const route = this.routes.find((r) => r.path === path);
-
-    if (route) {
-      // if (route.preserveState && this.pageStates.has(path)) {
-      //   removeAllChild(this.container);
-      //   this.container.appendChild(this.pageStates.get(path)!);
-      //   console.log('Страница из состояния');
-      // } else {
-      //   removeAllChild(this.container);
-      //   route.component(this.container);
-      // }
-      this.renderRoute(route);
-      return;
-    }
-
-    // Error Page if route not found
-    // const wildcardRoute = this.routes.find((r) => r.path === '*');
-    // if (wildcardRoute) {
-    //   removeAllChild(this.container);
-    //   wildcardRoute.component(this.container);
-    //   return;
-    // }
-
-    this.renderWildcardRoute();
-  }
-
-  private renderRoute(route: Route): void {
-    removeAllChild(this.container);
-
-    if (route.preserveState && this.pageStates.has(route.path)) {
-      this.restoreState(route.path);
-    } else {
-      route.component(this.container, this);
-      window.scrollTo(0, 0);
-      console.log(`Первая отрисовка ${route.path}`);
-    }
-  }
-
-  private restoreState(path: string): void {
-    const savedState = this.pageStates.get(path);
-    if (savedState) {
-      this.container.append(savedState);
-      this.restoreScrollPosition(path);
-      console.log(`Страница из сохранённого состояния ${path}`);
-    }
-  }
-
   private restoreScrollPosition(path: string): void {
     requestAnimationFrame(() => {
       const savedPosition = this.scrollPositions.get(path) || 0;
       window.scrollTo(0, savedPosition);
     });
-  }
-
-  // Error Page if route not found
-  private renderWildcardRoute(): void {
-    const wildcardRoute = this.routes.find((r) => r.path === '*');
-    if (wildcardRoute) {
-      removeAllChild(this.container);
-      wildcardRoute.component(this.container, this);
-      window.scrollTo(0, 0);
-    }
   }
 
   init(): void {
@@ -164,12 +130,14 @@ export class Router {
   }
 
   // методы очистки состояний (на всякий случай)
-  clearStates(): void {
-    this.pageStates.clear();
+  clearCache(): void {
+    this.pageContainers.clear();
+    this.scrollPositions.clear();
   }
 
-  clearStateForPath(path: string): void {
-    this.pageStates.delete(path);
+  clearPageCache(path: string): void {
+    this.pageContainers.delete(path);
+    this.scrollPositions.delete(path);
   }
 }
 

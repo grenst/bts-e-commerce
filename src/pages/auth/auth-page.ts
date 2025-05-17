@@ -309,6 +309,7 @@ export function createLoginPage(container: HTMLElement): void {
     title.textContent = isLoginForm ? 'Login' : 'Register';
 
     loginButton.textContent = isLoginForm ? 'Login' : 'Register';
+    loginButton.prepend(svgSpinner);
 
     registerLink.textContent = isLoginForm ? 'Register' : 'Login';
 
@@ -437,7 +438,8 @@ export function createLoginPage(container: HTMLElement): void {
 
   loginButton.addEventListener('click', async () => {
     hideFormError();
-    const { setLoading, addNotification } = uiStore.getState();
+    const { addNotification } = uiStore.getState();
+    // const { setLoading, addNotification } = uiStore.getState();
 
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -522,7 +524,10 @@ export function createLoginPage(container: HTMLElement): void {
       if (firstNameError) hideFieldError(firstNameError);
       if (lastNameError) hideFieldError(lastNameError);
 
-      setLoading(true);
+      // setLoading(true);
+      svgSpinner.classList.add('spinner_active');
+      const modalContainer = createModalContainer();
+
       try {
         const success = await AuthService.register(
           email,
@@ -547,7 +552,9 @@ export function createLoginPage(container: HTMLElement): void {
         console.error('Registration error:', error);
         showFormError('Registration failed. Please try again.');
       } finally {
-        setLoading(false);
+        // setLoading(false);
+        svgSpinner.classList.remove('spinner_active');
+        modalContainer.remove();
       }
     }
   });
