@@ -50,26 +50,24 @@ const routes: Route[] = [
   {
     // path: '/',
     path: '/main',
+    // (container, router) => createHomePage(container, router),
     component: createHomePage,
     preserveState: true,
   },
   {
     path: '/login',
     component: createLoginPage,
-    preserveState: false, // можно и не ставить (форму всё равно надо очищать)
+    preserveState: false, // можно и не ставить
   },
   {
     path: '/cart',
-    component: () => {
+    component: (container) => {
       // Placeholder for cart page
-      const cartPage = createElement({
+      createElement({
         tag: 'div',
-
         text: 'Cart Page - Coming Soon!',
-        parent: contentContainer,
+        parent: container,
       });
-      // contentContainer.append(cartPage);
-      return cartPage;
     },
     preserveState: true,
   },
@@ -80,14 +78,15 @@ const routes: Route[] = [
   },
   {
     path: '*',
-    component: () => {
+    component: (container) => {
       // Placeholder for Error page
       createElement({
         tag: 'h1',
         text: 'Error Page - Coming Soon! With BIG BUTTON. Go to Login or to About or to Main',
-        parent: contentContainer,
+        parent: container,
       });
     },
+    preserveState: false, // можно и не ставить будет работать
   },
 ];
 
