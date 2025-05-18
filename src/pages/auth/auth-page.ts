@@ -39,15 +39,21 @@ const dateOfBirthSchema = z
   .regex(/^\d{4}-\d{2}-\d{2}$/, {
     message: 'Date of birth must be in YYYY-MM-DD format',
   })
-  .refine((date) => {
-    const year = parseInt(date.substring(0, 4), 10);
-    const currentYear = new Date().getFullYear();
-    return year <= currentYear - 18;
-  }, { message: 'You must be at least 18 years old' })
-  .refine((date) => {
-    const year = parseInt(date.substring(0, 4), 10);
-    return year >= 1900;
-  }, { message: 'Date of birth year seems incorrect' });
+  .refine(
+    (date) => {
+      const year = Number.parseInt(date.slice(0, 4), 10);
+      const currentYear = new Date().getFullYear();
+      return year <= currentYear - 18;
+    },
+    { message: 'You must be at least 18 years old' }
+  )
+  .refine(
+    (date) => {
+      const year = Number.parseInt(date.slice(0, 4), 10);
+      return year >= 1900;
+    },
+    { message: 'Date of birth year seems incorrect' }
+  );
 
 const streetNameSchema = z
   .string()
@@ -71,7 +77,17 @@ const countrySchema = z
   .min(1, { message: 'Country is required' })
   .regex(/^[A-Z]{2}$/, {
     message: 'Country must be a 2-letter ISO code (e.g., US, DE)',
-  }); // For now, simple non-empty string. TODO: Use a predefined list.
+  });
+
+const houseNumberSchema = z
+  .string()
+  .min(1, { message: 'House number is required' })
+  .max(10, { message: 'House number must be ≤ 10 chars' });
+
+const apartmentSchema = z
+  .string()
+  .max(10, { message: 'Apartment must be ≤ 10 chars' })
+  .optional();
 
 const loginFormSchema = z.object({
   email: emailSchema,
@@ -85,6 +101,8 @@ const registerFormSchema = z.object({
   lastName: nameSchema,
   dateOfBirth: dateOfBirthSchema,
   streetName: streetNameSchema,
+  houseNumber: houseNumberSchema,
+  apartment: apartmentSchema,
   city: citySchema,
   postalCode: postalCodeSchema,
   country: countrySchema,
@@ -132,6 +150,8 @@ function validateRegisterForm(
   lastName: string,
   dateOfBirth: string,
   streetName: string,
+  houseNumber: string,
+  apartment: string,
   city: string,
   postalCode: string,
   country: string
@@ -144,6 +164,8 @@ function validateRegisterForm(
       lastName,
       dateOfBirth,
       streetName,
+      houseNumber,
+      apartment,
       city,
       postalCode,
       country,
@@ -361,6 +383,8 @@ export function createLoginPage(container: HTMLElement): void {
   let lastNameInput: HTMLInputElement | undefined;
   let dateOfBirthInput: HTMLInputElement | undefined;
   let streetNameInput: HTMLInputElement | undefined;
+  let houseNumberInput: HTMLInputElement | undefined;
+  let apartmentInput: HTMLInputElement | undefined;
   let cityInput: HTMLInputElement | undefined;
   let postalCodeInput: HTMLInputElement | undefined;
   let countryInput: HTMLInputElement | undefined;
@@ -369,6 +393,8 @@ export function createLoginPage(container: HTMLElement): void {
   let lastNameError: HTMLElement | undefined;
   let dateOfBirthError: HTMLElement | undefined;
   let streetNameError: HTMLElement | undefined;
+  let houseNumberError: HTMLElement | undefined;
+  let apartmentError: HTMLElement | undefined;
   let cityError: HTMLElement | undefined;
   let postalCodeError: HTMLElement | undefined;
   let countryError: HTMLElement | undefined;
@@ -550,6 +576,70 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
+        // House Number
+        const houseNumberContainer = createElement({
+          tag: 'div',
+          classes: ['mb-4'],
+        });
+        emailContainer.before(houseNumberContainer);
+
+        createElement({
+          tag: 'label',
+          text: 'House Number',
+          parent: houseNumberContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'houseNumber' },
+        });
+
+        houseNumberInput = createElement({
+          tag: 'input',
+          parent: houseNumberContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'text',
+            id: 'houseNumber',
+            placeholder: 'Enter your house №',
+          },
+        }) as HTMLInputElement;
+
+        houseNumberError = createElement({
+          tag: 'p',
+          parent: houseNumberContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        // Apartment
+        const apartmentContainer = createElement({
+          tag: 'div',
+          classes: ['mb-4'],
+        });
+        emailContainer.before(apartmentContainer);
+
+        createElement({
+          tag: 'label',
+          text: 'Apartment (optional)',
+          parent: apartmentContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'apartment' },
+        });
+
+        apartmentInput = createElement({
+          tag: 'input',
+          parent: apartmentContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'text',
+            id: 'apartment',
+            placeholder: 'Enter your apt. №',
+          },
+        }) as HTMLInputElement;
+
+        apartmentError = createElement({
+          tag: 'p',
+          parent: apartmentContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
         // City
         const cityContainer = createElement({
           tag: 'div',
@@ -567,7 +657,11 @@ export function createLoginPage(container: HTMLElement): void {
           tag: 'input',
           parent: cityContainer,
           classes: inputParameters,
-          attributes: { type: 'text', id: 'city', placeholder: 'Enter your city' },
+          attributes: {
+            type: 'text',
+            id: 'city',
+            placeholder: 'Enter your city',
+          },
         }) as HTMLInputElement;
         cityError = createElement({
           tag: 'p',
@@ -646,6 +740,8 @@ export function createLoginPage(container: HTMLElement): void {
     if (lastNameInput) lastNameInput.value = '';
     if (dateOfBirthInput) dateOfBirthInput.value = '';
     if (streetNameInput) streetNameInput.value = '';
+    if (houseNumberInput) houseNumberInput.value = '';
+    if (apartmentInput) apartmentInput.value = '';
     if (cityInput) cityInput.value = '';
     if (postalCodeInput) postalCodeInput.value = '';
     if (countryInput) countryInput.value = '';
@@ -657,6 +753,8 @@ export function createLoginPage(container: HTMLElement): void {
     if (lastNameError) lastNameError.classList.add('hidden');
     if (dateOfBirthError) dateOfBirthError.classList.add('hidden');
     if (streetNameError) streetNameError.classList.add('hidden');
+    if (houseNumberError) houseNumberError.classList.add('hidden');
+    if (apartmentError) apartmentError.classList.add('hidden');
     if (cityError) cityError.classList.add('hidden');
     if (postalCodeError) postalCodeError.classList.add('hidden');
     if (countryError) countryError.classList.add('hidden');
@@ -736,6 +834,8 @@ export function createLoginPage(container: HTMLElement): void {
       const lastName = lastNameInput?.value || '';
       const dateOfBirth = dateOfBirthInput?.value || '';
       const streetName = streetNameInput?.value || '';
+      const houseNumber = houseNumberInput?.value || '';
+      const apartment = apartmentInput?.value || '';
       const city = cityInput?.value || '';
       const postalCode = postalCodeInput?.value || '';
       const country = countryInput?.value.toUpperCase() || ''; // Ensure country code is uppercase
@@ -747,6 +847,8 @@ export function createLoginPage(container: HTMLElement): void {
         lastName,
         dateOfBirth,
         streetName,
+        houseNumber,
+        apartment,
         city,
         postalCode,
         country
@@ -782,6 +884,16 @@ export function createLoginPage(container: HTMLElement): void {
           showFieldError(streetNameError, validation.errors.streetName);
         } else if (streetNameError) {
           hideFieldError(streetNameError);
+        }
+        if (houseNumberError && validation.errors.houseNumber) {
+          showFieldError(houseNumberError, validation.errors.houseNumber);
+        } else if (houseNumberError) {
+          hideFieldError(houseNumberError);
+        }
+        if (apartmentError && validation.errors.apartment) {
+          showFieldError(apartmentError, validation.errors.apartment);
+        } else if (apartmentError) {
+          hideFieldError(apartmentError);
         }
         if (cityError && validation.errors.city) {
           showFieldError(cityError, validation.errors.city);
@@ -828,6 +940,8 @@ export function createLoginPage(container: HTMLElement): void {
           [
             {
               streetName,
+              streetNumber: houseNumber,
+              apartment,
               city,
               postalCode,
               country,

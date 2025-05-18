@@ -1,4 +1,5 @@
 import { apiInstance } from '../../api/axios-instances';
+import { AxiosError } from 'axios';
 import { debug } from './logger';
 import type { Address } from '../../types/commercetools'; // Import Address type
 
@@ -25,7 +26,10 @@ export async function signupCustomer(
     payload.defaultBillingAddress = 0;
   }
 
-console.log('Signing up customer with payload:', JSON.stringify(payload, null, 2));
+  console.log(
+    'Signing up customer with payload:',
+    JSON.stringify(payload, undefined, 2)
+  );
   try {
     await apiInstance.post('/me/signup', payload, {
       headers: {
@@ -33,10 +37,13 @@ console.log('Signing up customer with payload:', JSON.stringify(payload, null, 2
       },
     });
     debug('Signup succeeded');
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error during customer signup:', error);
-    if (error.response && error.response.data) {
-      console.error('CommerceTools API Error Response Body:', JSON.stringify(error.response.data, null, 2));
+    if (error instanceof AxiosError && error.response && error.response.data) {
+      console.error(
+        'CommerceTools API Error Response Body:',
+        JSON.stringify(error.response.data, undefined, 2)
+      );
     }
     // Re-throw the error so it can be handled by the caller if necessary
     throw error;
