@@ -1,11 +1,16 @@
 import { apiInstance } from '../../api/axios-instances';
 import { debug } from './logger';
+import type { Address } from '../../types/commercetools'; // Import Address type
 
 export interface CustomerDraft {
   email: string;
   password: string;
   firstName?: string;
   lastName?: string;
+  dateOfBirth?: string;
+  addresses?: Address[];
+  defaultShippingAddress?: number;
+  defaultBillingAddress?: number;
 }
 
 export async function signupCustomer(
@@ -13,12 +18,29 @@ export async function signupCustomer(
   anonymousAccessToken: string
 ): Promise<void> {
   debug('POST /me/signup', draft.email);
-  await apiInstance.post('/me/signup', draft, {
-    headers: {
-      Authorization: `Bearer ${anonymousAccessToken}`,
-    },
-  });
-  debug('Signup succeeded');
+
+  const payload: CustomerDraft = { ...draft };
+  if (payload.addresses && payload.addresses.length > 0) {
+    payload.defaultShippingAddress = 0;
+    payload.defaultBillingAddress = 0;
+  }
+
+console.log('Signing up customer with payload:', JSON.stringify(payload, null, 2));
+  try {
+    await apiInstance.post('/me/signup', payload, {
+      headers: {
+        Authorization: `Bearer ${anonymousAccessToken}`,
+      },
+    });
+    debug('Signup succeeded');
+  } catch (error: any) {
+    console.error('Error during customer signup:', error);
+    if (error.response && error.response.data) {
+      console.error('CommerceTools API Error Response Body:', JSON.stringify(error.response.data, null, 2));
+    }
+    // Re-throw the error so it can be handled by the caller if necessary
+    throw error;
+  }
 }
 
 export interface CommercetoolsCustomer {

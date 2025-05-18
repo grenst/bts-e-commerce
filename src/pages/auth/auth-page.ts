@@ -33,6 +33,46 @@ const nameSchema = z
   .min(1, { message: 'Name is required' })
   .max(50, { message: 'Name must be less than 50 characters' });
 
+const dateOfBirthSchema = z
+  .string()
+  .min(1, { message: 'Date of birth is required' })
+  .regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'Date of birth must be in YYYY-MM-DD format',
+  })
+  .refine((date) => {
+    const year = parseInt(date.substring(0, 4), 10);
+    const currentYear = new Date().getFullYear();
+    return year <= currentYear - 18;
+  }, { message: 'You must be at least 18 years old' })
+  .refine((date) => {
+    const year = parseInt(date.substring(0, 4), 10);
+    return year >= 1900;
+  }, { message: 'Date of birth year seems incorrect' });
+
+const streetNameSchema = z
+  .string()
+  .min(1, { message: 'Street name is required' })
+  .max(100, { message: 'Street name must be less than 100 characters' });
+
+const citySchema = z
+  .string()
+  .min(1, { message: 'City is required' })
+  .max(50, { message: 'City must be less than 50 characters' });
+
+const postalCodeSchema = z
+  .string()
+  .min(1, { message: 'Postal code is required' })
+  .regex(/^[a-zA-Z0-9\s-]{3,10}$/, {
+    message: 'Invalid postal code format',
+  });
+
+const countrySchema = z
+  .string()
+  .min(1, { message: 'Country is required' })
+  .regex(/^[A-Z]{2}$/, {
+    message: 'Country must be a 2-letter ISO code (e.g., US, DE)',
+  }); // For now, simple non-empty string. TODO: Use a predefined list.
+
 const loginFormSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
@@ -43,6 +83,11 @@ const registerFormSchema = z.object({
   password: passwordSchema,
   firstName: nameSchema,
   lastName: nameSchema,
+  dateOfBirth: dateOfBirthSchema,
+  streetName: streetNameSchema,
+  city: citySchema,
+  postalCode: postalCodeSchema,
+  country: countrySchema,
 });
 
 type ValidationResult = {
@@ -84,10 +129,25 @@ function validateRegisterForm(
   email: string,
   password: string,
   firstName: string,
-  lastName: string
+  lastName: string,
+  dateOfBirth: string,
+  streetName: string,
+  city: string,
+  postalCode: string,
+  country: string
 ): ValidationResult {
   try {
-    registerFormSchema.parse({ email, password, firstName, lastName });
+    registerFormSchema.parse({
+      email,
+      password,
+      firstName,
+      lastName,
+      dateOfBirth,
+      streetName,
+      city,
+      postalCode,
+      country,
+    });
     return { success: true, errors: {} };
   } catch (error) {
     const formattedErrors: Record<string, string> = {};
@@ -299,8 +359,19 @@ export function createLoginPage(container: HTMLElement): void {
   let isLoginForm = true;
   let firstNameInput: HTMLInputElement | undefined;
   let lastNameInput: HTMLInputElement | undefined;
+  let dateOfBirthInput: HTMLInputElement | undefined;
+  let streetNameInput: HTMLInputElement | undefined;
+  let cityInput: HTMLInputElement | undefined;
+  let postalCodeInput: HTMLInputElement | undefined;
+  let countryInput: HTMLInputElement | undefined;
+
   let firstNameError: HTMLElement | undefined;
   let lastNameError: HTMLElement | undefined;
+  let dateOfBirthError: HTMLElement | undefined;
+  let streetNameError: HTMLElement | undefined;
+  let cityError: HTMLElement | undefined;
+  let postalCodeError: HTMLElement | undefined;
+  let countryError: HTMLElement | undefined;
 
   function toggleForm(): void {
     isLoginForm = !isLoginForm;
@@ -315,13 +386,31 @@ export function createLoginPage(container: HTMLElement): void {
 
     if (isLoginForm) {
       if (firstNameInput?.parentElement) {
-        firstNameInput.parentElement.remove();
+        firstNameInput?.parentElement?.remove();
         lastNameInput?.parentElement?.remove();
+        dateOfBirthInput?.parentElement?.remove();
+        streetNameInput?.parentElement?.remove();
+        cityInput?.parentElement?.remove();
+        postalCodeInput?.parentElement?.remove();
+        countryInput?.parentElement?.remove();
+
         // Reset the variables to ensure they are recreated when switching back to register form
         firstNameInput = undefined;
         lastNameInput = undefined;
+        dateOfBirthInput = undefined;
+        streetNameInput = undefined;
+        cityInput = undefined;
+        postalCodeInput = undefined;
+        countryInput = undefined;
+
         firstNameError = undefined;
         lastNameError = undefined;
+        dateOfBirthError = undefined;
+        streetNameError = undefined;
+        cityError = undefined;
+        postalCodeError = undefined;
+        countryError = undefined;
+
         title.classList.add('before:w-20');
         title.classList.remove('before:w-29');
 
@@ -401,6 +490,153 @@ export function createLoginPage(container: HTMLElement): void {
           parent: lastNameContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
+
+        // Date of Birth
+        const dateOfBirthContainer = createElement({
+          tag: 'div',
+          classes: ['mb-4'],
+        });
+        emailContainer.before(dateOfBirthContainer);
+
+        createElement({
+          tag: 'label',
+          text: 'Date of Birth',
+          parent: dateOfBirthContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'dateOfBirth' },
+        });
+        dateOfBirthInput = createElement({
+          tag: 'input',
+          parent: dateOfBirthContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'date',
+            id: 'dateOfBirth',
+            placeholder: 'YYYY-MM-DD',
+          },
+        }) as HTMLInputElement;
+        dateOfBirthError = createElement({
+          tag: 'p',
+          parent: dateOfBirthContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        // Street Name
+        const streetNameContainer = createElement({
+          tag: 'div',
+          classes: ['mb-4'],
+        });
+        emailContainer.before(streetNameContainer);
+        createElement({
+          tag: 'label',
+          text: 'Street Name',
+          parent: streetNameContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'streetName' },
+        });
+        streetNameInput = createElement({
+          tag: 'input',
+          parent: streetNameContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'text',
+            id: 'streetName',
+            placeholder: 'Enter your street name',
+          },
+        }) as HTMLInputElement;
+        streetNameError = createElement({
+          tag: 'p',
+          parent: streetNameContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        // City
+        const cityContainer = createElement({
+          tag: 'div',
+          classes: ['mb-4'],
+        });
+        emailContainer.before(cityContainer);
+        createElement({
+          tag: 'label',
+          text: 'City',
+          parent: cityContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'city' },
+        });
+        cityInput = createElement({
+          tag: 'input',
+          parent: cityContainer,
+          classes: inputParameters,
+          attributes: { type: 'text', id: 'city', placeholder: 'Enter your city' },
+        }) as HTMLInputElement;
+        cityError = createElement({
+          tag: 'p',
+          parent: cityContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        // Postal Code
+        const postalCodeContainer = createElement({
+          tag: 'div',
+          classes: ['mb-4'],
+        });
+        emailContainer.before(postalCodeContainer);
+        createElement({
+          tag: 'label',
+          text: 'Postal Code',
+          parent: postalCodeContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'postalCode' },
+        });
+        postalCodeInput = createElement({
+          tag: 'input',
+          parent: postalCodeContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'text',
+            id: 'postalCode',
+            placeholder: 'Enter your postal code',
+          },
+        }) as HTMLInputElement;
+        postalCodeError = createElement({
+          tag: 'p',
+          parent: postalCodeContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        // Country
+        const countryContainer = createElement({
+          tag: 'div',
+          classes: ['mb-4'],
+        });
+        emailContainer.before(countryContainer);
+        createElement({
+          tag: 'label',
+          text: 'Country (2-letter ISO)',
+          parent: countryContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'country' },
+        });
+        countryInput = createElement({
+          tag: 'input',
+          parent: countryContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'text',
+            id: 'country',
+            placeholder: 'e.g., US, DE',
+            maxLength: '2', // Maxlength for 2-letter code
+          },
+        }) as HTMLInputElement;
+        // Convert to uppercase on input
+        countryInput.addEventListener('input', () => {
+          countryInput!.value = countryInput!.value.toUpperCase();
+        });
+        countryError = createElement({
+          tag: 'p',
+          parent: countryContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
       }
     }
 
@@ -408,12 +644,22 @@ export function createLoginPage(container: HTMLElement): void {
     passwordInput.value = '';
     if (firstNameInput) firstNameInput.value = '';
     if (lastNameInput) lastNameInput.value = '';
+    if (dateOfBirthInput) dateOfBirthInput.value = '';
+    if (streetNameInput) streetNameInput.value = '';
+    if (cityInput) cityInput.value = '';
+    if (postalCodeInput) postalCodeInput.value = '';
+    if (countryInput) countryInput.value = '';
 
     errorContainer.classList.add('hidden');
     emailError.classList.add('hidden');
     passwordError.classList.add('hidden');
     if (firstNameError) firstNameError.classList.add('hidden');
     if (lastNameError) lastNameError.classList.add('hidden');
+    if (dateOfBirthError) dateOfBirthError.classList.add('hidden');
+    if (streetNameError) streetNameError.classList.add('hidden');
+    if (cityError) cityError.classList.add('hidden');
+    if (postalCodeError) postalCodeError.classList.add('hidden');
+    if (countryError) countryError.classList.add('hidden');
   }
 
   registerLink.addEventListener('click', toggleForm);
@@ -488,30 +734,69 @@ export function createLoginPage(container: HTMLElement): void {
       // Registration form
       const firstName = firstNameInput?.value || '';
       const lastName = lastNameInput?.value || '';
+      const dateOfBirth = dateOfBirthInput?.value || '';
+      const streetName = streetNameInput?.value || '';
+      const city = cityInput?.value || '';
+      const postalCode = postalCodeInput?.value || '';
+      const country = countryInput?.value.toUpperCase() || ''; // Ensure country code is uppercase
 
       const validation = validateRegisterForm(
         email,
         password,
         firstName,
-        lastName
+        lastName,
+        dateOfBirth,
+        streetName,
+        city,
+        postalCode,
+        country
       );
 
       if (!validation.success) {
-        if (validation.errors.email)
+        if (validation.errors.email) {
           showFieldError(emailError, validation.errors.email);
-        else hideFieldError(emailError);
-        if (validation.errors.password)
-          showFieldError(passwordError, validation.errors.password);
-        else hideFieldError(passwordError);
-        if (firstNameError) {
-          if (validation.errors.firstName)
-            showFieldError(firstNameError, validation.errors.firstName);
-          else hideFieldError(firstNameError);
+        } else {
+          hideFieldError(emailError);
         }
-        if (lastNameError) {
-          if (validation.errors.lastName)
-            showFieldError(lastNameError, validation.errors.lastName);
-          else hideFieldError(lastNameError);
+        if (validation.errors.password) {
+          showFieldError(passwordError, validation.errors.password);
+        } else {
+          hideFieldError(passwordError);
+        }
+        if (firstNameError && validation.errors.firstName) {
+          showFieldError(firstNameError, validation.errors.firstName);
+        } else if (firstNameError) {
+          hideFieldError(firstNameError);
+        }
+        if (lastNameError && validation.errors.lastName) {
+          showFieldError(lastNameError, validation.errors.lastName);
+        } else if (lastNameError) {
+          hideFieldError(lastNameError);
+        }
+        if (dateOfBirthError && validation.errors.dateOfBirth) {
+          showFieldError(dateOfBirthError, validation.errors.dateOfBirth);
+        } else if (dateOfBirthError) {
+          hideFieldError(dateOfBirthError);
+        }
+        if (streetNameError && validation.errors.streetName) {
+          showFieldError(streetNameError, validation.errors.streetName);
+        } else if (streetNameError) {
+          hideFieldError(streetNameError);
+        }
+        if (cityError && validation.errors.city) {
+          showFieldError(cityError, validation.errors.city);
+        } else if (cityError) {
+          hideFieldError(cityError);
+        }
+        if (postalCodeError && validation.errors.postalCode) {
+          showFieldError(postalCodeError, validation.errors.postalCode);
+        } else if (postalCodeError) {
+          hideFieldError(postalCodeError);
+        }
+        if (countryError && validation.errors.country) {
+          showFieldError(countryError, validation.errors.country);
+        } else if (countryError) {
+          hideFieldError(countryError);
         }
         addNotification(
           'warning',
@@ -523,6 +808,11 @@ export function createLoginPage(container: HTMLElement): void {
       hideFieldError(passwordError);
       if (firstNameError) hideFieldError(firstNameError);
       if (lastNameError) hideFieldError(lastNameError);
+      if (dateOfBirthError) hideFieldError(dateOfBirthError);
+      if (streetNameError) hideFieldError(streetNameError);
+      if (cityError) hideFieldError(cityError);
+      if (postalCodeError) hideFieldError(postalCodeError);
+      if (countryError) hideFieldError(countryError);
 
       // setLoading(true);
       svgSpinner.classList.add('spinner_active');
@@ -533,19 +823,24 @@ export function createLoginPage(container: HTMLElement): void {
           email,
           password,
           firstName,
-          lastName
+          lastName,
+          dateOfBirth,
+          [
+            {
+              streetName,
+              city,
+              postalCode,
+              country,
+            },
+          ]
         );
         if (success) {
-          addNotification(
-            'success',
-            "Registration successful! You're loged in."
-          );
-          toggleForm(); // Switch to login form
-          emailInput.value = email;
-          passwordInput.value = '';
+          addNotification('success', 'Successfully registered!');
+          triggerHeaderUpdate(); // Update header to reflect logged-in state
+          getRouter().navigateTo('/main'); // Redirect to main page
         } else {
           showFormError(
-            'Registration failed. This email may already be in use or another error occurred.'
+            'Registration failed. The email might already be in use or another error occurred.'
           );
         }
       } catch (error) {
