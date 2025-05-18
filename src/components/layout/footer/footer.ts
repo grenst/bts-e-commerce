@@ -58,7 +58,7 @@ const createFooter = (parent: HTMLElement) => {
     text: 'About the Company',
     classes: ['yellow-lane'],
     attributes: {
-      href: '#',
+      href: '/about',
     },
   });
   liCompany.append(aLinkCompany);
@@ -182,36 +182,8 @@ const createFooter = (parent: HTMLElement) => {
   liBasket.append(aLinkBasket);
   // two section
 
-  // three section
-  const liContainerRep = createElement({
-    tag: 'li',
-    classes: ['li-container-Contact-info'],
-    parent: ulContainerFooter,
-  });
-
-  const h3TitleContactRep = createElement({
-    tag: 'h3',
-    text: 'Application',
-    classes: ['h3-title-info'],
-  });
-  liContainerRep.append(h3TitleContactRep);
-
-  const footerLinkGithub = createElement({
-    tag: 'a',
-    classes: ['footer-link', 'footer-container__github'],
-    attributes: {
-      target: '_blank',
-      href: 'https://github.com/grenst/bts-e-commerce/',
-    },
-    parent: liContainerRep,
-  });
-  const svgGithub = createSvgUse('#github', 'footer-svg_github');
-  svgGithub.classList.add('kets');
-  footerLinkGithub.append(svgGithub);
-  // three section
-
-  // four section
-  const liContainerSponsor = createElement({
+   // four section
+   const liContainerSponsor = createElement({
     tag: 'li',
     classes: ['li-container-Contact-info'],
     parent: ulContainerFooter,
@@ -239,7 +211,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const footerLinkRSS = createElement({
     tag: 'a',
-    classes: ['footer-link', 'footer-container__rss'],
+    classes: ['footer-linkRss', 'footer-container__rss'],
     attributes: {
       target: '_blank',
       href: 'https://rs.school/courses/javascript-ru',
@@ -251,6 +223,34 @@ const createFooter = (parent: HTMLElement) => {
   footerLinkRSS.append(svgRSS);
   // four section
 
+  // three section
+  const liContainerRep = createElement({
+    tag: 'li',
+    classes: ['li-container-Contact-info'],
+    parent: ulContainerFooter,
+  });
+
+  const h3TitleContactRep = createElement({
+    tag: 'h3',
+    text: 'Application',
+    classes: ['h3-title-info'],
+  });
+  liContainerRep.append(h3TitleContactRep);
+
+  const footerLinkGithub = createElement({
+    tag: 'a',
+    classes: ['footer-linkGit', 'footer-container__github'],
+    attributes: {
+      target: '_blank',
+      href: 'https://github.com/grenst/bts-e-commerce/',
+    },
+    parent: liContainerRep,
+  });
+  const svgGithub = createSvgUse('#github', 'footer-svg_github');
+  svgGithub.classList.add('kets');
+  footerLinkGithub.append(svgGithub);
+  // three section
+
   // five section
   const liContainerDevelopers = createElement({
     tag: 'li',
@@ -260,7 +260,7 @@ const createFooter = (parent: HTMLElement) => {
 
   const h3TitleDevelopers = createElement({
     tag: 'h3',
-    text: 'Communication with developers',
+    text: 'Developers',
     classes: ['h3-title-info'],
   });
   liContainerDevelopers.append(h3TitleDevelopers);
@@ -272,11 +272,11 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: 'https://github.com/grenst',
     },
-    text: ' - Team leader Andrey -',
-    parent: liContainerDevelopers,
+    text: ' - Developer Andrey -',
   });
-  const svgGithubAndrei = createSvgUse('#github', 'footer-svg_github');
-  footerLinkGithubAndrei.prepend(svgGithubAndrei);
+  liContainerDevelopers.append(footerLinkGithubAndrei);
+  // const svgGithubAndrei = createSvgUse('#github', 'footer-svg_github');
+  // footerLinkGithubAndrei.prepend(svgGithubAndrei);
 
   const footerLinkGithubVitaly = createElement({
     tag: 'a',
@@ -285,11 +285,11 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: 'https://github.com/VitaliMay',
     },
-    text: ' - Main Developer Vitaly -',
-    parent: liContainerDevelopers,
+    text: '- Developer Vitaly -',
   });
-  const svgGithubVitaly = createSvgUse('#github', 'footer-svg_github');
-  footerLinkGithubVitaly.prepend(svgGithubVitaly);
+  liContainerDevelopers.append(footerLinkGithubVitaly);
+  // const svgGithubVitaly = createSvgUse('#github', 'footer-svg_github');
+  // footerLinkGithubVitaly.prepend(svgGithubVitaly);
 
   const footerLinkGithubSergei = createElement({
     tag: 'a',
@@ -298,19 +298,23 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: 'https://github.com/SeregaSimba',
     },
-    text: ' - Some kind of finishing developer Sergei -',
-    parent: liContainerDevelopers,
+    text: ' - Developer Sergei -',
   });
-  const svgGithubSergei = createSvgUse('#github', 'footer-svg_github');
-  footerLinkGithubSergei.prepend(svgGithubSergei);
+  liContainerDevelopers.append(footerLinkGithubSergei);
+  // const svgGithubSergei = createSvgUse('#github', 'footer-svg_github');
+  // footerLinkGithubSergei.prepend(svgGithubSergei);
   // five section
 
-  createElement({
-    tag: 'p',
+  const linkTuDisc = createElement({
+    tag: 'a',
     text: "© 2025  Kat's Cats",
-    classes: ['copyright'],
-    parent: footerContainer,
+    classes: ['copyright', 'link-Tu-Disc'],
+    attributes: {
+      target: '_blank',
+      href: 'https://discord.com/channels/1363555884193546390/1363555884193546393',
+    },
   });
+  footerContainer.append(linkTuDisc);
 };
 
 export default createFooter;
