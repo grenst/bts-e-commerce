@@ -20,11 +20,22 @@ export async function signupCustomer(
 ): Promise<void> {
   debug('POST /me/signup', draft.email);
 
-  const payload: CustomerDraft = { ...draft };
-  if (payload.addresses && payload.addresses.length > 0) {
-    payload.defaultShippingAddress = 0;
-    payload.defaultBillingAddress = 0;
+  let addresses: Address[] = draft.addresses ?? [];
+
+  if (addresses.length === 1) {
+    const base = addresses[0];
+    addresses = [
+      { ...base, key: 'default-shipping' }, // index 0
+      { ...base, key: 'default-billing' }, // index 1
+    ];
   }
+
+  const payload: CustomerDraft = {
+    ...draft,
+    addresses,
+    defaultShippingAddress: 0,
+    defaultBillingAddress: 1,
+  };
 
   console.log(
     'Signing up customer with payload:',
@@ -32,10 +43,9 @@ export async function signupCustomer(
   );
   try {
     await apiInstance.post('/me/signup', payload, {
-      headers: {
-        Authorization: `Bearer ${anonymousAccessToken}`,
-      },
+      headers: { Authorization: `Bearer ${anonymousAccessToken}` },
     });
+
     debug('Signup succeeded');
   } catch (error: unknown) {
     console.error('Error during customer signup:', error);
