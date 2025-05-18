@@ -269,3 +269,8 @@ bubble-tea-shop/
 
 
 </div>
+
+#### 18.05.2025 
+
+[] 1: The about page has been added, and now in footer, when you click on About the Company, you are redirected to the about page. 
+[] 2: footer also now has an adaptive design, and a link to the discord channel has been added when clicking on © 2025 Kat's Cats
