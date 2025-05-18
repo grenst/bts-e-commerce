@@ -6,9 +6,7 @@ declare module '@commercetools/sdk-middleware-auth' {
 }
 
 declare module '@commercetools/sdk-middleware-http' {
-  export function createHttpMiddleware(
-    options: unknown
-  ): unknown;
+  export function createHttpMiddleware(options: unknown): unknown;
 }
 
 export interface Address {

@@ -1,6 +1,6 @@
 import { createStore } from 'zustand/vanilla';
 import { persist } from 'zustand/middleware';
-import type { Address } from '../types/commercetools'; // Import Address type
+import type { Address } from '../types/commercetools';
 
 export interface Customer {
   id: string;
@@ -11,6 +11,8 @@ export interface Customer {
   addresses: Address[];
   defaultShippingAddressId?: string;
   defaultBillingAddressId?: string;
+  shippingAddressIds?: string[];
+  billingAddressIds?: string[];
 }
 
 interface CustomerState {
@@ -27,7 +29,7 @@ export const useCustomerStore = createStore<CustomerState>()(
       clearCustomer: () => set({ customer: undefined }),
     }),
     {
-      name: 'customer-storage', // name of the item in localStorage
+      name: 'customer-storage', // key in localStorage
     }
   )
 );
