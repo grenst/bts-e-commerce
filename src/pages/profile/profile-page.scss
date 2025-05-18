@@ -1,3 +1,87 @@
-.bac-col {
-    background-color: #e7f0fe;
-  }
+/* ─── RADIO-SWITCH: Shipping / Billing ─────────────────────────── */
+.radio-inputs {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  width: 96%;
+  max-width: 200px;
+  margin: 0 2%;
+  background: #aaaaaa;
+  gap: 0;
+}
+
+.radio-inputs .name {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 100;
+  font-family: inter;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: rgb(83, 83, 83);
+  transition: all 0.15s ease-in-out;
+}
+
+.radio-inputs .name:hover {
+  background: rgba(255 255 255 / 0.5);
+}
+
+.radio-inputs input {
+  display: none;
+}
+
+/* ─── состояние :checked ────────────────────────────────────────── */
+.radio-inputs input:checked + .name {
+  background: #ffffff;
+  color: #000000;
+  font-weight: 600;
+  position: relative;
+  border-bottom: 1px solid #ffffff;
+  z-index: 100;
+
+  animation: select 0.3s ease forwards;
+}
+
+/* «частицы» сверху и снизу */
+.radio-inputs input:checked + .name::before,
+.radio-inputs input:checked + .name::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #000000;
+  opacity: 0;
+  animation: particles 0.5s ease forwards;
+}
+
+@keyframes select {
+  0%   { transform: scale(0.95) translateY(3px); }
+  50%  { transform: scale(1.05) translateY(1px); }
+  100% { transform: scale(1) translateY(1px); }
+}
+
+@keyframes particles {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(0); }
+  50%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(var(--direction)); }
+}
+
+.radio-inputs input:checked + .name::before {
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  --direction: -10px;            /* для keyframes */
+}
+
+.radio-inputs input:checked + .name::after {
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  --direction: 10px;
+}
+
+.address-card p {
+  font-family: nexa-light;
+}

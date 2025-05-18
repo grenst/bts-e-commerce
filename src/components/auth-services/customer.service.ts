@@ -27,6 +27,11 @@ export interface CommercetoolsCustomer {
   firstName?: string;
   lastName?: string;
   version: number; // Added version for updates
+  addresses: import('../../types/commercetools').Address[];
+  defaultShippingAddressId?: string;
+  defaultBillingAddressId?: string;
+  shippingAddressIds?: string[];
+  billingAddressIds?: string[];
 }
 
 export async function fetchMyCustomer(
@@ -35,6 +40,7 @@ export async function fetchMyCustomer(
   debug('GET /me (customer info)');
   const { data } = await apiInstance.get<CommercetoolsCustomer>('/me', {
     headers: { Authorization: `Bearer ${accessToken}` },
+    params: { expand: 'addresses[*]' }, // Expand all addresses
   });
   debug('Customer fetched', data.email);
   return data;
