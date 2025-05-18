@@ -20,6 +20,7 @@ import { createRouter, Route } from './router/router';
 import createHomePage from './pages/home/home';
 import createLoginPage from './pages/auth/auth-page';
 import createProfilePage from './pages/profile/profile';
+import createAboutPage from './pages/about/about-page';
 import {
   createNotificationsContainer,
   createLoadingIndicator,
@@ -58,6 +59,11 @@ const routes: Route[] = [
     path: '/login',
     component: createLoginPage,
     preserveState: false, // можно и не ставить
+  },
+  {
+    path: '/about',
+    component: createAboutPage,
+    preserveState: false,
   },
   {
     path: '/cart',
