@@ -10,6 +10,7 @@ import {
   CustomerDraft,
   CommercetoolsCustomer,
 } from '../components/auth-services/customer.service';
+import type { Address } from '../types/commercetools'; // Added import for Address
 import { apiInstance } from '../api/axios-instances';
 import { useTokenStore } from '../store/token-store';
 import { useCustomerStore } from '../store/customer-store';
@@ -28,15 +29,22 @@ export const AuthService = {
     email: string,
     password: string,
     firstName?: string,
-    lastName?: string
+    lastName?: string,
+    dateOfBirth?: string,
+    addresses?: Address[] // Ensured Address type is used
   ): Promise<boolean> {
     try {
       // anonymous token /me/signup
       const anon = await getAnonymousToken();
-      await signupCustomer(
-        { email, password, firstName, lastName } as CustomerDraft,
-        anon.access_token
-      );
+      const customerDraft: CustomerDraft = {
+        email,
+        password,
+        firstName,
+        lastName,
+        dateOfBirth,
+        addresses,
+      };
+      await signupCustomer(customerDraft, anon.access_token);
 
       // login (password‑grant)
       return await this.login(email, password);

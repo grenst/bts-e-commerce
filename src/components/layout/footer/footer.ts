@@ -182,8 +182,8 @@ const createFooter = (parent: HTMLElement) => {
   liBasket.append(aLinkBasket);
   // two section
 
-   // four section
-   const liContainerSponsor = createElement({
+  // four section
+  const liContainerSponsor = createElement({
     tag: 'li',
     classes: ['li-container-Contact-info'],
     parent: ulContainerFooter,
