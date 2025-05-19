@@ -137,9 +137,7 @@ input:focus {
   display: block;
   transition: transform .15s linear;
 }
-// .group:hover .pricee {
-//   @apply bg-gray-900 text-white border-transparent;
-// }
+
 .group:hover .pricee > span {
   transform: translateY(-100%);
 }
