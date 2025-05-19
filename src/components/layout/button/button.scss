@@ -12,3 +12,11 @@
     background-color: color.adjust($primary-color, $lightness: -25%);
   }
 }
+
+.button {
+  &:disabled {
+    cursor: not-allowed; 
+    background-color: var(--color-gray-600);
+    color: var(--color-gray-500);
+  }
+}
