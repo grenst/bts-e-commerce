@@ -7,6 +7,11 @@
   top: 20px;
   transform: translate(50%, -50%);
   cursor: pointer;
+  color: var( --color-gray-600);
+
+  &:hover {
+    color: var( --color-gray-900);
+  }
 }
 
 .eye {

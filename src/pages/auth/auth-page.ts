@@ -12,21 +12,39 @@ import { useCustomerStore } from '../../store/customer-store';
 import { triggerHeaderUpdate } from '../../index';
 import createModalContainer from '../../components/layout/modal/modal-container';
 
+// const emailSchema = z
+//   .string()
+//   .min(1, { message: 'Email is required' })
+//   .email({ message: 'Invalid email format' });
+
 const emailSchema = z
   .string()
-  .min(1, { message: 'Email is required' })
-  .email({ message: 'Invalid email format' });
+  .min(1, { message: 'Please enter your email' })
+  .email({ message: 'Please enter a valid email (e.g., user@example.com)' });
+
+// const passwordSchema = z
+//   .string()
+//   .min(8, { message: 'Password must be at least 8 characters' })
+//   .regex(/[A-Z]/, {
+//     message: 'Password must contain at least one uppercase letter',
+//   })
+//   .regex(/[a-z]/, {
+//     message: 'Password must contain at least one lowercase letter',
+//   })
+//   .regex(/[0-9]/, { message: 'Password must contain at least one number' });
 
 const passwordSchema = z
   .string()
-  .min(8, { message: 'Password must be at least 8 characters' })
+  .min(8, { message: 'Use at least 8 characters' }) // Короче и понятнее
   .regex(/[A-Z]/, {
-    message: 'Password must contain at least one uppercase letter',
+    message: 'Add at least one uppercase letter (A-Z)', // Уточнение в скобках
   })
   .regex(/[a-z]/, {
-    message: 'Password must contain at least one lowercase letter',
+    message: 'Add at least one lowercase letter (a-z)',
   })
-  .regex(/[0-9]/, { message: 'Password must contain at least one number' });
+  .regex(/[0-9]/, {
+    message: 'Include a number (0-9)',
+  });
 
 const nameSchema = z
   .string()
@@ -228,7 +246,7 @@ export function createLoginPage(container: HTMLElement): void {
   });
 
   const formContainer = createElement({
-    tag: 'div',
+    tag: 'form',
     parent: pageContainer,
     classes: ['space-y-4'],
   });
@@ -292,11 +310,13 @@ export function createLoginPage(container: HTMLElement): void {
       'focus:outline-none',
       'focus:pb-2',
       'focus:mb-1',
+      'pr-8',
     ],
     attributes: {
       type: 'password',
       id: 'password',
       placeholder: 'Enter your password',
+      // placeholder: 'Enter your password (Use 8+ chars with A-Z, a-z, 0-9)',
     },
   }) as HTMLInputElement;
 
@@ -348,6 +368,9 @@ export function createLoginPage(container: HTMLElement): void {
     'cursor-pointer',
     'relative',
   ]);
+
+  // TO DO
+  // loginButton.disabled = true;
 
   const svgSpinner = createSvgUse('#spinner', 'spinner');
   svgSpinner.classList.add('animate-spin');
@@ -722,16 +745,24 @@ export function createLoginPage(container: HTMLElement): void {
             maxLength: '2', // Maxlength for 2-letter code
           },
         }) as HTMLInputElement;
+
         // Convert to uppercase on input
-        countryInput.addEventListener('input', () => {
-          countryInput!.value = countryInput!.value.toUpperCase();
-        });
+        // countryInput.addEventListener('input', () => {
+        //   countryInput!.value = countryInput!.value.toUpperCase();
+        // });
+
         countryError = createElement({
           tag: 'p',
           parent: countryContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
+
+        // Добавляем обработчики после создания элементов
+        setupValidationHandlers();
       }
+      // // TO DO
+      // loginButton.disabled = true;
+      // validateForm();
     }
 
     emailInput.value = '';
@@ -762,6 +793,85 @@ export function createLoginPage(container: HTMLElement): void {
 
   registerLink.addEventListener('click', toggleForm);
 
+  /****************************************** */
+  /****************************************** */
+
+  // Функция для настройки обработчиков (теряются про тогле)
+  function setupValidationHandlers() {
+    // Удаляем старые обработчики, если они есть
+    emailInput.removeEventListener('input', validateForm);
+    passwordInput.removeEventListener('input', validateForm);
+    if (firstNameInput) {
+      firstNameInput.removeEventListener('input', validateForm);
+    }
+    if (lastNameInput) {
+      lastNameInput.removeEventListener('input', validateForm);
+    }
+    if (dateOfBirthInput) {
+      dateOfBirthInput.removeEventListener('input', validateForm);
+    }
+    if (streetNameInput) {
+      streetNameInput.removeEventListener('input', validateForm);
+    }
+    if (houseNumberInput) {
+      houseNumberInput.removeEventListener('input', validateForm);
+    }
+    if (apartmentInput) {
+      apartmentInput.removeEventListener('input', validateForm);
+    }
+    if (cityInput) {
+      cityInput.removeEventListener('input', validateForm);
+    }
+    if (postalCodeInput) {
+      postalCodeInput.removeEventListener('input', validateForm);
+    }
+    if (countryInput) {
+      countryInput.removeEventListener('input', validateForm);
+    }
+
+    // Добавляем новые обработчики
+    emailInput.addEventListener('input', validateForm);
+    passwordInput.addEventListener('input', validateForm);
+
+    // if (firstNameInput) {
+    //   firstNameInput.addEventListener('input', validateForm);
+    // }
+
+    // if (lastNameInput) {
+    //   lastNameInput.addEventListener('input', validateForm);
+    // }
+    if (firstNameInput) {
+      firstNameInput.addEventListener('input', validateForm);
+    }
+    if (lastNameInput) {
+      lastNameInput.addEventListener('input', validateForm);
+    }
+    if (dateOfBirthInput) {
+      dateOfBirthInput.addEventListener('input', validateForm);
+    }
+    if (streetNameInput) {
+      streetNameInput.addEventListener('input', validateForm);
+    }
+    if (houseNumberInput) {
+      houseNumberInput.addEventListener('input', validateForm);
+    }
+    if (apartmentInput) {
+      apartmentInput.addEventListener('input', validateForm);
+    }
+    if (cityInput) {
+      cityInput.addEventListener('input', validateForm);
+    }
+    if (postalCodeInput) {
+      postalCodeInput.addEventListener('input', validateForm);
+    }
+    if (countryInput) {
+      countryInput.addEventListener('input', validateForm);
+    }
+  }
+
+  /****************************************** */
+  /****************************************** */
+
   function showFieldError(field: HTMLElement, message: string): void {
     field.textContent = message;
     field.classList.remove('hidden');
@@ -779,6 +889,138 @@ export function createLoginPage(container: HTMLElement): void {
   function hideFormError(): void {
     errorContainer.classList.add('hidden');
   }
+
+  /************************************************************** */
+  /************************************************************** */
+  function validateForm() {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    console.log('начал что-то вводить');
+
+    if (isLoginForm) {
+      const validation = validateLoginForm(email, password);
+      updateFieldErrors(validation);
+    } else {
+      const firstName = firstNameInput?.value || '';
+      const lastName = lastNameInput?.value || '';
+      const dateOfBirth = dateOfBirthInput?.value || '';
+      const streetName = streetNameInput?.value || '';
+      const houseNumber = houseNumberInput?.value || '';
+      const apartment = apartmentInput?.value || '';
+      const city = cityInput?.value || '';
+      const postalCode = postalCodeInput?.value || '';
+      const country = countryInput?.value || '';
+
+      const validation = validateRegisterForm(
+        email,
+        password,
+        firstName,
+        lastName,
+        dateOfBirth,
+        streetName,
+        houseNumber,
+        apartment,
+        city,
+        postalCode,
+        country
+      );
+      updateFieldErrors(validation);
+    }
+  }
+
+  // Функция для обновления ошибок полей
+  function updateFieldErrors(validation: ValidationResult) {
+    if (validation.errors.email) {
+      showFieldError(emailError, validation.errors.email);
+    } else {
+      hideFieldError(emailError);
+    }
+
+    if (validation.errors.password) {
+      showFieldError(passwordError, validation.errors.password);
+    } else {
+      hideFieldError(passwordError);
+    }
+
+    if (!isLoginForm) {
+      if (firstNameError) {
+        if (validation.errors.firstName) {
+          showFieldError(firstNameError, validation.errors.firstName);
+        } else {
+          hideFieldError(firstNameError);
+        }
+      }
+
+      if (lastNameError) {
+        if (validation.errors.lastName) {
+          showFieldError(lastNameError, validation.errors.lastName);
+        } else {
+          hideFieldError(lastNameError);
+        }
+      }
+
+      if (dateOfBirthError) {
+        if (validation.errors.dateOfBirth) {
+          showFieldError(dateOfBirthError, validation.errors.dateOfBirth);
+        } else {
+          hideFieldError(dateOfBirthError);
+        }
+      }
+
+      if (streetNameError) {
+        if (validation.errors.streetName) {
+          showFieldError(streetNameError, validation.errors.streetName);
+        } else {
+          hideFieldError(streetNameError);
+        }
+      }
+
+      if (houseNumberError) {
+        if (validation.errors.houseNumber) {
+          showFieldError(houseNumberError, validation.errors.houseNumber);
+        } else {
+          hideFieldError(houseNumberError);
+        }
+      }
+
+      if (apartmentError) {
+        if (validation.errors.apartment) {
+          showFieldError(apartmentError, validation.errors.apartment);
+        } else {
+          hideFieldError(apartmentError);
+        }
+      }
+
+      if (cityError) {
+        if (validation.errors.city) {
+          showFieldError(cityError, validation.errors.city);
+        } else {
+          hideFieldError(cityError);
+        }
+      }
+
+      if (postalCodeError) {
+        if (validation.errors.postalCode) {
+          showFieldError(postalCodeError, validation.errors.postalCode);
+        } else {
+          hideFieldError(postalCodeError);
+        }
+      }
+
+      if (countryError) {
+        if (validation.errors.country) {
+          showFieldError(countryError, validation.errors.country);
+        } else {
+          hideFieldError(countryError);
+        }
+      }
+    }
+    // loginButton.disabled = !validation.success;
+  }
+
+  /************************************************************** */
+  /************************************************************** */
 
   loginButton.addEventListener('click', async () => {
     hideFormError();
@@ -855,6 +1097,7 @@ export function createLoginPage(container: HTMLElement): void {
       );
 
       if (!validation.success) {
+        // loginButton.disabled = true;
         if (validation.errors.email) {
           showFieldError(emailError, validation.errors.email);
         } else {
