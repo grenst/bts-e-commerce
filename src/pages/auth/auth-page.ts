@@ -6,7 +6,8 @@ import {
 } from '../../utils/element-utilities';
 import createButton from '../../components/layout/button/button';
 import { getRouter } from '../../router/router';
-import { addNotification } from '../../store/store'; // Changed uiStore to addNotification
+import { uiStore } from '../../store/store';
+// import { addNotification } from '../../store/store'; // Changed uiStore to addNotification
 import { AuthService } from '../../services/auth.service';
 import { useCustomerStore } from '../../store/customer-store';
 import { triggerHeaderUpdate } from '../../index';
@@ -770,6 +771,7 @@ export function createLoginPage(container: HTMLElement): void {
             countryError.textContent = '';
           }
         });
+
         const dropdownElement = countryInput.getElement();
         if (countryContainerElement) {
           countryContainerElement.append(dropdownElement);
@@ -814,7 +816,7 @@ export function createLoginPage(container: HTMLElement): void {
     if (countryError) countryError.classList.add('hidden');
   }
 
-  registerLink.addEventListener('click', toggleForm);
+  // registerLink.addEventListener('click', toggleForm);
 
   /****************************************** */
   /****************************************** */
@@ -935,6 +937,7 @@ export function createLoginPage(container: HTMLElement): void {
       const city = cityInput?.value || '';
       const postalCode = postalCodeInput?.value || '';
       // const country = countryInput?.value || '';
+      const country = countryInput?.getSelectedValue() || '';
 
       const validation = validateRegisterForm(
         email,
@@ -946,8 +949,8 @@ export function createLoginPage(container: HTMLElement): void {
         houseNumber,
         apartment,
         city,
-        postalCode
-        // country
+        postalCode,
+        country
       );
       updateFieldErrors(validation);
     }
@@ -1048,11 +1051,15 @@ export function createLoginPage(container: HTMLElement): void {
 
   loginButton.addEventListener('click', async () => {
     hideFormError();
+    const { addNotification } = uiStore.getState();
+    // const { setLoading, addNotification } = uiStore.getState();
+
     const email = emailInput.value;
     const password = passwordInput.value;
 
     if (isLoginForm) {
       const validation = validateLoginForm(email, password);
+
       if (!validation.success) {
         if (validation.errors.email)
           showFieldError(emailError, validation.errors.email);
@@ -1060,17 +1067,23 @@ export function createLoginPage(container: HTMLElement): void {
         if (validation.errors.password)
           showFieldError(passwordError, validation.errors.password);
         else hideFieldError(passwordError);
+        addNotification(
+          'warning',
+          'Please fix the form errors before submitting.'
+        );
         return;
       }
       hideFieldError(emailError);
       hideFieldError(passwordError);
 
+      // setLoading(true);
       svgSpinner.classList.add('spinner_active');
       const modalContainer = createModalContainer();
+
       try {
         const success = await AuthService.login(email, password);
         if (success) {
-          addNotification('success', 'Successfully logged in!'); // Swapped arguments
+          addNotification('success', 'Successfully logged in!');
           triggerHeaderUpdate();
           getRouter().navigateTo('/');
         } else {
@@ -1080,33 +1093,60 @@ export function createLoginPage(container: HTMLElement): void {
         console.error('Login error:', error);
         showFormError('Login failed. Please try again.');
       } finally {
+        // setLoading(false);
         svgSpinner.classList.remove('spinner_active');
         modalContainer.remove();
       }
     } else {
       // Registration form
-      const firstName = firstNameInput?.value || '';
-      const lastName = lastNameInput?.value || '';
-      const dateOfBirth = dateOfBirthInput?.value || '';
-      const streetName = streetNameInput?.value || '';
-      const houseNumber = houseNumberInput?.value || '';
-      const apartment = apartmentInput?.value || '';
-      const city = cityInput?.value || '';
-      const postalCode = postalCodeInput?.value || '';
-      const country = countryInput?.getSelectedValue() || ''; // Corrected: Get value from FilterableDropdown
+      // const firstName = firstNameInput?.value || '';
+      // const lastName = lastNameInput?.value || '';
+      // const dateOfBirth = dateOfBirthInput?.value || '';
+      // const streetName = streetNameInput?.value || '';
+      // const houseNumber = houseNumberInput?.value || '';
+      // const apartment = apartmentInput?.value || '';
+      // const city = cityInput?.value || '';
+      // const postalCode = postalCodeInput?.value || '';
+      // // const country = countryInput?.value || ''; // Ensure country code is uppercase
+      // const country = countryInput?.getSelectedValue() || '';
+
+      const formData = {
+        email: emailInput.value,
+        password: passwordInput.value,
+        firstName: firstNameInput?.value || '',
+        lastName: lastNameInput?.value || '',
+        dateOfBirth: dateOfBirthInput?.value || '',
+        streetName: streetNameInput?.value || '',
+        houseNumber: houseNumberInput?.value || '',
+        apartment: apartmentInput?.value || '',
+        city: cityInput?.value || '',
+        postalCode: postalCodeInput?.value || '',
+        country: countryInput?.getSelectedValue() || '', // Получаем страну ТОЛЬКО ЗДЕСЬ
+      };
 
       const validation = validateRegisterForm(
-        email,
-        password,
-        firstName,
-        lastName,
-        dateOfBirth,
-        streetName,
-        houseNumber,
-        apartment,
-        city,
-        postalCode,
-        country
+        // email,
+        // password,
+        // firstName,
+        // lastName,
+        // dateOfBirth,
+        // streetName,
+        // houseNumber,
+        // apartment,
+        // city,
+        // postalCode,
+        // country
+        formData.email,
+        formData.password,
+        formData.firstName,
+        formData.lastName,
+        formData.dateOfBirth,
+        formData.streetName,
+        formData.houseNumber,
+        formData.apartment,
+        formData.city,
+        formData.postalCode,
+        formData.country // Используем уже полученное значение
       );
 
       if (!validation.success) {
@@ -1123,91 +1163,102 @@ export function createLoginPage(container: HTMLElement): void {
         }
         if (firstNameError && validation.errors.firstName) {
           showFieldError(firstNameError, validation.errors.firstName);
-        } else {
+        } else if (firstNameError) {
           hideFieldError(firstNameError);
         }
         if (lastNameError && validation.errors.lastName) {
           showFieldError(lastNameError, validation.errors.lastName);
-        } else hideFieldError(lastNameError);
-        if (dateOfBirthError && validation.errors.dateOfBirth)
+        } else if (lastNameError) {
+          hideFieldError(lastNameError);
+        }
+        if (dateOfBirthError && validation.errors.dateOfBirth) {
           showFieldError(dateOfBirthError, validation.errors.dateOfBirth);
-        else hideFieldError(dateOfBirthError);
-        if (streetNameError && validation.errors.streetName)
+        } else if (dateOfBirthError) {
+          hideFieldError(dateOfBirthError);
+        }
+        if (streetNameError && validation.errors.streetName) {
           showFieldError(streetNameError, validation.errors.streetName);
-        else hideFieldError(streetNameError);
-        if (houseNumberError && validation.errors.houseNumber)
+        } else if (streetNameError) {
+          hideFieldError(streetNameError);
+        }
+        if (houseNumberError && validation.errors.houseNumber) {
           showFieldError(houseNumberError, validation.errors.houseNumber);
-        else hideFieldError(houseNumberError);
-        if (apartmentError && validation.errors.apartment)
+        } else if (houseNumberError) {
+          hideFieldError(houseNumberError);
+        }
+        if (apartmentError && validation.errors.apartment) {
           showFieldError(apartmentError, validation.errors.apartment);
-        else hideFieldError(apartmentError);
-        if (cityError && validation.errors.city)
+        } else if (apartmentError) {
+          hideFieldError(apartmentError);
+        }
+        if (cityError && validation.errors.city) {
           showFieldError(cityError, validation.errors.city);
-        else hideFieldError(cityError);
-        if (postalCodeError && validation.errors.postalCode)
+        } else if (cityError) {
+          hideFieldError(cityError);
+        }
+        if (postalCodeError && validation.errors.postalCode) {
           showFieldError(postalCodeError, validation.errors.postalCode);
-        else hideFieldError(postalCodeError);
-        if (countryError && validation.errors.country)
+        } else if (postalCodeError) {
+          hideFieldError(postalCodeError);
+        }
+        if (countryError && validation.errors.country) {
           showFieldError(countryError, validation.errors.country);
-        else hideFieldError(countryError);
+        } else if (countryError) {
+          hideFieldError(countryError);
+        }
+        addNotification(
+          'warning',
+          'Please fix the form errors before submitting.'
+        );
         return;
       }
-
-      // Clear all individual field errors if validation passes before API call
       hideFieldError(emailError);
       hideFieldError(passwordError);
-      hideFieldError(firstNameError);
-      hideFieldError(lastNameError);
-      hideFieldError(dateOfBirthError);
-      hideFieldError(streetNameError);
-      hideFieldError(houseNumberError);
-      hideFieldError(apartmentError);
-      hideFieldError(cityError);
-      hideFieldError(postalCodeError);
-      hideFieldError(countryError);
+      if (firstNameError) hideFieldError(firstNameError);
+      if (lastNameError) hideFieldError(lastNameError);
+      if (dateOfBirthError) hideFieldError(dateOfBirthError);
+      if (streetNameError) hideFieldError(streetNameError);
+      if (cityError) hideFieldError(cityError);
+      if (postalCodeError) hideFieldError(postalCodeError);
+      if (countryError) hideFieldError(countryError);
 
+      // setLoading(true);
       svgSpinner.classList.add('spinner_active');
       const modalContainer = createModalContainer();
+
       try {
+        //
         const success = await AuthService.register(
-          // Call with direct arguments
-          email,
-          password,
-          firstName,
-          lastName,
-          dateOfBirth,
+          formData.email,
+          formData.password,
+          formData.firstName,
+          formData.lastName,
+          formData.dateOfBirth,
           [
-            // addresses array
             {
-              streetName,
-              streetNumber: houseNumber, // Assuming houseNumber is streetNumber
-              apartment,
-              city,
-              postalCode,
-              country,
-              // You might want to add default shipping/billing flags here
-              // isDefaultShipping: true,
-              // isDefaultBilling: true,
+              streetName: formData.streetName,
+              streetNumber: formData.houseNumber,
+              apartment: formData.apartment,
+              city: formData.city,
+              postalCode: formData.postalCode,
+              country: formData.country, // Используем то же значение
             },
           ]
-          // defaultShippingAddress and defaultBillingAddress are not direct params of register method
         );
         if (success) {
-          addNotification('success', 'Successfully registered and logged in!'); // Swapped arguments
-          triggerHeaderUpdate();
-          getRouter().navigateTo('/');
+          addNotification('success', 'Successfully registered!');
+          triggerHeaderUpdate(); // Update header to reflect logged-in state
+          getRouter().navigateTo('/main'); // Redirect to main page
         } else {
           showFormError(
-            'Registration failed. The email might already be in use or there was a server error.'
+            'Registration failed. The email might already be in use or another error occurred.'
           );
         }
       } catch (error) {
         console.error('Registration error:', error);
-        const errorMessage =
-          (error as Error).message ||
-          'Registration failed due to an unexpected error. Please try again.';
-        showFormError(errorMessage);
+        showFormError('Registration failed. Please try again.');
       } finally {
+        // setLoading(false);
         svgSpinner.classList.remove('spinner_active');
         modalContainer.remove();
       }
@@ -1223,15 +1274,7 @@ export function createLoginPage(container: HTMLElement): void {
   emailInput.addEventListener('keypress', handleEnterKey);
   passwordInput.addEventListener('keypress', handleEnterKey);
 
-  registerLink.addEventListener('click', toggleForm);
+  isLoginForm = false;
   toggleForm(); // Initialize as login form
-  toggleForm(); // Then switch to register to show all fields initially if that's the desired default for dev
-  // Or, more typically, just call it once if login is the default.
-  // For this exercise, let's assume login is the default initial state.
-  // So, we call toggleForm() once to set up the initial state (which is login).
-  // If the page should start with register, then call toggleForm() once, and ensure `isLoginForm` starts as false.
-  // Let's adjust to start with login form:
-  isLoginForm = false; // force it to be register initially
-  toggleForm(); // this will set it to login form and clear inputs.
-  // if we want to start with register, then isLoginForm should be true and call toggleForm()
+  registerLink.addEventListener('click', toggleForm);
 }
