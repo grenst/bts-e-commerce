@@ -11,18 +11,15 @@ export default function createAboutPage(container: HTMLElement): void {
       'about-page',
       'container',
       'mx-auto',
-      'bg-white',
       'rounded-lg',
-      'shadow-xl',
-      'mt-30',
       'p-6',
-      'bg-white',
-      'shadow-md',
       '-z-0',
       'relative',
     ],
     parent: container,
   });
+  profileContainer.style.background =
+    'linear-gradient(to right, rgba(255,255,255,0.5) 0%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 50%, rgba(255,255,255,1) 75%, rgba(255,255,255,0.5) 100%)';
 
   createElement({
     tag: 'h1',
@@ -72,7 +69,7 @@ export default function createAboutPage(container: HTMLElement): void {
 
   const pIntroduction = createElement({
     tag: 'p',
-    text: 'An interactive web application for online ordering of Bubble Tea drinks, with modern e-commerce integration.',
+    text: 'Create your perfect Bubble Tea 🧋 online!',
     classes: ['p-introduction'],
   });
   containerAbout.append(pIntroduction);
@@ -97,7 +94,7 @@ export default function createAboutPage(container: HTMLElement): void {
 
   const prefaceH3 = createElement({
     tag: 'h3',
-    text: 'Bubble Tea Shop is a non-profit educational project that simulates an online store for making and ordering bubble tea. The goal of the project is to provide users with an interactive experience of creating unique drinks, choosing from a variety of options.: type of tea, milk, syrups, fillings, sweetness level and temperature.',
+    text: 'With Bubble Tea Shop, choose the type of tea, milk, syrups, toppings, sweetness level and temperature - and get a unique drink created by you! Try it right now and feel the taste of real creativity in every sip!',
     classes: ['preface-h3'],
   });
   containerTextPreface.append(prefaceH3);
@@ -132,35 +129,35 @@ export default function createAboutPage(container: HTMLElement): void {
 
   const pointOne = createElement({
     tag: 'li',
-    text: '* Drink Designer: flexibly customize ingredients to create a personalized recipe.',
+    text: 'Feel the pleasure of creating a drink that fully suits your taste and mood. Flexibly customize ingredients to create a unique recipe.',
     classes: ['point'],
   });
   descriptionUl.append(pointOne);
 
   const pointTwo = createElement({
     tag: 'li',
-    text: '* User authentication: registration and login to save the order history.',
+    text: 'Diversify your routine with new tastes and surprise your colleagues.',
     classes: ['point'],
   });
   descriptionUl.append(pointTwo);
 
   const pointThree = createElement({
     tag: 'li',
-    text: '* Shopping cart and checkout: user-friendly interface for managing selected items.',
+    text: 'Immerse yourself in the world of vibrant flavors and aromas from the comfort of your home or office.',
     classes: ['point'],
   });
   descriptionUl.append(pointThree);
 
   const pointFour = createElement({
     tag: 'li',
-    text: '* Order history: viewing and repeating previous purchases.',
+    text: 'Easily order and receive fresh drinks with delivery right to your doorstep.',
     classes: ['point'],
   });
   descriptionUl.append(pointFour);
 
   const pointFive = createElement({
     tag: 'li',
-    text: '* Responsive design: adapts to different devices, from mobile to desktop.',
+    text: 'Ideal for those who appreciate quality, diversity and individualism.',
     classes: ['point'],
   });
   descriptionUl.append(pointFive);
@@ -179,14 +176,14 @@ export default function createAboutPage(container: HTMLElement): void {
 
   const technologiesTitleH3 = createElement({
     tag: 'h3',
-    text: 'Technology and architecture',
+    text: 'Simplicity and Uniqueness',
     classes: ['technologies-Title-h3'],
   });
   containerTechnologiesText.append(technologiesTitleH3);
 
   const technologiesTitleP = createElement({
     tag: 'p',
-    text: 'The project is built using Commercetools, a modern e-commerce platform that provides scalability and flexibility. Interaction with the platform is implemented through a productive stack of frontend technologies with an emphasis on data entry security and user interface convenience.',
+    text: 'In this project, we present a unique application that gives each user the opportunity to turn their taste preferences in drinks into reality. Create your own unique recipes, discover new flavors and share them with colleagues and friends. Experiment without limits, break the boundaries of imagination and fill the world with bright colors with the Bubble Tea Store! - Create your perfect drink today!',
     classes: ['technologies-title-p'],
   });
   containerTechnologiesText.append(technologiesTitleP);
@@ -227,21 +224,21 @@ export default function createAboutPage(container: HTMLElement): void {
 
   const objectivesProjectTitleOne = createElement({
     tag: 'li',
-    text: '* Demonstration of the practical application of modern technologies in e-commerce.',
+    text: 'Help users create drinks based on their taste preferences.',
     classes: ['objectives-project-title'],
   });
   objectivesProjectTitleUl.append(objectivesProjectTitleOne);
 
   const objectivesProjectTitleTwo = createElement({
     tag: 'li',
-    text: '* Training and development of skills in developing full-fledged web applications.',
+    text: 'Manage the order time according to your schedule - quickly, conveniently, and without waiting in line.',
     classes: ['objectives-project-title'],
   });
   objectivesProjectTitleUl.append(objectivesProjectTitleTwo);
 
   const objectivesProjectTitleThree = createElement({
     tag: 'li',
-    text: '* Training and development of skills in developing full-fledged web applications.',
+    text: 'Avoid stress and fuss while enjoying a comfortable and fast service.',
     classes: ['objectives-project-title'],
   });
   objectivesProjectTitleUl.append(objectivesProjectTitleThree);
@@ -265,13 +262,6 @@ export default function createAboutPage(container: HTMLElement): void {
     classes: ['history-text-p'],
   });
   containerHistory.append(historyTextP);
-
-  const textThanks = createElement({
-    tag: 'p',
-    text: 'Words of gratitude (if necessary)',
-    classes: ['text-thanks'],
-  });
-  containerHistory.append(textThanks);
 
   const containerImgFooter = createElement({
     tag: 'div',

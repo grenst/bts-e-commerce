@@ -139,6 +139,7 @@ export function updateUserNavOnHeader(
     userActionsContainer.append(aboutLink);
 
     aboutLink.classList.add('about-icon');
+    aboutLink.addEventListener('click', () => router.navigateTo('/about'));
 
     cartLink.addEventListener('click', () => router.navigateTo('/cart'));
   } else {
