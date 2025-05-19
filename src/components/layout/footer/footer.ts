@@ -272,11 +272,11 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: 'https://github.com/grenst',
     },
-    text: ' - Developer Andrey -',
+    text: 'Andrey',
   });
   liContainerDevelopers.append(footerLinkGithubAndrei);
-  // const svgGithubAndrei = createSvgUse('#github', 'footer-svg_github');
-  // footerLinkGithubAndrei.prepend(svgGithubAndrei);
+  const svgGithubAndrei = createSvgUse('#github', 'footer-svg_githubAnd');
+  footerLinkGithubAndrei.prepend(svgGithubAndrei);
 
   const footerLinkGithubVitaly = createElement({
     tag: 'a',
@@ -285,11 +285,11 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: 'https://github.com/VitaliMay',
     },
-    text: '- Developer Vitaly -',
+    text: 'Vitaly',
   });
   liContainerDevelopers.append(footerLinkGithubVitaly);
-  // const svgGithubVitaly = createSvgUse('#github', 'footer-svg_github');
-  // footerLinkGithubVitaly.prepend(svgGithubVitaly);
+  const svgGithubVitaly = createSvgUse('#github', 'footer-svg_githubVet');
+  footerLinkGithubVitaly.prepend(svgGithubVitaly);
 
   const footerLinkGithubSergei = createElement({
     tag: 'a',
@@ -298,11 +298,11 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: 'https://github.com/SeregaSimba',
     },
-    text: ' - Developer Sergei -',
+    text: 'Sergei',
   });
   liContainerDevelopers.append(footerLinkGithubSergei);
-  // const svgGithubSergei = createSvgUse('#github', 'footer-svg_github');
-  // footerLinkGithubSergei.prepend(svgGithubSergei);
+  const svgGithubSergei = createSvgUse('#github', 'footer-svg_githubSer');
+  footerLinkGithubSergei.prepend(svgGithubSergei);
   // five section
 
   const linkTuDisc = createElement({
