@@ -18,7 +18,7 @@ import createFooter from './components/layout/footer/footer';
 import { body, createEl as createElement } from './utils/element-utilities';
 import { createRouter, Route } from './router/router';
 import createHomePage from './pages/home/home';
-import createLoginPage from './pages/auth/auth-page';
+import { createLoginPage } from './pages/auth/auth-page';
 import createProfilePage from './pages/profile/profile';
 import createAboutPage from './pages/about/about-page';
 import {

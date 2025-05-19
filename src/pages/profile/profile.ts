@@ -7,8 +7,9 @@ import { AuthService } from '../../services/auth.service';
 import type { Address } from '../../types/commercetools';
 import { addNotification } from '../../store/store';
 import './profile-page.scss';
+import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown'; // Added
+import { COUNTRIES } from '../../data/countries';
 
-// Helper to create a text / email input row
 function createFormField(
   labelText: string,
   inputType: string,
@@ -475,12 +476,24 @@ export default function createProfilePage(container: HTMLElement): void {
       addr.postalCode,
       form
     );
-    const country = createAddrField(
-      'Country (ISO-2)',
-      'country',
-      addr.country,
-      form
-    );
+
+    // Country Dropdown
+    createElement({
+      tag: 'label',
+      text: 'Country',
+      attributes: { for: 'country-dropdown-profile' },
+      classes: ['block', 'text-sm', 'mb-1', 'font-medium', 'text-gray-700'],
+      parent: form,
+    });
+    const countryDropdown = new FilterableDropdown(COUNTRIES, () => {
+      // Optional: handle selection change if needed for immediate validation
+    });
+    if (addr.country) {
+      countryDropdown.setSelectedValue(addr.country);
+    }
+    const countryDropdownElement = countryDropdown.getElement();
+
+    form.append(countryDropdownElement);
 
     const customer = useCustomerStore.getState().customer;
     const otherDefaultId =
@@ -515,7 +528,7 @@ export default function createProfilePage(container: HTMLElement): void {
         number.value = otherDefault.streetNumber ?? '';
         city.value = otherDefault.city ?? '';
         postal.value = otherDefault.postalCode ?? '';
-        country.value = otherDefault.country ?? '';
+        countryDropdown.setSelectedValue(otherDefault.country ?? undefined);
       });
     }
 
@@ -550,7 +563,7 @@ export default function createProfilePage(container: HTMLElement): void {
         streetNumber: number.value.trim(),
         city: city.value.trim(),
         postalCode: postal.value.trim(),
-        country: country.value.trim().toUpperCase(),
+        country: countryDropdown.getSelectedValue() || '',
       };
 
       const actions = [
