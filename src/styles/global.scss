@@ -207,6 +207,15 @@ body {
   position: relative;
 }
 
+/* убираю скролл */
+body.lock {
+  overflow: hidden;
+
+  // @media (hover: hover) {
+  //   margin-right: 17px; // чтобы не дёргалось при открытии модалки
+  // }
+}
+
 .spinner {
   width: 30px;
   height: 30px;

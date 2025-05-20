@@ -1,5 +1,5 @@
 // src/components/product-modal/product-modal.ts
-import { createEl as h } from '../../utils/element-utilities';
+import { createEl as h, body } from '../../utils/element-utilities';
 import { getProductById, Product } from '../../api/products/product-service';
 import './product-page.scss';
 
@@ -20,6 +20,9 @@ export function createProductModal(): ProductModal {
     parent: overlay,
     classes: ['product-modal-content'],
   });
+
+  h({ parent: card, classes: ['modal-corner', 'modal-corner_left'] });
+  h({ parent: card, classes: ['modal-corner', 'modal-corner_right'] });
 
   h({ tag: 'div', parent: card, classes: ['product-modal-bg'] });
 
@@ -239,10 +242,12 @@ export function createProductModal(): ProductModal {
     update();
 
     overlay.style.display = 'flex';
+    body.classList.add('lock');
   }
 
   function hideModal(): void {
     overlay.style.display = 'none';
+    body.classList.remove('lock');
   }
 
   return { modalElement: overlay, showModal, hideModal };
