@@ -79,8 +79,12 @@ export function createAnimatedBackground(): void {
     const textElement = createElement({
       tag: 'span',
       text,
-      classes: ['text-black', 'inline-block', 'whitespace-nowrap'],
+      classes: ['inline-block', 'whitespace-nowrap'],
+      // classes: ['text-white', 'inline-block', 'whitespace-nowrap'],
       parent: lineContainer,
+      attributes: {
+        'data-text': text,
+      },
     });
     animatedLineElements.push(textElement);
   }

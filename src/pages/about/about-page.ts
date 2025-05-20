@@ -1,6 +1,9 @@
 import { createEl as createElement } from '../../utils/element-utilities';
 // import { useCustomerStore } from '../../store/customer-store';
 import './about-style.scss';
+import aboutImg1 from '@assets/images/about-1.webp';
+import aboutImg2 from '@assets/images/about-2.webp';
+import aboutImg3 from '@assets/images/about-3.webp';
 
 export default function createAboutPage(container: HTMLElement): void {
   container.innerHTML = '';
@@ -122,7 +125,7 @@ export default function createAboutPage(container: HTMLElement): void {
     tag: 'img',
     classes: ['ImgPreface'],
     attributes: {
-      src: '../src/assets/images/about-1.webp',
+      src: aboutImg1,
     },
   });
   containerImgPreface.append(ImgPreface);
@@ -198,7 +201,7 @@ export default function createAboutPage(container: HTMLElement): void {
     tag: 'img',
     classes: ['img-technologies'],
     attributes: {
-      src: '../src/assets/images/about-2.webp',
+      src: aboutImg2,
     },
   });
   containerImgTechnologies.append(imgTechnologies);
@@ -273,7 +276,7 @@ export default function createAboutPage(container: HTMLElement): void {
     tag: 'img',
     classes: ['img-Footer'],
     attributes: {
-      src: '../src/assets/images/about-3.webp',
+      src: aboutImg3,
     },
   });
   containerImgFooter.append(imgFooter);

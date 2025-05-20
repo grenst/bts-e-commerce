@@ -10,6 +10,7 @@
   --color-text-primary-light: #212529; // A common dark gray for text
   --color-text-secondary-light: #495057;
   --color-primary-light: #007bff; // Example primary color (blue)
+  --color-primary-light-invert: #ff8000; // Example primary color (blue)
   --color-secondary-light: #6c757d; // Example secondary color (gray)
   --color-accent-light: #ffc107; // Example accent color (yellow)
   --color-surface-light: #f8f9fa; // For cards, sections backgrounds
@@ -49,9 +50,13 @@ header {
 }
 #bg-losung {
   font-weight: 700;
+  color: var(--color-primary-light-invert);
+  mix-blend-mode: difference;
+  background-blend-mode: exclusion;
   span {
     font-size: 3rem;
     transform: translateY(10px);
+    z-index: 1;
     
     @media screen and (max-width: 600px) {
       font-size: 2.5rem;
