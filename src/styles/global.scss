@@ -52,16 +52,29 @@ header {
     }
   }
 }
+
 #bg-losung {
   font-weight: 700;
-  color: var(--color-primary-light-invert);
+  color: #f2ff37; 
+  
+  // background: linear-gradient(45deg, #ffffff, #ffcf2f);
+  // -webkit-background-clip: text;
+  // background-clip: text;
+  // -webkit-text-fill-color: transparent;
+
+  -webkit-mask-image: linear-gradient(45deg, rgb(82, 35, 35, 1), rgba(255, 255, 255, 0.4));
+  mask-image: linear-gradient(45deg, rgb(120, 43, 43, 1), rgba(255, 255, 255, 0.4));
+
   mix-blend-mode: difference;
   background-blend-mode: exclusion;
+  padding-top: 4px;
+  
   span {
     font-size: 3rem;
     transform: translateY(10px);
+    padding-bottom: 15px;
     z-index: 1;
-    
+
     @media screen and (max-width: 600px) {
       font-size: 2.5rem;
     }

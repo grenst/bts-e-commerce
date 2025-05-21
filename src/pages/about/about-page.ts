@@ -18,11 +18,11 @@ export default function createAboutPage(container: HTMLElement): void {
       'p-6',
       '-z-0',
       'relative',
+      'bg-[linear-gradient(to_left,rgba(255,255,255,0.5)_0%,rgba(255,255,255,1)_15%,rgba(255,255,255,1)_85%,rgba(255,255,255,0.5)_100%)]',
+      'min-[500px]:bg-[linear-gradient(to_left,rgba(255,255,255,0)_0%,rgba(255,255,255,1)_25%,rgba(255,255,255,1)_75%,rgba(255,255,255,0)_100%)]',
     ],
     parent: container,
   });
-  profileContainer.style.background =
-    'linear-gradient(to right, rgba(255,255,255,0.5) 0%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 50%, rgba(255,255,255,1) 75%, rgba(255,255,255,0.5) 100%)';
 
   createElement({
     tag: 'h1',

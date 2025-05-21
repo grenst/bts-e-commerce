@@ -35,13 +35,19 @@ export function createProductModal(): ProductModal {
     tag: 'div',
     parent: overlay,
     // classes: ['product-modal-content'],
-    classes: ['product-modal-content', 'bg-test'],
+    classes: ['product-modal-content'],
   });
 
   // h({ parent: card, classes: ['modal-corner', 'modal-corner_left'] });
   // h({ parent: card, classes: ['modal-corner', 'modal-corner_right'] });
   // h({ parent: card, classes: ['modal-corner', 'modal-corner_bottom-left'] });
   // h({ parent: card, classes: ['modal-corner', 'modal-corner_bottom-right'] });
+
+  const quitModalHelp = h({
+    tag: 'button',
+    parent: card,
+    classes: ['quit-modal-helper'],
+  });
 
   h({ tag: 'div', parent: card, classes: ['product-modal-bg'] });
 
@@ -61,6 +67,8 @@ export function createProductModal(): ProductModal {
   overlay.addEventListener('click', (event_) => {
     if (event_.target === overlay) hideModal();
   });
+
+  quitModalHelp.addEventListener('click', hideModal);
   buttonClose.addEventListener('click', hideModal);
 
   /* ─────────────── API ─────────────── */
