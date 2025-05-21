@@ -3,9 +3,15 @@ import { createEl as h, body } from '../../utils/element-utilities';
 import { getProductById, Product } from '../../api/products/product-service';
 import './product-page.scss';
 
+type Point = { x: number; y: number };
+
+function getScrollbarWidth(): number {
+  return window.innerWidth - document.documentElement.clientWidth;
+}
+
 export interface ProductModal {
   modalElement: HTMLElement;
-  showModal: (productId: string) => Promise<void>;
+  showModal: (productId: string, origin?: Point) => Promise<void>;
   hideModal: () => void;
 }
 
@@ -44,8 +50,22 @@ export function createProductModal(): ProductModal {
   });
   buttonClose.addEventListener('click', hideModal);
 
+  function applyBodyLock(): void {
+    const width = getScrollbarWidth();
+    body.style.setProperty('--scrollbar-width', `${width}px`);
+    body.classList.add('lock');
+  }
+
+  function releaseBodyLock(): void {
+    body.classList.remove('lock');
+    body.style.removeProperty('--scrollbar-width');
+  }
+
   /* ─────────────── API ─────────────── */
-  async function showModal(id: string): Promise<void> {
+  async function showModal(id: string, origin: Point = {
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+  }): Promise<void> {
     details.innerHTML = '';
 
     let product: Product | undefined;
@@ -111,15 +131,21 @@ export function createProductModal(): ProductModal {
     buildHeadline(['headline-bg', 'z-15', 'text-black']);
 
     /* 1.2. IMG  */
+    const originalImageUrl = product.masterVariant.images?.[0]?.url;
+    const placeholderUrl = '../../assets/images/placeholder.webp';
+    const smallImageUrl = originalImageUrl
+      ? `${originalImageUrl}?width=250&height=250&format=webp`
+      // ? `${originalImageUrl}?format=webp`
+      : placeholderUrl;
+
     h({
       tag: 'img',
       parent: heroLeft,
       classes: ['hero-img', 'z-10'],
       attributes: {
-        src:
-          product.masterVariant.images?.[0]?.url ??
-          '../../assets/images/placeholder.webp',
+        src: smallImageUrl,
         alt: product.name.en ?? 'product photo',
+        loading: 'lazy',
       },
     });
 
@@ -187,6 +213,7 @@ export function createProductModal(): ProductModal {
         'justify-between',
         'h-[28px]',
         'px-2',
+        'pointer'
       ],
     });
     let qty = 1;
@@ -242,12 +269,57 @@ export function createProductModal(): ProductModal {
     update();
 
     overlay.style.display = 'flex';
+    applyBodyLock(); 
+
+    const rect = card.getBoundingClientRect();
+
+    // просто разница client – left/top
+    const ox = origin.x - rect.left;
+    const oy = origin.y - rect.top;
+
+    card.style.setProperty('--ox', `${ox}px`);
+    card.style.setProperty('--oy', `${oy}px`);
+
+    if (import.meta.env.DEV) {
+      console.table({
+        originClient: origin,
+        rectTopLeft: { x: rect.left, y: rect.top },
+        offsetForCSS: { x: ox, y: oy },
+      });
+    }
+
+    /* 3. сбрасываем финальный класс (на случай повторного открытия) */
+    card.classList.remove('open');
+    overlay.classList.remove('open');
+
+    /* 4. принудительно применяем стартовое состояние */
+    void card.offsetWidth;        // reflow
+
+    /* 5. запускаем анимацию на следующий кадр */
+    requestAnimationFrame(() => {
+      card.classList.add('open');
+      overlay.classList.add('open');
+    });
+
     body.classList.add('lock');
   }
 
+  h({ parent: card, classes: ['modal-corner_bottom', 'modal-corner_bottom-left'] });
+  h({ parent: card, classes: ['modal-corner_bottom', 'modal-corner_bottom-right'] });
+  
+
   function hideModal(): void {
-    overlay.style.display = 'none';
-    body.classList.remove('lock');
+    card.classList.remove('open');
+    overlay.classList.remove('open');
+
+    /* ждём завершения transition, затем убираем из потока */
+    const onEnd = (): void => {
+      overlay.style.display = 'none';
+      overlay.removeEventListener('transitionend', onEnd);
+      body.classList.remove('lock');
+    };
+    overlay.addEventListener('transitionend', onEnd);
+    releaseBodyLock();
   }
 
   return { modalElement: overlay, showModal, hideModal };

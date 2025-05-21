@@ -10,7 +10,7 @@ interface Product {
 
 export function createProductCardElement(
   product: Product,
-  showModal: (productId: string) => Promise<void>
+  showModal: (id: string, origin: { x: number; y: number }) => void,
 ): HTMLElement {
   const card = document.createElement('div');
   card.classList.add(
@@ -40,9 +40,9 @@ export function createProductCardElement(
   card.append(imageContainer);
 
   const productImage = document.createElement('img');
-  const imageUrl = product.masterVariant.images?.[0]?.url;
+  const imageUrl = product.masterVariant.images?.[1]?.url;
   if (imageUrl) {
-    productImage.src = imageUrl;
+    productImage.src = `${imageUrl}?width=250&height=250&format=webp`;
     productImage.alt = product.name['en-US'] || 'Product Image';
     productImage.classList.add('object-cover', 'object-top', 'h-[140%]'); // Cover the container
   } else {
@@ -128,9 +128,24 @@ export function createProductCardElement(
 
   // TODO: Add "Add to Cart" button or other CTAs here later
 
-  card.addEventListener('click', () => {
-    showModal(product.id);
-  });
+  // card.addEventListener('click', (e: MouseEvent) => {
+  //   showModal(product.id, { x: e.clientX, y: e.clientY });
+  // });
+
+  card.addEventListener('click', (e: MouseEvent) => {
+  // полный набор координат
+  const info = {
+    client: { x: e.clientX, y: e.clientY },   // внутри вьюпорта
+    page:   { x: e.pageX,   y: e.pageY },     // учтён скролл
+    screen: { x: e.screenX, y: e.screenY },   // координаты монитора
+    scroll: { x: window.scrollX, y: window.scrollY },
+  };
+  console.table(info);        // удобнее, чем console.log
+
+  // для модалки чаще удобнее pageX/pageY (видимо вы скроллите страницу)
+  showModal(product.id, { x: e.pageX, y: e.pageY });
+});
+
 
   return card;
 }
