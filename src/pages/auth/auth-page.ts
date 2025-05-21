@@ -122,12 +122,41 @@ const registerFormSchema = z.object({
   city: citySchema,
   postalCode: postalCodeSchema,
   country: countrySchema,
+  // Optional billing address fields
+  billingStreetName: streetNameSchema.optional(),
+  billingHouseNumber: houseNumberSchema.optional(),
+  billingApartment: apartmentSchema.optional(),
+  billingCity: citySchema.optional(),
+  billingPostalCode: postalCodeSchema.optional(),
+  billingCountry: countrySchema.optional(),
 });
 
 type ValidationResult = {
   success: boolean;
   errors: Record<string, string>;
 };
+interface RegistrationValidationData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  streetName: string;
+  houseNumber: string;
+  apartment: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  isBillingSameAsShipping?: boolean;
+  billingStreetName?: string;
+  billingHouseNumber?: string;
+  billingApartment?: string;
+  billingCity?: string;
+  billingPostalCode?: string;
+  billingCountry?: string;
+  defaultShippingAddress?: boolean;
+  defaultBillingAddress?: boolean;
+}
 
 const inputParameters = [
   'text-3xl',
@@ -170,10 +199,19 @@ function validateRegisterForm(
   apartment: string,
   city: string,
   postalCode: string,
-  country: string
+
+  country: string,
+  billingAddress?: {
+    billingStreetName?: string;
+    billingHouseNumber?: string;
+    billingApartment?: string;
+    billingCity?: string;
+    billingPostalCode?: string;
+    billingCountry?: string;
+  }
 ): ValidationResult {
   try {
-    registerFormSchema.parse({
+    const dataToValidate: RegistrationValidationData = {
       email,
       password,
       firstName,
@@ -185,7 +223,24 @@ function validateRegisterForm(
       city,
       postalCode,
       country,
-    });
+    };
+
+    if (billingAddress) {
+      if (billingAddress.billingStreetName)
+        dataToValidate.billingStreetName = billingAddress.billingStreetName;
+      if (billingAddress.billingHouseNumber)
+        dataToValidate.billingHouseNumber = billingAddress.billingHouseNumber;
+      if (billingAddress.billingApartment)
+        dataToValidate.billingApartment = billingAddress.billingApartment;
+      if (billingAddress.billingCity)
+        dataToValidate.billingCity = billingAddress.billingCity;
+      if (billingAddress.billingPostalCode)
+        dataToValidate.billingPostalCode = billingAddress.billingPostalCode;
+      if (billingAddress.billingCountry)
+        dataToValidate.billingCountry = billingAddress.billingCountry;
+    }
+
+    registerFormSchema.parse(dataToValidate);
     return { success: true, errors: {} };
   } catch (error) {
     const formattedErrors: Record<string, string> = {};
@@ -410,6 +465,14 @@ export function createLoginPage(container: HTMLElement): void {
   let cityInput: HTMLInputElement | undefined;
   let postalCodeInput: HTMLInputElement | undefined;
   let countryInput: FilterableDropdown | undefined;
+  let billingAddressSameAsShippingCheckbox: HTMLInputElement | undefined;
+  let billingAddressSectionContainer: HTMLElement | undefined;
+  let billingStreetNameInput: HTMLInputElement | undefined;
+  let billingHouseNumberInput: HTMLInputElement | undefined;
+  let billingApartmentInput: HTMLInputElement | undefined;
+  let billingCityInput: HTMLInputElement | undefined;
+  let billingPostalCodeInput: HTMLInputElement | undefined;
+  let billingCountryInput: FilterableDropdown | undefined;
 
   let firstNameError: HTMLElement | undefined;
   let lastNameError: HTMLElement | undefined;
@@ -421,6 +484,15 @@ export function createLoginPage(container: HTMLElement): void {
   let postalCodeError: HTMLElement | undefined;
   let countryError: HTMLElement | undefined;
   let countryContainerElement: HTMLDivElement | undefined;
+  let shippingAddressSectionContainer: HTMLElement | undefined;
+
+  let billingStreetNameError: HTMLElement | undefined;
+  let billingHouseNumberError: HTMLElement | undefined;
+  let billingApartmentError: HTMLElement | undefined;
+  let billingCityError: HTMLElement | undefined;
+  let billingPostalCodeError: HTMLElement | undefined;
+  let billingCountryError: HTMLElement | undefined;
+  let billingCountryContainerElement: HTMLDivElement | undefined;
 
   function clearErrorMessagesAndInputs(): void {
     emailError.classList.add('hidden');
@@ -439,6 +511,14 @@ export function createLoginPage(container: HTMLElement): void {
     if (postalCodeError) postalCodeError.classList.add('hidden');
     if (countryError) countryError.classList.add('hidden');
 
+    if (billingStreetNameError) billingStreetNameError.classList.add('hidden');
+    if (billingHouseNumberError)
+      billingHouseNumberError.classList.add('hidden');
+    if (billingApartmentError) billingApartmentError.classList.add('hidden');
+    if (billingCityError) billingCityError.classList.add('hidden');
+    if (billingPostalCodeError) billingPostalCodeError.classList.add('hidden');
+    if (billingCountryError) billingCountryError.classList.add('hidden');
+
     if (firstNameInput) firstNameInput.value = '';
     if (lastNameInput) lastNameInput.value = '';
     if (dateOfBirthInput) dateOfBirthInput.value = '';
@@ -448,6 +528,13 @@ export function createLoginPage(container: HTMLElement): void {
     if (cityInput) cityInput.value = '';
     if (postalCodeInput) postalCodeInput.value = '';
     if (countryInput) countryInput.setSelectedValue(undefined);
+
+    if (billingStreetNameInput) billingStreetNameInput.value = '';
+    if (billingHouseNumberInput) billingHouseNumberInput.value = '';
+    if (billingApartmentInput) billingApartmentInput.value = '';
+    if (billingCityInput) billingCityInput.value = '';
+    if (billingPostalCodeInput) billingPostalCodeInput.value = '';
+    if (billingCountryInput) billingCountryInput.setSelectedValue(undefined);
   }
 
   function toggleForm(): void {
@@ -467,12 +554,13 @@ export function createLoginPage(container: HTMLElement): void {
         firstNameInput?.parentElement?.remove();
         lastNameInput?.parentElement?.remove();
         dateOfBirthInput?.parentElement?.remove();
-        streetNameInput?.parentElement?.remove();
-        houseNumberInput?.parentElement?.remove();
-        apartmentInput?.parentElement?.remove();
-        cityInput?.parentElement?.remove();
-        postalCodeInput?.parentElement?.remove();
-        countryContainerElement?.remove();
+
+        shippingAddressSectionContainer?.remove();
+        shippingAddressSectionContainer = undefined;
+        billingAddressSameAsShippingCheckbox?.parentElement?.remove();
+        billingAddressSameAsShippingCheckbox = undefined;
+        billingAddressSectionContainer?.remove();
+        billingAddressSectionContainer = undefined;
 
         firstNameInput = undefined;
         lastNameInput = undefined;
@@ -484,6 +572,13 @@ export function createLoginPage(container: HTMLElement): void {
         postalCodeInput = undefined;
         countryInput = undefined;
         countryContainerElement = undefined;
+        billingStreetNameInput = undefined;
+        billingHouseNumberInput = undefined;
+        billingApartmentInput = undefined;
+        billingCityInput = undefined;
+        billingPostalCodeInput = undefined;
+        billingCountryInput = undefined;
+        billingCountryContainerElement = undefined;
 
         firstNameError = undefined;
         lastNameError = undefined;
@@ -494,6 +589,12 @@ export function createLoginPage(container: HTMLElement): void {
         cityError = undefined;
         postalCodeError = undefined;
         countryError = undefined;
+        billingStreetNameError = undefined;
+        billingHouseNumberError = undefined;
+        billingApartmentError = undefined;
+        billingCityError = undefined;
+        billingPostalCodeError = undefined;
+        billingCountryError = undefined;
 
         title.classList.add('before:w-20');
         title.classList.remove('before:w-29');
@@ -508,7 +609,7 @@ export function createLoginPage(container: HTMLElement): void {
           tag: 'div',
           classes: ['mb-4'],
         });
-        emailContainer.before(firstNameContainer);
+        // emailContainer.before(firstNameContainer); // Will be reordered
         title.classList.add('before:w-29');
         title.classList.remove('before:w-20', 'login-name::before');
         title.classList.add('reset-animation');
@@ -541,7 +642,7 @@ export function createLoginPage(container: HTMLElement): void {
           tag: 'div',
           classes: ['mb-4'],
         });
-        emailContainer.before(lastNameContainer);
+        // emailContainer.before(lastNameContainer); // Will be reordered
         createElement({
           tag: 'label',
           text: 'Last Name',
@@ -569,7 +670,13 @@ export function createLoginPage(container: HTMLElement): void {
           tag: 'div',
           classes: ['mb-4'],
         });
+        // emailContainer.before(dateOfBirthContainer); // Will be reordered
+
+        // firstName, lastName, dateOfBirth, THEN email, password
         emailContainer.before(dateOfBirthContainer);
+        dateOfBirthContainer.before(lastNameContainer);
+        lastNameContainer.before(firstNameContainer);
+
         createElement({
           tag: 'label',
           text: 'Date of Birth',
@@ -593,29 +700,37 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
-        // Shipping Address Fields
+        // Shipping Address Section
+        shippingAddressSectionContainer = createElement({
+          tag: 'div',
+          classes: ['space-y-4', 'address-section', 'mt-6'],
+        });
+        buttonContainer.before(shippingAddressSectionContainer);
+
         createElement({
           tag: 'h2',
-          text: 'Shipping Address',
-          parent: formContainer,
+          text: 'Address',
+          parent: shippingAddressSectionContainer,
           classes: [
+            'address-title',
+            'font-bold',
             'text-lg',
-            'font-semibold',
-            'text-gray-800',
-            'mt-6',
             'mb-3',
+            'text-gray-800',
           ],
         });
-        const shippingAddressContainer = createElement({
-          tag: 'div',
-          parent: formContainer,
-          classes: ['space-y-4', 'address-section'],
-        });
-        emailContainer.before(shippingAddressContainer); // Insert before email
+
+        // shippingAddressSubheadingElement was unused, so its creation is removed!!!!
+        // createElement({
+        //   tag: 'h2',
+        //   text: 'Shipping Address',
+        //   parent: shippingAddressSectionContainer,
+        //   classes: ['text-lg', 'font-semibold', 'text-gray-800', 'mb-3'],
+        // });
 
         const streetNameContainer = createElement({
           tag: 'div',
-          parent: shippingAddressContainer,
+          parent: shippingAddressSectionContainer,
           classes: ['mb-4'],
         });
         createElement({
@@ -643,7 +758,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const houseNumberContainer = createElement({
           tag: 'div',
-          parent: shippingAddressContainer,
+          parent: shippingAddressSectionContainer,
           classes: ['mb-4'],
         });
         createElement({
@@ -671,7 +786,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const apartmentContainer = createElement({
           tag: 'div',
-          parent: shippingAddressContainer,
+          parent: shippingAddressSectionContainer,
           classes: ['mb-4'],
         });
         createElement({
@@ -699,7 +814,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const cityContainer = createElement({
           tag: 'div',
-          parent: shippingAddressContainer,
+          parent: shippingAddressSectionContainer,
           classes: ['mb-4'],
         });
         createElement({
@@ -727,7 +842,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const postalCodeContainer = createElement({
           tag: 'div',
-          parent: shippingAddressContainer,
+          parent: shippingAddressSectionContainer,
           classes: ['mb-4'],
         });
         createElement({
@@ -756,7 +871,7 @@ export function createLoginPage(container: HTMLElement): void {
         // Country - Corrected Section
         countryContainerElement = createElement({
           tag: 'div',
-          parent: shippingAddressContainer,
+          parent: shippingAddressSectionContainer,
           classes: ['mb-4'],
         }) as HTMLDivElement;
         createElement({
@@ -783,6 +898,234 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
+        // "Billing Address is same" Checkbox
+        const checkboxContainer = createElement({
+          tag: 'div',
+          parent: formContainer,
+          classes: ['mb-4', 'flex', 'items-center'],
+        });
+        shippingAddressSectionContainer.after(checkboxContainer);
+
+        billingAddressSameAsShippingCheckbox = createElement({
+          tag: 'input',
+          parent: checkboxContainer,
+          classes: ['mr-2'],
+          attributes: {
+            type: 'checkbox',
+            id: 'billingSameAsShipping',
+            checked: 'true',
+          },
+        }) as HTMLInputElement;
+
+        createElement({
+          tag: 'label',
+          text: 'Billing Address is same',
+          parent: checkboxContainer,
+          classes: ['text-sm', 'text-gray-700'],
+          attributes: { for: 'billingSameAsShipping' },
+        });
+
+        // Billing Address Section
+        billingAddressSectionContainer = createElement({
+          tag: 'div',
+          classes: ['space-y-4', 'address-section', 'mt-6', 'hidden'], // Initially hidden
+        });
+        buttonContainer.before(billingAddressSectionContainer); // before the register button
+
+        createElement({
+          tag: 'h2',
+          text: 'Billing address',
+          parent: billingAddressSectionContainer,
+          classes: [
+            'address-title',
+            'font-bold',
+            'text-lg',
+            'mb-3',
+            'text-gray-800',
+          ],
+        });
+
+        const billingStreetNameContainer = createElement({
+          tag: 'div',
+          parent: billingAddressSectionContainer,
+          classes: ['mb-4'],
+        });
+        createElement({
+          tag: 'label',
+          text: 'Street Name',
+          parent: billingStreetNameContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'billingStreetName' },
+        });
+        billingStreetNameInput = createElement({
+          tag: 'input',
+          parent: billingStreetNameContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'text',
+            id: 'billingStreetName',
+            placeholder: 'Enter street name',
+          },
+        }) as HTMLInputElement;
+        billingStreetNameError = createElement({
+          tag: 'p',
+          parent: billingStreetNameContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        const billingHouseNumberContainer = createElement({
+          tag: 'div',
+          parent: billingAddressSectionContainer,
+          classes: ['mb-4'],
+        });
+        createElement({
+          tag: 'label',
+          text: 'House Number',
+          parent: billingHouseNumberContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'billingHouseNumber' },
+        });
+        billingHouseNumberInput = createElement({
+          tag: 'input',
+          parent: billingHouseNumberContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'text',
+            id: 'billingHouseNumber',
+            placeholder: 'e.g., 123A',
+          },
+        }) as HTMLInputElement;
+        billingHouseNumberError = createElement({
+          tag: 'p',
+          parent: billingHouseNumberContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        const billingApartmentContainer = createElement({
+          tag: 'div',
+          parent: billingAddressSectionContainer,
+          classes: ['mb-4'],
+        });
+        createElement({
+          tag: 'label',
+          text: 'Apartment (Optional)',
+          parent: billingApartmentContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'billingApartment' },
+        });
+        billingApartmentInput = createElement({
+          tag: 'input',
+          parent: billingApartmentContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'text',
+            id: 'billingApartment',
+            placeholder: 'e.g., Apt 4B',
+          },
+        }) as HTMLInputElement;
+        billingApartmentError = createElement({
+          tag: 'p',
+          parent: billingApartmentContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        const billingCityContainer = createElement({
+          tag: 'div',
+          parent: billingAddressSectionContainer,
+          classes: ['mb-4'],
+        });
+        createElement({
+          tag: 'label',
+          text: 'City',
+          parent: billingCityContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'billingCity' },
+        });
+        billingCityInput = createElement({
+          tag: 'input',
+          parent: billingCityContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'text',
+            id: 'billingCity',
+            placeholder: 'Enter your city',
+          },
+        }) as HTMLInputElement;
+        billingCityError = createElement({
+          tag: 'p',
+          parent: billingCityContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        const billingPostalCodeContainer = createElement({
+          tag: 'div',
+          parent: billingAddressSectionContainer,
+          classes: ['mb-4'],
+        });
+        createElement({
+          tag: 'label',
+          text: 'Postal Code',
+          parent: billingPostalCodeContainer,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'billingPostalCode' },
+        });
+        billingPostalCodeInput = createElement({
+          tag: 'input',
+          parent: billingPostalCodeContainer,
+          classes: inputParameters,
+          attributes: {
+            type: 'text',
+            id: 'billingPostalCode',
+            placeholder: 'Enter your postal code',
+          },
+        }) as HTMLInputElement;
+        billingPostalCodeError = createElement({
+          tag: 'p',
+          parent: billingPostalCodeContainer,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        billingCountryContainerElement = createElement({
+          tag: 'div',
+          parent: billingAddressSectionContainer,
+          classes: ['mb-4'],
+        }) as HTMLDivElement;
+        createElement({
+          tag: 'label',
+          text: 'Country',
+          parent: billingCountryContainerElement,
+          classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+          attributes: { for: 'billingCountry-dropdown' },
+        });
+        billingCountryInput = new FilterableDropdown(
+          COUNTRIES,
+          (selectedCountry) => {
+            if (billingCountryError && selectedCountry) {
+              billingCountryError.classList.add('hidden');
+              billingCountryError.textContent = '';
+            }
+          }
+        );
+        const billingDropdownElement = billingCountryInput.getElement();
+        if (billingCountryContainerElement) {
+          billingCountryContainerElement.append(billingDropdownElement);
+        }
+        billingCountryError = createElement({
+          tag: 'p',
+          parent: billingCountryContainerElement,
+          classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+        });
+
+        billingAddressSameAsShippingCheckbox.addEventListener('change', () => {
+          if (billingAddressSectionContainer) {
+            billingAddressSectionContainer.classList.toggle(
+              'hidden',
+              billingAddressSameAsShippingCheckbox?.checked
+            );
+          }
+          validateForm(); // Re-validate when checkbox state changes
+        });
+
         // Добавляем обработчики после создания элементов
         setupValidationHandlers();
       }
@@ -802,6 +1145,16 @@ export function createLoginPage(container: HTMLElement): void {
     if (cityInput) cityInput.value = '';
     if (postalCodeInput) postalCodeInput.value = '';
     // if (countryInput) countryInput.value = '';
+    if (billingAddressSameAsShippingCheckbox)
+      billingAddressSameAsShippingCheckbox.checked = true;
+    if (billingAddressSectionContainer)
+      billingAddressSectionContainer.classList.add('hidden');
+    if (billingStreetNameInput) billingStreetNameInput.value = '';
+    if (billingHouseNumberInput) billingHouseNumberInput.value = '';
+    if (billingApartmentInput) billingApartmentInput.value = '';
+    if (billingCityInput) billingCityInput.value = '';
+    if (billingPostalCodeInput) billingPostalCodeInput.value = '';
+    if (billingCountryInput) billingCountryInput.setSelectedValue(undefined);
 
     errorContainer.classList.add('hidden');
     emailError.classList.add('hidden');
@@ -815,12 +1168,17 @@ export function createLoginPage(container: HTMLElement): void {
     if (cityError) cityError.classList.add('hidden');
     if (postalCodeError) postalCodeError.classList.add('hidden');
     if (countryError) countryError.classList.add('hidden');
+
+    if (billingStreetNameError) billingStreetNameError.classList.add('hidden');
+    if (billingHouseNumberError)
+      billingHouseNumberError.classList.add('hidden');
+    if (billingApartmentError) billingApartmentError.classList.add('hidden');
+    if (billingCityError) billingCityError.classList.add('hidden');
+    if (billingPostalCodeError) billingPostalCodeError.classList.add('hidden');
+    if (billingCountryError) billingCountryError.classList.add('hidden');
   }
 
   // registerLink.addEventListener('click', toggleForm);
-
-  /****************************************** */
-  /****************************************** */
 
   // Функция для настройки обработчиков (теряются про тогле)
   function setupValidationHandlers() {
@@ -853,6 +1211,25 @@ export function createLoginPage(container: HTMLElement): void {
     }
     // if (countryInput) {
     //   countryInput.removeEventListener('input', validateForm);
+    // }
+
+    if (billingStreetNameInput) {
+      billingStreetNameInput.removeEventListener('input', validateForm);
+    }
+    if (billingHouseNumberInput) {
+      billingHouseNumberInput.removeEventListener('input', validateForm);
+    }
+    if (billingApartmentInput) {
+      billingApartmentInput.removeEventListener('input', validateForm);
+    }
+    if (billingCityInput) {
+      billingCityInput.removeEventListener('input', validateForm);
+    }
+    if (billingPostalCodeInput) {
+      billingPostalCodeInput.removeEventListener('input', validateForm);
+    }
+    // if (billingCountryInput) {
+    //   billingCountryInput.removeEventListener('input', validateForm);
     // }
 
     // Добавляем новые обработчики
@@ -893,10 +1270,26 @@ export function createLoginPage(container: HTMLElement): void {
     // if (countryInput) {
     //   countryInput.addEventListener('input', validateForm);
     // }
-  }
 
-  /****************************************** */
-  /****************************************** */
+    if (billingStreetNameInput) {
+      billingStreetNameInput.addEventListener('input', validateForm);
+    }
+    if (billingHouseNumberInput) {
+      billingHouseNumberInput.addEventListener('input', validateForm);
+    }
+    if (billingApartmentInput) {
+      billingApartmentInput.addEventListener('input', validateForm);
+    }
+    if (billingCityInput) {
+      billingCityInput.addEventListener('input', validateForm);
+    }
+    if (billingPostalCodeInput) {
+      billingPostalCodeInput.addEventListener('input', validateForm);
+    }
+    // if (billingCountryInput) {
+    //   billingCountryInput.addEventListener('input', validateForm);
+    // }
+  }
 
   function showFieldError(field: HTMLElement, message: string): void {
     field.textContent = message;
@@ -917,8 +1310,6 @@ export function createLoginPage(container: HTMLElement): void {
     errorContainer.classList.add('hidden');
   }
 
-  /************************************************************** */
-  /************************************************************** */
   function validateForm() {
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -940,6 +1331,40 @@ export function createLoginPage(container: HTMLElement): void {
       // const country = countryInput?.value || '';
       const country = countryInput?.getSelectedValue() || '';
 
+      let billingStreetName = '';
+      let billingHouseNumber = '';
+      let billingApartment = '';
+      let billingCity = '';
+      let billingPostalCode = '';
+      let billingCountry = '';
+
+      if (
+        billingAddressSameAsShippingCheckbox &&
+        !billingAddressSameAsShippingCheckbox.checked
+      ) {
+        billingStreetName = billingStreetNameInput?.value || '';
+        billingHouseNumber = billingHouseNumberInput?.value || '';
+        billingApartment = billingApartmentInput?.value || '';
+        billingCity = billingCityInput?.value || '';
+        billingPostalCode = billingPostalCodeInput?.value || '';
+        billingCountry = billingCountryInput?.getSelectedValue() || '';
+      }
+
+      let billingDetails;
+      if (
+        billingAddressSameAsShippingCheckbox &&
+        !billingAddressSameAsShippingCheckbox.checked
+      ) {
+        billingDetails = {
+          billingStreetName,
+          billingHouseNumber,
+          billingApartment,
+          billingCity,
+          billingPostalCode,
+          billingCountry,
+        };
+      }
+
       const validation = validateRegisterForm(
         email,
         password,
@@ -951,7 +1376,8 @@ export function createLoginPage(container: HTMLElement): void {
         apartment,
         city,
         postalCode,
-        country
+        country,
+        billingDetails
       );
       updateFieldErrors(validation);
     }
@@ -1043,12 +1469,81 @@ export function createLoginPage(container: HTMLElement): void {
           hideFieldError(countryError);
         }
       }
+
+      // Billing address errors (only if checkbox is unchecked)
+      if (
+        billingAddressSameAsShippingCheckbox &&
+        !billingAddressSameAsShippingCheckbox.checked
+      ) {
+        if (billingStreetNameError) {
+          if (validation.errors.billingStreetName) {
+            showFieldError(
+              billingStreetNameError,
+              validation.errors.billingStreetName
+            );
+          } else {
+            hideFieldError(billingStreetNameError);
+          }
+        }
+        if (billingHouseNumberError) {
+          if (validation.errors.billingHouseNumber) {
+            showFieldError(
+              billingHouseNumberError,
+              validation.errors.billingHouseNumber
+            );
+          } else {
+            hideFieldError(billingHouseNumberError);
+          }
+        }
+        if (billingApartmentError) {
+          if (validation.errors.billingApartment) {
+            showFieldError(
+              billingApartmentError,
+              validation.errors.billingApartment
+            );
+          } else {
+            hideFieldError(billingApartmentError);
+          }
+        }
+        if (billingCityError) {
+          if (validation.errors.billingCity) {
+            showFieldError(billingCityError, validation.errors.billingCity);
+          } else {
+            hideFieldError(billingCityError);
+          }
+        }
+        if (billingPostalCodeError) {
+          if (validation.errors.billingPostalCode) {
+            showFieldError(
+              billingPostalCodeError,
+              validation.errors.billingPostalCode
+            );
+          } else {
+            hideFieldError(billingPostalCodeError);
+          }
+        }
+        if (billingCountryError) {
+          if (validation.errors.billingCountry) {
+            showFieldError(
+              billingCountryError,
+              validation.errors.billingCountry
+            );
+          } else {
+            hideFieldError(billingCountryError);
+          }
+        }
+      } else {
+        // Hide billing errors if checkbox is checked
+        if (billingStreetNameError) hideFieldError(billingStreetNameError);
+        if (billingHouseNumberError) hideFieldError(billingHouseNumberError);
+        if (billingApartmentError) hideFieldError(billingApartmentError);
+        if (billingCityError) hideFieldError(billingCityError);
+        if (billingPostalCodeError) hideFieldError(billingPostalCodeError);
+        if (billingCountryError) hideFieldError(billingCountryError);
+      }
     }
     // loginButton.disabled = !validation.success;
   }
-
-  /************************************************************** */
-  /************************************************************** */
 
   loginButton.addEventListener('click', async () => {
     hideFormError();
@@ -1111,140 +1606,129 @@ export function createLoginPage(container: HTMLElement): void {
       // // const country = countryInput?.value || ''; // Ensure country code is uppercase
       // const country = countryInput?.getSelectedValue() || '';
 
-      const formData = {
-        email: emailInput.value,
-        password: passwordInput.value,
-        firstName: firstNameInput?.value || '',
-        lastName: lastNameInput?.value || '',
-        dateOfBirth: dateOfBirthInput?.value || '',
+      const shippingAddressData = {
         streetName: streetNameInput?.value || '',
         houseNumber: houseNumberInput?.value || '',
         apartment: apartmentInput?.value || '',
         city: cityInput?.value || '',
         postalCode: postalCodeInput?.value || '',
-        country: countryInput?.getSelectedValue() || '', // Получаем страну ТОЛЬКО ЗДЕСЬ
+        country: countryInput?.getSelectedValue() || '',
       };
 
+      let billingAddressData: typeof shippingAddressData | undefined;
+      let billingDetailsForValidation:
+        | {
+            billingStreetName?: string;
+            billingHouseNumber?: string;
+            billingApartment?: string;
+            billingCity?: string;
+            billingPostalCode?: string;
+            billingCountry?: string;
+          }
+        | undefined;
+
+      const isBillingSame = billingAddressSameAsShippingCheckbox?.checked;
+
+      if (!isBillingSame) {
+        billingAddressData = {
+          streetName: billingStreetNameInput?.value || '',
+          houseNumber: billingHouseNumberInput?.value || '',
+          apartment: billingApartmentInput?.value || '',
+          city: billingCityInput?.value || '',
+          postalCode: billingPostalCodeInput?.value || '',
+          country: billingCountryInput?.getSelectedValue() || '',
+        };
+        billingDetailsForValidation = {
+          billingStreetName: billingAddressData.streetName,
+          billingHouseNumber: billingAddressData.houseNumber,
+          billingApartment: billingAddressData.apartment,
+          billingCity: billingAddressData.city,
+          billingPostalCode: billingAddressData.postalCode,
+          billingCountry: billingAddressData.country,
+        };
+      }
+
       const validation = validateRegisterForm(
-        // email,
-        // password,
-        // firstName,
-        // lastName,
-        // dateOfBirth,
-        // streetName,
-        // houseNumber,
-        // apartment,
-        // city,
-        // postalCode,
-        // country
-        formData.email,
-        formData.password,
-        formData.firstName,
-        formData.lastName,
-        formData.dateOfBirth,
-        formData.streetName,
-        formData.houseNumber,
-        formData.apartment,
-        formData.city,
-        formData.postalCode,
-        formData.country // Используем уже полученное значение
+        emailInput.value,
+        passwordInput.value,
+        firstNameInput?.value || '',
+        lastNameInput?.value || '',
+        dateOfBirthInput?.value || '',
+        shippingAddressData.streetName,
+        shippingAddressData.houseNumber,
+        shippingAddressData.apartment,
+        shippingAddressData.city,
+        shippingAddressData.postalCode,
+        shippingAddressData.country,
+        billingDetailsForValidation
       );
 
+      updateFieldErrors(validation); // Update errors for all fields first
+
       if (!validation.success) {
-        // loginButton.disabled = true;
-        if (validation.errors.email) {
-          showFieldError(emailError, validation.errors.email);
-        } else {
-          hideFieldError(emailError);
-        }
-        if (validation.errors.password) {
-          showFieldError(passwordError, validation.errors.password);
-        } else {
-          hideFieldError(passwordError);
-        }
-        if (firstNameError && validation.errors.firstName) {
-          showFieldError(firstNameError, validation.errors.firstName);
-        } else if (firstNameError) {
-          hideFieldError(firstNameError);
-        }
-        if (lastNameError && validation.errors.lastName) {
-          showFieldError(lastNameError, validation.errors.lastName);
-        } else if (lastNameError) {
-          hideFieldError(lastNameError);
-        }
-        if (dateOfBirthError && validation.errors.dateOfBirth) {
-          showFieldError(dateOfBirthError, validation.errors.dateOfBirth);
-        } else if (dateOfBirthError) {
-          hideFieldError(dateOfBirthError);
-        }
-        if (streetNameError && validation.errors.streetName) {
-          showFieldError(streetNameError, validation.errors.streetName);
-        } else if (streetNameError) {
-          hideFieldError(streetNameError);
-        }
-        if (houseNumberError && validation.errors.houseNumber) {
-          showFieldError(houseNumberError, validation.errors.houseNumber);
-        } else if (houseNumberError) {
-          hideFieldError(houseNumberError);
-        }
-        if (apartmentError && validation.errors.apartment) {
-          showFieldError(apartmentError, validation.errors.apartment);
-        } else if (apartmentError) {
-          hideFieldError(apartmentError);
-        }
-        if (cityError && validation.errors.city) {
-          showFieldError(cityError, validation.errors.city);
-        } else if (cityError) {
-          hideFieldError(cityError);
-        }
-        if (postalCodeError && validation.errors.postalCode) {
-          showFieldError(postalCodeError, validation.errors.postalCode);
-        } else if (postalCodeError) {
-          hideFieldError(postalCodeError);
-        }
-        if (countryError && validation.errors.country) {
-          showFieldError(countryError, validation.errors.country);
-        } else if (countryError) {
-          hideFieldError(countryError);
-        }
         addNotification(
           'warning',
           'Please fix the form errors before submitting.'
         );
         return;
       }
+
+      // Clear all errors if validation passes
       hideFieldError(emailError);
       hideFieldError(passwordError);
       if (firstNameError) hideFieldError(firstNameError);
       if (lastNameError) hideFieldError(lastNameError);
       if (dateOfBirthError) hideFieldError(dateOfBirthError);
       if (streetNameError) hideFieldError(streetNameError);
+      if (houseNumberError) hideFieldError(houseNumberError);
+      if (apartmentError) hideFieldError(apartmentError);
       if (cityError) hideFieldError(cityError);
       if (postalCodeError) hideFieldError(postalCodeError);
       if (countryError) hideFieldError(countryError);
+      if (billingStreetNameError) hideFieldError(billingStreetNameError);
+      if (billingHouseNumberError) hideFieldError(billingHouseNumberError);
+      if (billingApartmentError) hideFieldError(billingApartmentError);
+      if (billingCityError) hideFieldError(billingCityError);
+      if (billingPostalCodeError) hideFieldError(billingPostalCodeError);
+      if (billingCountryError) hideFieldError(billingCountryError);
 
-      // setLoading(true);
       svgSpinner.classList.add('spinner_active');
       const modalContainer = createModalContainer();
 
+      const addresses = [
+        {
+          streetName: shippingAddressData.streetName,
+          streetNumber: shippingAddressData.houseNumber,
+          apartment: shippingAddressData.apartment,
+          city: shippingAddressData.city,
+          postalCode: shippingAddressData.postalCode,
+          country: shippingAddressData.country,
+        },
+      ];
+
+      if (isBillingSame) {
+        // If billing is same, duplicate shipping address for billing
+        addresses.push({ ...addresses[0] });
+      } else if (billingAddressData) {
+        // Otherwise, use the separate billing address
+        addresses.push({
+          streetName: billingAddressData.streetName,
+          streetNumber: billingAddressData.houseNumber,
+          apartment: billingAddressData.apartment,
+          city: billingAddressData.city,
+          postalCode: billingAddressData.postalCode,
+          country: billingAddressData.country,
+        });
+      }
+
       try {
-        //
         const success = await AuthService.register(
-          formData.email,
-          formData.password,
-          formData.firstName,
-          formData.lastName,
-          formData.dateOfBirth,
-          [
-            {
-              streetName: formData.streetName,
-              streetNumber: formData.houseNumber,
-              apartment: formData.apartment,
-              city: formData.city,
-              postalCode: formData.postalCode,
-              country: formData.country, // Используем то же значение
-            },
-          ]
+          emailInput.value,
+          passwordInput.value,
+          firstNameInput?.value || '',
+          lastNameInput?.value || '',
+          dateOfBirthInput?.value || '',
+          addresses
         );
         if (success) {
           addNotification('success', 'Successfully registered!');
