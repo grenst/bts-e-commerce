@@ -27,7 +27,8 @@ export default function createErrorPage(container: HTMLElement): void {
 
   createElement({
     tag: 'h1',
-    text: 'Error Page',
+    text: 'Error\u00A0Page',
+    // text: 'Error Page',
     classes: [
       'text-3xl',
       'font-bold',
