@@ -313,8 +313,9 @@ export function createLoginPage(container: HTMLElement): void {
     attributes: {
       type: 'password',
       id: 'password',
-      placeholder: 'Enter your password',
+      // placeholder: 'Enter your password',
       // placeholder: 'Enter your password (Use 8+ chars with A-Z, a-z, 0-9)',
+      placeholder: 'Use A-Z a-z 0-9',
     },
   }) as HTMLInputElement;
 
