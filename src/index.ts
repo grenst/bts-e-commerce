@@ -26,6 +26,7 @@ import {
   createLoadingIndicator,
   addNotification,
 } from './store/store';
+import createErrorPage from './pages/error/error-page';
 
 // --- sprite
 svgSpriteElement();
@@ -84,14 +85,7 @@ const routes: Route[] = [
   },
   {
     path: '*',
-    component: (container) => {
-      // Placeholder for Error page
-      createElement({
-        tag: 'h1',
-        text: 'Error Page - Coming Soon! With BIG BUTTON. Go to Login or to About or to Main',
-        parent: container,
-      });
-    },
+    component: createErrorPage,
     preserveState: false, // можно и не ставить будет работать
   },
 ];
