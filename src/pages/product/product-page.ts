@@ -18,11 +18,13 @@ export function createProductModal(): ProductModal {
   const card = h({
     tag: 'div',
     parent: overlay,
-    classes: ['product-modal-content'],
+    classes: ['product-modal-content', 'bg-test'],
   });
 
-  h({ parent: card, classes: ['modal-corner', 'modal-corner_left'] });
-  h({ parent: card, classes: ['modal-corner', 'modal-corner_right'] });
+  // h({ parent: card, classes: ['modal-corner', 'modal-corner_left'] });
+  // h({ parent: card, classes: ['modal-corner', 'modal-corner_right'] });
+  // h({ parent: card, classes: ['modal-corner', 'modal-corner_bottom-left'] });
+  // h({ parent: card, classes: ['modal-corner', 'modal-corner_bottom-right'] });
 
   h({ tag: 'div', parent: card, classes: ['product-modal-bg'] });
 
