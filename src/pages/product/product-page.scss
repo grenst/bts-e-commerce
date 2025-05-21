@@ -212,10 +212,11 @@
 
 .modal-corner {
   position: absolute;
+  z-index: -1;
   // top: 0;
   width: 80px;
   height: 80px;
-  border-top: 1px solid var(--color-gray-900);
+  border: 1px solid var(--color-gray-900);
   // border-top: 1px solid #000; 
 
   &_left {
@@ -257,64 +258,3 @@
   -webkit-backdrop-filter: blur(4px); /* Для Safari */
 }
 
-// Bottom photo-frame for modal
-.modal-corner_bottom {
-  position: absolute;
-  bottom: 0;
-  width: 80px;
-  height: 80px;
-  border-top: 1px solid var(--color-gray-900);
-  transform: rotate(180deg); // Vitalij, I'm just rotate them and switch each other
-  z-index: -1;
-  &-left {
-    right: 0;
-    border-left: 1px solid var(--color-gray-900); 
-  }
-
-  &-right {
-    left: 0;
-    border-right: 1px solid var(--color-gray-900); 
-  }
-
-  &_bottom-left {
-    left: 0;
-    bottom: 0;
-    border-right: none; 
-    border-top: none; 
-  }
-
-  &_bottom-right {
-    right: 0;
-    bottom: 0;
-    border-left: none;
-    border-top: none;
-  }
-}
-
-.bg-test {
-  border-radius: 4px;
-  // background: yellow;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px); /* Для Safari */
-}
-
-// Bottom photo-frame for modal
-.modal-corner_bottom {
-  position: absolute;
-  bottom: 0;
-  width: 80px;
-  height: 80px;
-  border-top: 1px solid var(--color-gray-900);
-  transform: rotate(180deg); // Vitalij, I'm just rotate them and switch each other
-  z-index: -1;
-  &-left {
-    right: 0;
-    border-left: 1px solid var(--color-gray-900); 
-  }
-
-  &-right {
-    left: 0;
-    border-right: 1px solid var(--color-gray-900); 
-  }
-}

@@ -34,6 +34,7 @@ export function createProductModal(): ProductModal {
   const card = h({
     tag: 'div',
     parent: overlay,
+    // classes: ['product-modal-content'],
     classes: ['product-modal-content', 'bg-test'],
   });
 
@@ -136,8 +137,7 @@ export function createProductModal(): ProductModal {
     const originalImageUrl = product.masterVariant.images?.[0]?.url;
     const placeholderUrl = '../../assets/images/placeholder.webp';
     const smallImageUrl = originalImageUrl
-      ?
-        `${originalImageUrl}?format=webp`
+      ? `${originalImageUrl}?format=webp`
       : placeholderUrl;
 
     h({
