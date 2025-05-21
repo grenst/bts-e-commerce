@@ -134,7 +134,7 @@ export function createProductModal(): ProductModal {
     const originalImageUrl = product.masterVariant.images?.[0]?.url;
     const placeholderUrl = '../../assets/images/placeholder.webp';
     const smallImageUrl = originalImageUrl
-      ? // ? `${originalImageUrl}?width=250&height=250&format=webp`
+      ?
         `${originalImageUrl}?format=webp`
       : placeholderUrl;
 
@@ -273,29 +273,17 @@ export function createProductModal(): ProductModal {
 
     const rect = card.getBoundingClientRect();
 
-    // просто разница client – left/top
     const ox = currentOrigin.x - rect.left;
     const oy = currentOrigin.y - rect.top;
 
     card.style.setProperty('--ox', `${ox}px`);
     card.style.setProperty('--oy', `${oy}px`);
 
-    if (import.meta.env.DEV) {
-      console.table({
-        originClient: currentOrigin,
-        rectTopLeft: { x: rect.left, y: rect.top },
-        offsetForCSS: { x: ox, y: oy },
-      });
-    }
-
-    /* 3. сбрасываем финальный класс (иногда повторно открывается!!!) */
     card.classList.remove('open');
     overlay.classList.remove('open');
 
-    /* 4. принудительно применяем стартовое состояние */
     void card.offsetWidth;
 
-    /* 5. запускаем анимацию на следующий кадр */
     requestAnimationFrame(() => {
       card.classList.add('open');
       overlay.classList.add('open');
@@ -317,7 +305,6 @@ export function createProductModal(): ProductModal {
     card.classList.remove('open');
     overlay.classList.remove('open');
 
-    /* ждём завершения transition, затем убираем из потока */
     const onEnd = (): void => {
       overlay.style.display = 'none';
       overlay.removeEventListener('transitionend', onEnd);
