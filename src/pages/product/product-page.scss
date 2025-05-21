@@ -51,19 +51,19 @@
 .product-modal-content {
   /* стартовое состояние */
   opacity: 0;
-  transform: scale(.35);               /* уменьшенный старт */
+  transform: scale(.35);
   transform-origin: var(--ox,50%) var(--oy,50%);
   transition:
     transform .4s cubic-bezier(.22,1,.36,1),
     opacity   .25s ease-out;
 
-  &.open {                             /* финал анимации */
+  &.open {
     opacity: 1;
     transform: scale(1);
   }
 }
 
-/* (по желанию) лёгкое затемнение задника */
+/* лёгкое затемнение задника */
 .product-modal-overlay {
   opacity: 0;
   transition: opacity .25s ease-out;

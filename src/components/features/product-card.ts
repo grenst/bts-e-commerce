@@ -10,7 +10,7 @@ interface Product {
 
 export function createProductCardElement(
   product: Product,
-  showModal: (id: string, origin: { x: number; y: number }) => void,
+  showModal: (id: string, origin: { x: number; y: number }) => void
 ): HTMLElement {
   const card = document.createElement('div');
   card.classList.add(
@@ -132,20 +132,9 @@ export function createProductCardElement(
   //   showModal(product.id, { x: e.clientX, y: e.clientY });
   // });
 
-  card.addEventListener('click', (e: MouseEvent) => {
-  // полный набор координат
-  const info = {
-    client: { x: e.clientX, y: e.clientY },   // внутри вьюпорта
-    page:   { x: e.pageX,   y: e.pageY },     // учтён скролл
-    screen: { x: e.screenX, y: e.screenY },   // координаты монитора
-    scroll: { x: window.scrollX, y: window.scrollY },
-  };
-  console.table(info);        // удобнее, чем console.log
-
-  // для модалки чаще удобнее pageX/pageY (видимо вы скроллите страницу)
-  showModal(product.id, { x: e.pageX, y: e.pageY });
-});
-
+  card.addEventListener('click', (event_: MouseEvent) => {
+    showModal(product.id, { x: event_.pageX, y: event_.pageY });
+  });
 
   return card;
 }
