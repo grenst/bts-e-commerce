@@ -42,7 +42,7 @@ export function createProductCardElement(
   const productImage = document.createElement('img');
   const imageUrl = product.masterVariant.images?.[1]?.url;
   if (imageUrl) {
-    productImage.src = `${imageUrl}?width=250&height=250&format=webp`;
+    productImage.src = `${imageUrl}?format=webp`;
     productImage.alt = product.name['en-US'] || 'Product Image';
     productImage.classList.add('object-cover', 'object-top', 'h-[140%]'); // Cover the container
   } else {

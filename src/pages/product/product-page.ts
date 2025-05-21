@@ -134,8 +134,8 @@ export function createProductModal(): ProductModal {
     const originalImageUrl = product.masterVariant.images?.[0]?.url;
     const placeholderUrl = '../../assets/images/placeholder.webp';
     const smallImageUrl = originalImageUrl
-      ? `${originalImageUrl}?width=250&height=250&format=webp`
-      // ? `${originalImageUrl}?format=webp`
+      // ? `${originalImageUrl}?width=250&height=250&format=webp`
+      ? `${originalImageUrl}?format=webp`
       : placeholderUrl;
 
     h({
