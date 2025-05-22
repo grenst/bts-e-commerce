@@ -20,22 +20,6 @@
   background: transparent;
 }
 
-.product-modal-bg {
-  position: absolute;
-  bottom: 0;
-  // height: 70vh;
-  inset: 0;
-  margin: clamp(2vw, 33vw, 210px) 0.75rem 0.75rem 0.75rem;
-  background: #f2f2f2;
-  z-index: -1;
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border: 1px solid #000;
-  }
-}
-
 .quit-modal-helper {
   position: absolute;
   background: transparent;
@@ -139,8 +123,8 @@
 .hero-img {
   position: relative;
   z-index: 1;
-  width: min(60vw, 24rem);
-  max-width: 100%;
+  width: min(50vw, 20rem);
+  max-width: 90%;
   margin: 0 auto;
   object-fit: contain;
 }
@@ -155,6 +139,9 @@
   font: 700 1.125rem/1;
   font-weight: 900;
   z-index: 1;
+  p {
+    // text-wrap
+  }
   .padder {
     width: 20px;
     height: 26.8vh;
