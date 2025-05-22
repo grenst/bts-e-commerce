@@ -57,7 +57,7 @@ export function createProductModal(): ProductModal {
       'absolute',
       'h-full',
       'w-full',
-      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_25%,rgba(255,255,255,1)_75%,rgba(255,255,255,1)_100%)]',
+      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_25%,rgba(255,255,255,0)_40%,rgba(255,255,255,1)_75%,rgba(255,255,255,1)_100%)]',
       '-z-1',
     ],
   });
