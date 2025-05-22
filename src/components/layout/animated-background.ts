@@ -53,7 +53,7 @@ export function createAnimatedBackground(): void {
       'px-4',
       'pb-16',
       'bg-transparent',
-      'rounded-md',
+      // 'rounded-md',
       'text-center',
       'max-w-md',
       'z-30',
@@ -63,9 +63,9 @@ export function createAnimatedBackground(): void {
 
   // Create and animate lines for bgLosung
   const losungTextLines = [
-    'Your market',
-    'for a world in',
-    'freshness crisis.',
+    'Life is water.',
+    "So let's make",
+    'this life happy!',
   ];
   const animatedLineElements: HTMLElement[] = [];
 

@@ -272,7 +272,7 @@ const createFooter = (parent: HTMLElement) => {
       target: '_blank',
       href: 'https://github.com/grenst',
     },
-    text: 'Andrey',
+    text: 'Andrii',
   });
   liContainerDevelopers.append(footerLinkGithubAndrei);
   const svgGithubAndrei = createSvgUse('#github', 'footer-svg_githubAnd');

@@ -43,7 +43,7 @@ const { header, mainTitle, userNav } = createHeaderElements(router);
 
 createElement({
   tag: 'div',
-  classes: ['max-w-4xl', 'py-4', 'mx-auto', 'relative', 'z-[1]', 'mt-[80px]'],
+  classes: ['mx-auto', 'relative', 'z-[1]', 'mt-[50px]'],
   parent: body,
   children: [contentContainer],
 });

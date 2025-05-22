@@ -35,7 +35,7 @@ export function createProductModal(): ProductModal {
     tag: 'div',
     parent: overlay,
     // classes: ['product-modal-content'],
-    classes: ['product-modal-content', 'bg-test'],
+    classes: ['product-modal-content'],
   });
 
   // h({ parent: card, classes: ['modal-corner', 'modal-corner_left'] });
@@ -43,7 +43,24 @@ export function createProductModal(): ProductModal {
   // h({ parent: card, classes: ['modal-corner', 'modal-corner_bottom-left'] });
   // h({ parent: card, classes: ['modal-corner', 'modal-corner_bottom-right'] });
 
-  h({ tag: 'div', parent: card, classes: ['product-modal-bg'] });
+  const quitModalHelp = h({
+    tag: 'button',
+    parent: card,
+    classes: ['quit-modal-helper'],
+  });
+
+  h({
+    tag: 'div',
+    parent: card,
+    classes: [
+      'product-modal-bg',
+      'absolute',
+      'h-full',
+      'w-full',
+      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_25%,rgba(255,255,255,1)_75%,rgba(255,255,255,1)_100%)]',
+      '-z-1',
+    ],
+  });
 
   const buttonClose = h({
     tag: 'button',
@@ -61,6 +78,8 @@ export function createProductModal(): ProductModal {
   overlay.addEventListener('click', (event_) => {
     if (event_.target === overlay) hideModal();
   });
+
+  quitModalHelp.addEventListener('click', hideModal);
   buttonClose.addEventListener('click', hideModal);
 
   /* ─────────────── API ─────────────── */
@@ -161,6 +180,7 @@ export function createProductModal(): ProductModal {
         product.description?.en ??
         Object.values(product.description ?? {})[0] ??
         '',
+      classes: ['text-wrap', 'h-[40dvh]'],
     });
     h({
       tag: 'div',
@@ -196,8 +216,8 @@ export function createProductModal(): ProductModal {
       tag: 'div',
       parent: order,
       classes: [
-        'border',
-        'border-gray-500',
+        // 'border',
+        // 'border-gray-500',
         'order-quantity',
         'flex',
         'items-stretch',
@@ -294,14 +314,14 @@ export function createProductModal(): ProductModal {
     body.classList.add('lock');
   }
 
-  h({
-    parent: card,
-    classes: ['modal-corner_bottom', 'modal-corner_bottom-left'],
-  });
-  h({
-    parent: card,
-    classes: ['modal-corner_bottom', 'modal-corner_bottom-right'],
-  });
+  // h({
+  //   parent: card,
+  //   classes: ['modal-corner_bottom', 'modal-corner_bottom-left'],
+  // });
+  // h({
+  //   parent: card,
+  //   classes: ['modal-corner_bottom', 'modal-corner_bottom-right'],
+  // });
 
   function hideModal(): void {
     card.classList.remove('open');
