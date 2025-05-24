@@ -33,6 +33,12 @@ svgSpriteElement();
 
 createAnimatedBackground();
 
+// const wrapper = createElement({
+//   tag: 'div',
+//   parent: body,
+//   classes: ['wrapper'],
+// });
+
 const contentContainer = createElement({
   tag: 'main',
   classes: ['min-h-[60vh]'],
@@ -44,6 +50,7 @@ const { header, mainTitle, userNav } = createHeaderElements(router);
 createElement({
   tag: 'div',
   classes: ['mx-auto', 'relative', 'z-[1]', 'mt-[50px]'],
+  // parent: wrapper,
   parent: body,
   children: [contentContainer],
 });
@@ -99,6 +106,7 @@ export function triggerHeaderUpdate(): void {
 }
 
 // --- footer
+// createFooter(wrapper);
 createFooter(body);
 
 createNotificationsContainer(body);

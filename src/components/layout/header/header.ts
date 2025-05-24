@@ -18,7 +18,10 @@ interface HeaderElements {
   userNav: HTMLElement;
 }
 
-export function createHeaderElements(router: Router): HeaderElements {
+export function createHeaderElements(
+  router: Router
+  // parent: HTMLElement
+): HeaderElements {
   const header = createElement({
     tag: 'header',
     classes: [
@@ -38,6 +41,7 @@ export function createHeaderElements(router: Router): HeaderElements {
       'z-10',
       'header-color',
     ],
+    // parent,
     parent: body,
   });
 
