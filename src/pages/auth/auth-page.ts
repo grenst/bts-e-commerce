@@ -15,6 +15,8 @@ import createModalContainer from '../../components/layout/modal/modal-container'
 import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown';
 import { COUNTRIES } from '../../data/countries';
 
+import { createInputField, createPageContainer } from './auth-form-elements';
+
 const NAME_CITY_REGEX = /^[A-Za-zÀ-ÿ]+(?: [A-Za-zÀ-ÿ]+)*$/u;
 
 const POSTAL_CODE_PATTERNS: Record<string, RegExp> = {
@@ -429,21 +431,23 @@ export function createLoginPage(container: HTMLElement): void {
     return;
   }
 
-  const pageContainer = createElement({
-    tag: 'div',
-    parent: container,
-    classes: [
-      'auth-page',
-      'max-w-md',
-      'mx-auto',
-      'mt-20',
-      'p-6',
-      'bg-white',
-      'shadow-md',
-      '-z-0',
-      'relative',
-    ],
-  });
+  // const pageContainer = createElement({
+  //   tag: 'div',
+  //   parent: container,
+  //   classes: [
+  //     'auth-page',
+  //     'max-w-md',
+  //     'mx-auto',
+  //     'mt-20',
+  //     'p-6',
+  //     'bg-white',
+  //     'shadow-md',
+  //     '-z-0',
+  //     'relative',
+  //   ],
+  // });
+
+  const pageContainer = createPageContainer(container);
 
   createElement({
     tag: 'h1',
@@ -472,32 +476,44 @@ export function createLoginPage(container: HTMLElement): void {
     classes: ['space-y-4'],
   });
 
-  const emailContainer = createElement({
-    tag: 'div',
-    parent: formContainer,
-    classes: ['mb-4'],
+  const {
+    fieldContainer: emailContainer,
+    input: emailInput,
+    error: emailError,
+  } = createInputField({
+    container: formContainer,
+    type: 'email',
+    id: 'email',
+    label: 'Email',
+    placeholder: 'Enter your email',
   });
 
-  createElement({
-    tag: 'label',
-    text: 'Email',
-    parent: emailContainer,
-    classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
-    attributes: { for: 'email' },
-  });
+  // const emailContainer = createElement({
+  //   tag: 'div',
+  //   parent: formContainer,
+  //   classes: ['mb-4'],
+  // });
 
-  const emailInput = createElement({
-    tag: 'input',
-    parent: emailContainer,
-    classes: inputParameters,
-    attributes: { type: 'email', id: 'email', placeholder: 'Enter your email' },
-  }) as HTMLInputElement;
+  // createElement({
+  //   tag: 'label',
+  //   text: 'Email',
+  //   parent: emailContainer,
+  //   classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
+  //   attributes: { for: 'email' },
+  // });
 
-  const emailError = createElement({
-    tag: 'p',
-    parent: emailContainer,
-    classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
-  });
+  // const emailInput = createElement({
+  //   tag: 'input',
+  //   parent: emailContainer,
+  //   classes: inputParameters,
+  //   attributes: { type: 'email', id: 'email', placeholder: 'Enter your email' },
+  // }) as HTMLInputElement;
+
+  // const emailError = createElement({
+  //   tag: 'p',
+  //   parent: emailContainer,
+  //   classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
+  // });
 
   // Password field
   const passwordContainer = createElement({

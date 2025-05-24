@@ -54,6 +54,7 @@
     "eslint-plugin-unicorn": "^59.0.1",
     "gh-pages": "^6.3.0",
     "gsap": "^3.13.0",
+    "postal-code-validator": "^1.0.3",
     "postcode-validator": "^3.10.3",
     "zod": "^3.24.4",
     "zustand": "^5.0.4"
