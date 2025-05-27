@@ -1,7 +1,29 @@
+import { createEl as createElement } from '../../utils/element-utilities';
 import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown';
+import {
+  createPageContainer,
+  createTitleLogin,
+  createInputField,
+  createPasswordField,
+} from './auth-form-elements';
 
 export interface AuthFormState {
   isLoginForm: boolean;
+  title: {
+    element: HTMLElement;
+    loginText: string;
+    registerText: string;
+  };
+  basicFields: {
+    pageContainer: HTMLElement;
+    formContainer: HTMLElement;
+    emailContainer: HTMLElement;
+    emailInput: HTMLInputElement;
+    passwordInput: HTMLInputElement;
+    emailError: HTMLElement;
+    passwordError: HTMLElement;
+    errorContainer: HTMLElement;
+  };
   inputs: {
     firstName: HTMLInputElement | undefined;
     lastName: HTMLInputElement | undefined;
@@ -53,6 +75,21 @@ export interface AuthFormState {
 
 export const initialAuthFormState: AuthFormState = {
   isLoginForm: true,
+  title: {
+    element: undefined!, // Будет инициализировано
+    loginText: 'Login',
+    registerText: 'Register',
+  },
+  basicFields: {
+    pageContainer: undefined!,
+    formContainer: undefined!,
+    emailContainer: undefined!,
+    emailInput: undefined!, // Будет инициализировано при создании формы
+    passwordInput: undefined!,
+    emailError: undefined!,
+    passwordError: undefined!,
+    errorContainer: undefined!,
+  },
   inputs: {
     firstName: undefined,
     lastName: undefined,
@@ -95,3 +132,65 @@ export const initialAuthFormState: AuthFormState = {
     billingCountry: undefined,
   },
 };
+
+// --- отслеживаем, какие поля уже тронуты ---
+export const dirty: Record<string, boolean> = {};
+
+export function initializeAuthForm(
+  parentContainer: HTMLElement
+): AuthFormState {
+  const pageContainer = createPageContainer(parentContainer);
+  const titleElement = createTitleLogin(pageContainer);
+
+  const formContainer = createElement({
+    tag: 'form',
+    parent: pageContainer,
+    classes: ['space-y-4'],
+  });
+
+  // Создаем основные поля (email/password)
+  const {
+    fieldContainer: emailContainer,
+    input: emailInput,
+    error: emailError,
+  } = createInputField({
+    container: formContainer,
+    type: 'email',
+    id: 'email',
+    label: 'Email',
+    placeholder: 'Enter your email',
+  });
+
+  const { input: passwordInput, error: passwordError } = createPasswordField({
+    container: formContainer,
+    id: 'password',
+    placeholder: 'Use A-Z a-z 0-9',
+  });
+
+  const errorContainer = createElement({
+    tag: 'div',
+    parent: formContainer,
+    classes: ['hidden', 'mb-4', 'p-3', 'bg-red-100', 'text-red-700', 'rounded'],
+  });
+
+  return {
+    ...initialAuthFormState,
+    title: {
+      ...initialAuthFormState.title,
+      element: titleElement,
+    },
+    basicFields: {
+      pageContainer,
+      formContainer,
+      emailContainer,
+      emailInput: emailInput,
+      passwordInput: passwordInput,
+      emailError,
+      passwordError,
+      errorContainer,
+    },
+    containers: {
+      ...initialAuthFormState.containers,
+    },
+  };
+}

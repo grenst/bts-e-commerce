@@ -15,7 +15,13 @@ import createModalContainer from '../../components/layout/modal/modal-container'
 import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown';
 import { COUNTRIES } from '../../data/countries';
 
-import { createInputField, createPageContainer } from './auth-form-elements';
+// import {
+//   createInputField,
+//   createPageContainer,
+//   createPasswordField,
+// } from './auth-form-elements';
+// import { AuthFormState, initializeAuthForm, dirty } from './auth-form-state';
+import { initializeAuthForm, dirty } from './auth-form-state';
 
 const NAME_CITY_REGEX = /^[A-Za-zÀ-ÿ]+(?: [A-Za-zÀ-ÿ]+)*$/u;
 
@@ -164,27 +170,6 @@ const loginFormSchema = z.object({
   password: passwordSchema,
 });
 
-// const registerFormSchema = z.object({
-//   email: emailSchema,
-//   password: passwordSchema,
-//   firstName: nameSchema,
-//   lastName: nameSchema,
-//   dateOfBirth: dateOfBirthSchema,
-//   streetName: streetNameSchema,
-//   houseNumber: houseNumberSchema,
-//   apartment: apartmentSchema,
-//   city: citySchema,
-//   postalCode: postalCodeSchema,
-//   country: countrySchema,
-//   // Optional billing address fields
-//   billingStreetName: streetNameSchema.optional(),
-//   billingHouseNumber: houseNumberSchema.optional(),
-//   billingApartment: apartmentSchema.optional(),
-//   billingCity: citySchema.optional(),
-//   billingPostalCode: postalCodeSchema.optional(),
-//   billingCountry: countrySchema.optional(),
-// });
-
 const FALLBACK_POSTAL_RE = /^(?=.{3,10}$)[A-Za-z0-9-]+(?: [A-Za-z0-9-]+)?$/;
 
 const registerFormSchema = z
@@ -277,8 +262,9 @@ const inputParameters = [
   'focus:ring-none',
   'focus:border-b-10',
 ];
+
 // --- отслеживаем, какие поля уже тронуты ---
-const dirty: Record<string, boolean> = {};
+// const dirty: Record<string, boolean> = {};
 
 function touch(field: string): void {
   dirty[field] = true;
@@ -431,165 +417,29 @@ export function createLoginPage(container: HTMLElement): void {
     return;
   }
 
-  // const pageContainer = createElement({
-  //   tag: 'div',
-  //   parent: container,
-  //   classes: [
-  //     'auth-page',
-  //     'max-w-md',
-  //     'mx-auto',
-  //     'mt-20',
-  //     'p-6',
-  //     'bg-white',
-  //     'shadow-md',
-  //     '-z-0',
-  //     'relative',
-  //   ],
-  // });
+  /******************************************** */
+  /******************************************** */
+  /******************************************** */
 
-  const pageContainer = createPageContainer(container);
+  // Инициализация состояния
+  const state = initializeAuthForm(container);
 
-  createElement({
-    tag: 'h1',
-    text: 'Login',
-    parent: pageContainer,
-    classes: [
-      'text-2xl',
-      'font-bold',
-      'mb-6',
-      'z-30',
-      'text-center',
-      'text-gray-800',
-      "before:content-['']",
-      'before:absolute',
-      'before:h-6',
-      'before:w-20',
-      'before:bg-yellow-400',
-      'before:-z-1',
-      'login-name',
-    ],
-  });
+  // Получаем элементы из состояния
+  const { title, basicFields } = state;
+  // const { title, basicFields, inputs, containers, errors } = state;
 
-  const formContainer = createElement({
-    tag: 'form',
-    parent: pageContainer,
-    classes: ['space-y-4'],
-  });
+  const { element: titleLogin, loginText, registerText } = title;
 
   const {
-    fieldContainer: emailContainer,
-    input: emailInput,
-    error: emailError,
-  } = createInputField({
-    container: formContainer,
-    type: 'email',
-    id: 'email',
-    label: 'Email',
-    placeholder: 'Enter your email',
-  });
-
-  // const emailContainer = createElement({
-  //   tag: 'div',
-  //   parent: formContainer,
-  //   classes: ['mb-4'],
-  // });
-
-  // createElement({
-  //   tag: 'label',
-  //   text: 'Email',
-  //   parent: emailContainer,
-  //   classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
-  //   attributes: { for: 'email' },
-  // });
-
-  // const emailInput = createElement({
-  //   tag: 'input',
-  //   parent: emailContainer,
-  //   classes: inputParameters,
-  //   attributes: { type: 'email', id: 'email', placeholder: 'Enter your email' },
-  // }) as HTMLInputElement;
-
-  // const emailError = createElement({
-  //   tag: 'p',
-  //   parent: emailContainer,
-  //   classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
-  // });
-
-  // Password field
-  const passwordContainer = createElement({
-    tag: 'div',
-    parent: formContainer,
-    classes: ['mb-4'],
-  });
-
-  createElement({
-    tag: 'label',
-    text: 'Password',
-    parent: passwordContainer,
-    classes: ['block', 'text-sm', 'font-large', 'text-gray-700', 'mb-1'],
-    attributes: { for: 'password' },
-  });
-
-  const passwordInputContainer = createElement({
-    parent: passwordContainer,
-    classes: ['relative'],
-  });
-
-  const passwordInput = createElement({
-    tag: 'input',
-    parent: passwordInputContainer,
-    classes: [
-      'w-full',
-      'px-3',
-      'py-2',
-      'mb-2',
-      'border-gray-300',
-      'focus:outline-none',
-      'focus:pb-2',
-      'focus:mb-1',
-      'pr-8',
-    ],
-    attributes: {
-      type: 'password',
-      id: 'password',
-      // placeholder: 'Enter your password',
-      // placeholder: 'Enter your password (Use 8+ chars with A-Z, a-z, 0-9)',
-      placeholder: 'Use A-Z a-z 0-9',
-    },
-  }) as HTMLInputElement;
-
-  const eyeButton = createElement({
-    tag: 'button',
-    parent: passwordInputContainer,
-    classes: ['button-eye'],
-    attributes: { type: 'button', 'aria-label': 'Toggle password visibility' },
-  });
-
-  const eyeInvisible = createSvgUse('#eye-invisible', 'eye');
-  const eyeVisible = createSvgUse('#eye-visible', 'eye');
-
-  eyeButton.append(eyeInvisible, eyeVisible);
-  eyeInvisible.classList.add('eye_active');
-
-  eyeButton.addEventListener('click', () => {
-    const isPassword = passwordInput.type === 'password';
-    passwordInput.type = isPassword ? 'text' : 'password';
-
-    eyeInvisible.classList.toggle('eye_active');
-    eyeVisible.classList.toggle('eye_active');
-  });
-
-  const passwordError = createElement({
-    tag: 'p',
-    parent: passwordContainer,
-    classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
-  });
-
-  const errorContainer = createElement({
-    tag: 'div',
-    parent: formContainer,
-    classes: ['mt-4', 'p-3', 'bg-red-100', 'text-red-700', 'hidden'],
-  });
+    pageContainer,
+    formContainer,
+    emailContainer,
+    emailInput,
+    passwordInput,
+    emailError,
+    passwordError,
+    errorContainer,
+  } = basicFields;
 
   const buttonContainer = createElement({
     tag: 'div',
@@ -639,8 +489,9 @@ export function createLoginPage(container: HTMLElement): void {
     ],
   });
 
-  let isLoginForm = true;
-  let firstNameInput: HTMLInputElement | undefined;
+  // let isLoginForm = true;
+  // let firstNameInput: HTMLInputElement | undefined;
+
   let lastNameInput: HTMLInputElement | undefined;
   let dateOfBirthInput: HTMLInputElement | undefined;
   let streetNameInput: HTMLInputElement | undefined;
@@ -685,44 +536,29 @@ export function createLoginPage(container: HTMLElement): void {
     emailInput.value = '';
     passwordInput.value = '';
 
-    if (firstNameError) firstNameError.classList.add('hidden');
-    if (lastNameError) lastNameError.classList.add('hidden');
-    if (dateOfBirthError) dateOfBirthError.classList.add('hidden');
-    if (streetNameError) streetNameError.classList.add('hidden');
-    if (houseNumberError) houseNumberError.classList.add('hidden');
-    if (apartmentError) apartmentError.classList.add('hidden');
-    if (cityError) cityError.classList.add('hidden');
-    if (postalCodeError) postalCodeError.classList.add('hidden');
-    if (countryError) countryError.classList.add('hidden');
+    for (const error of Object.values(state.errors)) {
+      error?.classList.add('hidden');
+    }
 
-    if (billingStreetNameError) billingStreetNameError.classList.add('hidden');
-    if (billingHouseNumberError)
-      billingHouseNumberError.classList.add('hidden');
-    if (billingApartmentError) billingApartmentError.classList.add('hidden');
-    if (billingCityError) billingCityError.classList.add('hidden');
-    if (billingPostalCodeError) billingPostalCodeError.classList.add('hidden');
-    if (billingCountryError) billingCountryError.classList.add('hidden');
+    for (const input of Object.values(state.inputs)) {
+      if (!input) continue;
+      if (input instanceof HTMLInputElement) {
+        input.value = '';
+      } else if (input instanceof FilterableDropdown) {
+        input.setSelectedValue(undefined);
+      }
+    }
 
-    if (firstNameInput) firstNameInput.value = '';
-    if (lastNameInput) lastNameInput.value = '';
-    if (dateOfBirthInput) dateOfBirthInput.value = '';
-    if (streetNameInput) streetNameInput.value = '';
-    if (houseNumberInput) houseNumberInput.value = '';
-    if (apartmentInput) apartmentInput.value = '';
-    if (cityInput) cityInput.value = '';
-    if (postalCodeInput) postalCodeInput.value = '';
-    if (countryInput) countryInput.setSelectedValue(undefined);
-
-    if (billingStreetNameInput) billingStreetNameInput.value = '';
-    if (billingHouseNumberInput) billingHouseNumberInput.value = '';
-    if (billingApartmentInput) billingApartmentInput.value = '';
-    if (billingCityInput) billingCityInput.value = '';
-    if (billingPostalCodeInput) billingPostalCodeInput.value = '';
-    if (billingCountryInput) billingCountryInput.setSelectedValue(undefined);
+    for (const key of Object.keys(dirty)) {
+      dirty[key] = false;
+    }
   }
 
   function toggleForm(): void {
-    isLoginForm = !isLoginForm;
+    const { isLoginForm } = state;
+    state.isLoginForm = !isLoginForm;
+
+    const { firstName: firstNameInput } = state.inputs;
 
     for (const k of Object.keys(dirty)) {
       dirty[k] = false;
@@ -730,15 +566,14 @@ export function createLoginPage(container: HTMLElement): void {
 
     clearErrorMessagesAndInputs();
 
-    const title = pageContainer.querySelector('h1') as HTMLElement;
-    title.textContent = isLoginForm ? 'Login' : 'Register';
+    titleLogin.textContent = state.isLoginForm ? loginText : registerText;
 
-    loginButton.textContent = isLoginForm ? 'Login' : 'Register';
+    loginButton.textContent = state.isLoginForm ? loginText : registerText;
     loginButton.prepend(svgSpinner);
 
-    registerLink.textContent = isLoginForm ? 'Register' : 'Login';
+    registerLink.textContent = state.isLoginForm ? registerText : loginText;
 
-    if (isLoginForm) {
+    if (state.isLoginForm) {
       if (firstNameInput?.parentElement) {
         firstNameInput?.parentElement?.remove();
         lastNameInput?.parentElement?.remove();
@@ -751,7 +586,7 @@ export function createLoginPage(container: HTMLElement): void {
         billingAddressSectionContainer?.remove();
         billingAddressSectionContainer = undefined;
 
-        firstNameInput = undefined;
+        state.inputs.firstName = undefined;
         lastNameInput = undefined;
         dateOfBirthInput = undefined;
         streetNameInput = undefined;
@@ -785,12 +620,12 @@ export function createLoginPage(container: HTMLElement): void {
         billingPostalCodeError = undefined;
         billingCountryError = undefined;
 
-        title.classList.add('before:w-20');
-        title.classList.remove('before:w-29');
+        titleLogin.classList.add('before:w-20');
+        titleLogin.classList.remove('before:w-29');
 
-        title.classList.add('reset-animation');
-        void title.offsetWidth;
-        title.classList.remove('reset-animation');
+        titleLogin.classList.add('reset-animation');
+        void titleLogin.offsetWidth;
+        titleLogin.classList.remove('reset-animation');
       }
     } else {
       if (!firstNameInput) {
@@ -799,11 +634,11 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['mb-4'],
         });
         // emailContainer.before(firstNameContainer); // Will be reordered
-        title.classList.add('before:w-29');
-        title.classList.remove('before:w-20', 'login-name::before');
-        title.classList.add('reset-animation');
-        void title.offsetWidth;
-        title.classList.remove('reset-animation');
+        titleLogin.classList.add('before:w-29');
+        titleLogin.classList.remove('before:w-20', 'login-name::before');
+        titleLogin.classList.add('reset-animation');
+        void titleLogin.offsetWidth;
+        titleLogin.classList.remove('reset-animation');
         createElement({
           tag: 'label',
           text: 'First Name',
@@ -811,7 +646,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'firstName' },
         });
-        firstNameInput = createElement({
+        state.inputs.firstName = createElement({
           tag: 'input',
           parent: firstNameContainer,
           classes: inputParameters,
@@ -1372,6 +1207,7 @@ export function createLoginPage(container: HTMLElement): void {
 
   // Функция для настройки обработчиков (теряются про тогле)
   function setupValidationHandlers() {
+    const { firstName: firstNameInput } = state.inputs;
     // Удаляем старые обработчики, если они есть
     emailInput.removeEventListener('input', validateForm);
     passwordInput.removeEventListener('input', validateForm);
@@ -1553,6 +1389,8 @@ export function createLoginPage(container: HTMLElement): void {
   }
 
   function validateForm() {
+    const { isLoginForm } = state;
+    const { firstName: firstNameInput } = state.inputs;
     const email = emailInput.value;
     const password = passwordInput.value;
 
@@ -1627,6 +1465,8 @@ export function createLoginPage(container: HTMLElement): void {
 
   // Функция для обновления ошибок полей
   function updateFieldErrors(validation: ValidationResult): void {
+    const { isLoginForm } = state;
+    const { firstName: firstNameInput } = state.inputs;
     // Хелпер для единообразия
     const handle = (
       fieldName: string,
@@ -1699,6 +1539,7 @@ export function createLoginPage(container: HTMLElement): void {
     const { addNotification } = uiStore.getState();
     // const { setLoading, addNotification } = uiStore.getState();
 
+    const { isLoginForm } = state;
     const email = emailInput.value;
     const password = passwordInput.value;
 
@@ -1743,18 +1584,6 @@ export function createLoginPage(container: HTMLElement): void {
         modalContainer.remove();
       }
     } else {
-      // Registration form
-      // const firstName = firstNameInput?.value || '';
-      // const lastName = lastNameInput?.value || '';
-      // const dateOfBirth = dateOfBirthInput?.value || '';
-      // const streetName = streetNameInput?.value || '';
-      // const houseNumber = houseNumberInput?.value || '';
-      // const apartment = apartmentInput?.value || '';
-      // const city = cityInput?.value || '';
-      // const postalCode = postalCodeInput?.value || '';
-      // // const country = countryInput?.value || ''; // Ensure country code is uppercase
-      // const country = countryInput?.getSelectedValue() || '';
-
       const shippingAddressData = {
         streetName: streetNameInput?.value || '',
         houseNumber: houseNumberInput?.value || '',
@@ -1800,7 +1629,8 @@ export function createLoginPage(container: HTMLElement): void {
       const validation = validateRegisterForm(
         emailInput.value,
         passwordInput.value,
-        firstNameInput?.value || '',
+        state.inputs.firstName?.value || '',
+        // firstNameInput?.value || '',
         lastNameInput?.value || '',
         dateOfBirthInput?.value || '',
         shippingAddressData.streetName,
@@ -1876,7 +1706,8 @@ export function createLoginPage(container: HTMLElement): void {
         const success = await AuthService.register(
           emailInput.value,
           passwordInput.value,
-          firstNameInput?.value || '',
+          state.inputs.firstName?.value || '',
+          // firstNameInput?.value || '',
           lastNameInput?.value || '',
           dateOfBirthInput?.value || '',
           addresses
@@ -1910,7 +1741,7 @@ export function createLoginPage(container: HTMLElement): void {
   emailInput.addEventListener('keypress', handleEnterKey);
   passwordInput.addEventListener('keypress', handleEnterKey);
 
-  isLoginForm = false;
+  state.isLoginForm = false;
   toggleForm(); // Initialize as login form
   registerLink.addEventListener('click', toggleForm);
 }
