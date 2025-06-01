@@ -3,25 +3,9 @@ import { AxiosError } from 'axios';
 import { useTokenStore } from '../../store/token-store';
 import { getAnonymousToken } from '../../components/auth-services/token.service';
 
-export interface Product {
-  // Added export
-  id: string;
-  name: { [key: string]: string };
-  description?: { [key: string]: string };
-  masterVariant: {
-    images?: { url: string }[];
-    prices?: { value: { centAmount: number; currencyCode: string } }[];
-  };
-  categories: Array<{ id: string; typeId: 'category' }>;
-  key?: string;
-}
+import { Product, Category } from '../../types/catalog-types';
 
-// Interface for Category
-export interface Category {
-  id: string;
-  name: { [key: string]: string };
-  // Add other category fields if needed, e.g., slug, description
-}
+export const getAllProducts = getAllPublishedProducts;
 
 interface CategoryPagedQueryResponse {
   limit: number;

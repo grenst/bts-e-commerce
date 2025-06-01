@@ -1,0 +1,9 @@
+.catalog-sub-nav {
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+  max-height: 0;
+
+  &.open {
+    max-height: 200px; /* Adjust as needed for content */
+  }
+}

@@ -3,10 +3,9 @@ import {
   getAllPublishedProducts,
   getAllCategories,
 } from '../../api/products/product-service';
-import type { Product, Category } from '../../api/products/product-service';
+import { Product, Category } from '../../types/catalog-types';
 import { createProductCardElement } from '../../components/features/product-card';
 import { gsap, ScrollTrigger } from '../../animations/gsap-init';
-// import { Router } from '../../router/router';
 import { createProductModal, ProductModal } from '../product/product-page';
 
 // Interfaces for Actuality List
@@ -135,42 +134,128 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     attributes: { id: 'hero-section' },
     classes: [
       'h-[calc(100dvh-140px)]', // Adjusted height if actuality section is above
-      'bg-transparent',
-      'bg-cover',
-      'bg-center',
+      // 'bg-transparent',
+      // 'bg-cover',
+      // 'bg-center',
       'flex',
       'items-center',
       'justify-center',
       'text-center',
       'relative',
       'overflow-hidden',
-      '-z-100',
+      // 'z-100',
     ],
     parent: homeContainer,
   });
 
-  const heroTitle = createElement({
-    tag: 'h2',
-    attributes: { id: 'hero-title' },
-    text: '',
+  // Create container for animated background
+  const heroContainer = createElement({
+    tag: 'div',
     classes: [
-      'text-4xl',
-      'font-nexa-bold',
-      'text-white',
-      'bg-black/50',
-      'p-4',
-      'rounded-md',
+      'absolute',
+      'inset-0',
+      'overflow-hidden',
+      'flex',
+      'justify-center',
+      'items-center',
+      'flex-col',
     ],
     parent: heroSection,
   });
 
-  gsap.from(heroTitle, {
-    duration: 1.2,
-    opacity: 0,
-    scale: 0.5,
-    ease: 'back.out(1.7)',
-    delay: 0.3,
+  // --- ANIMATED BACKGROUND ---
+  const bgLosung = createElement({
+    tag: 'div',
+    attributes: { id: 'bg-losung' },
+    classes: [
+      'font-nexa-bold',
+      'px-4',
+      'pb-16',
+      'bg-transparent',
+      // 'rounded-md',
+      'text-center',
+      'max-w-md',
+      'z-30',
+    ],
+    parent: heroContainer,
   });
+
+  // Create and animate lines for bgLosung
+  const losungTextLines = [
+    'Life is water.',
+    "So let's make",
+    'this life happy!',
+  ];
+  const animatedLineElements: HTMLElement[] = [];
+
+  for (const text of losungTextLines) {
+    const lineContainer = createElement({
+      tag: 'div',
+      classes: ['overflow-hidden', 'relative', 'leading-8'],
+      parent: bgLosung,
+    });
+
+    const textElement = createElement({
+      tag: 'span',
+      text,
+      classes: ['inline-block', 'whitespace-nowrap'],
+      // classes: ['text-white', 'inline-block', 'whitespace-nowrap'],
+      parent: lineContainer,
+      attributes: {
+        'data-text': text,
+      },
+    });
+    animatedLineElements.push(textElement);
+  }
+
+  if (animatedLineElements.length > 0) {
+    gsap.fromTo(
+      animatedLineElements,
+      { yPercent: 120 },
+      {
+        yPercent: 0,
+        stagger: 0.25,
+        duration: 0.8,
+        ease: 'power2.out',
+        delay: 0.3,
+      }
+    );
+  }
+
+  createElement({
+    tag: 'a', // ← был button
+    attributes: { id: 'hero-button', href: '/catalog' },
+    text: 'Our drinks',
+    classes: [
+      'hero_btn',
+      'inline-block',
+      'text-xl',
+      'font-nexa-bold',
+      'text-white',
+      // 'bg-black/70',
+      'bg-[linear-gradient(to_right,rgba(0,0,0,1)_0%,rgba(0,0,0,1)_25%,rgba(0,0,0,1)_45%,rgba(1,0,150,1)_100%)]',
+      'px-4',
+      'py-2',
+      'mt-[10dvh]',
+      'rounded-full',
+      'font-nexa-bold',
+      'opacity-80',
+      'transition',
+      'duration-350',
+      'ease-in-out',
+      'hover:opacity-100',
+      'hover:scale-[1.07]',
+    ],
+    parent: heroContainer,
+  });
+
+  // gsap.from(heroTitle, {
+  //   duration: 1.2,
+  //   opacity: 0,
+  //   scale: 0.5,
+  //   ease: 'back.out(1.7)',
+  //   delay: 0.3,
+  // });
 
   // Fetch all products and categories once for the page
   let allProducts: Product[] = [];
