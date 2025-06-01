@@ -45,63 +45,63 @@ export function createAnimatedBackground(): void {
     });
   }
 
-  // --- Losung Text ---
-  const bgLosung = createElement({
-    tag: 'div',
-    attributes: { id: 'bg-losung' },
-    classes: [
-      'px-4',
-      'pb-16',
-      'bg-transparent',
-      // 'rounded-md',
-      'text-center',
-      'max-w-md',
-      'z-30',
-    ],
-    parent: animatedBackgroundContainer,
-  });
+  // // --- Losung Text ---
+  // const bgLosung = createElement({
+  //   tag: 'div',
+  //   attributes: { id: 'bg-losung' },
+  //   classes: [
+  //     'px-4',
+  //     'pb-16',
+  //     'bg-transparent',
+  //     // 'rounded-md',
+  //     'text-center',
+  //     'max-w-md',
+  //     'z-30',
+  //   ],
+  //   parent: animatedBackgroundContainer,
+  // });
 
-  // Create and animate lines for bgLosung
-  const losungTextLines = [
-    'Life is water.',
-    "So let's make",
-    'this life happy!',
-  ];
-  const animatedLineElements: HTMLElement[] = [];
+  // // Create and animate lines for bgLosung
+  // const losungTextLines = [
+  //   'Life is water.',
+  //   "So let's make",
+  //   'this life happy!',
+  // ];
+  // const animatedLineElements: HTMLElement[] = [];
 
-  for (const text of losungTextLines) {
-    const lineContainer = createElement({
-      tag: 'div',
-      classes: ['overflow-hidden', 'relative', 'leading-8'],
-      parent: bgLosung,
-    });
+  // for (const text of losungTextLines) {
+  //   const lineContainer = createElement({
+  //     tag: 'div',
+  //     classes: ['overflow-hidden', 'relative', 'leading-8'],
+  //     parent: bgLosung,
+  //   });
 
-    const textElement = createElement({
-      tag: 'span',
-      text,
-      classes: ['inline-block', 'whitespace-nowrap'],
-      // classes: ['text-white', 'inline-block', 'whitespace-nowrap'],
-      parent: lineContainer,
-      attributes: {
-        'data-text': text,
-      },
-    });
-    animatedLineElements.push(textElement);
-  }
+  //   const textElement = createElement({
+  //     tag: 'span',
+  //     text,
+  //     classes: ['inline-block', 'whitespace-nowrap'],
+  //     // classes: ['text-white', 'inline-block', 'whitespace-nowrap'],
+  //     parent: lineContainer,
+  //     attributes: {
+  //       'data-text': text,
+  //     },
+  //   });
+  //   animatedLineElements.push(textElement);
+  // }
 
-  if (animatedLineElements.length > 0) {
-    gsap.fromTo(
-      animatedLineElements,
-      { yPercent: 120 },
-      {
-        yPercent: 0,
-        stagger: 0.25,
-        duration: 0.8,
-        ease: 'power2.out',
-        delay: 0.3,
-      }
-    );
-  }
+  // if (animatedLineElements.length > 0) {
+  //   gsap.fromTo(
+  //     animatedLineElements,
+  //     { yPercent: 120 },
+  //     {
+  //       yPercent: 0,
+  //       stagger: 0.25,
+  //       duration: 0.8,
+  //       ease: 'power2.out',
+  //       delay: 0.3,
+  //     }
+  //   );
+  // }
 
   setupBackgroundAnimations();
 }

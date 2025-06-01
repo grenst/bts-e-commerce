@@ -135,42 +135,109 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     attributes: { id: 'hero-section' },
     classes: [
       'h-[calc(100dvh-140px)]', // Adjusted height if actuality section is above
-      'bg-transparent',
-      'bg-cover',
-      'bg-center',
+      // 'bg-transparent',
+      // 'bg-cover',
+      // 'bg-center',
       'flex',
       'items-center',
       'justify-center',
       'text-center',
       'relative',
       'overflow-hidden',
-      '-z-100',
+      // 'z-100',
     ],
     parent: homeContainer,
   });
 
-  const heroTitle = createElement({
-    tag: 'h2',
-    attributes: { id: 'hero-title' },
-    text: '',
+  // Create container for animated background
+  const heroContainer = createElement({
+    tag: 'div',
+    classes: ['absolute', 'inset-0', 'overflow-hidden', 'flex', 'justify-center', 'items-center', 'flex-col'],
+    parent: heroSection,
+  });
+
+  // --- ANIMATED BACKGROUND ---
+  const bgLosung = createElement({
+    tag: 'div',
+    attributes: { id: 'bg-losung' },
     classes: [
-      'text-4xl',
+      'font-nexa-bold',
+      'px-4',
+      'pb-16',
+      'bg-transparent',
+      // 'rounded-md',
+      'text-center',
+      'max-w-md',
+      'z-30',
+    ],
+    parent: heroContainer,
+  });
+
+  // Create and animate lines for bgLosung
+  const losungTextLines = [
+    'Life is water.',
+    "So let's make",
+    'this life happy!',
+  ];
+  const animatedLineElements: HTMLElement[] = [];
+
+  for (const text of losungTextLines) {
+    const lineContainer = createElement({
+      tag: 'div',
+      classes: ['overflow-hidden', 'relative', 'leading-8'],
+      parent: bgLosung,
+    });
+
+    const textElement = createElement({
+      tag: 'span',
+      text,
+      classes: ['inline-block', 'whitespace-nowrap'],
+      // classes: ['text-white', 'inline-block', 'whitespace-nowrap'],
+      parent: lineContainer,
+      attributes: {
+        'data-text': text,
+      },
+    });
+    animatedLineElements.push(textElement);
+  }
+
+  if (animatedLineElements.length > 0) {
+    gsap.fromTo(
+      animatedLineElements,
+      { yPercent: 120 },
+      {
+        yPercent: 0,
+        stagger: 0.25,
+        duration: 0.8,
+        ease: 'power2.out',
+        delay: 0.3,
+      }
+    );
+  }
+
+  const catalogBtn = createElement({
+    tag: 'a',
+    attributes: { id: 'hero-button', href: '/catalog' },
+    text: 'Our drinks',
+    classes: [
+      'hero_btn',
+      'text-xl',
       'font-nexa-bold',
       'text-white',
       'bg-black/50',
       'p-4',
-      'rounded-md',
+      'rounded-full',
     ],
-    parent: heroSection,
+    parent: heroContainer,
   });
 
-  gsap.from(heroTitle, {
-    duration: 1.2,
-    opacity: 0,
-    scale: 0.5,
-    ease: 'back.out(1.7)',
-    delay: 0.3,
-  });
+  // gsap.from(heroTitle, {
+  //   duration: 1.2,
+  //   opacity: 0,
+  //   scale: 0.5,
+  //   ease: 'back.out(1.7)',
+  //   delay: 0.3,
+  // });
 
   // Fetch all products and categories once for the page
   let allProducts: Product[] = [];
@@ -631,3 +698,4 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
 }
 
 export default createHomePage;
+
