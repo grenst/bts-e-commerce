@@ -18,13 +18,14 @@ export function createProductCardElement(
     'bg-white',
     'cursor-pointer',
     'overflow-hidden',
+    'border',
     'flex',
     'flex-col',
-    'transition-all',
+    'transition-translate',
     'duration-300',
     'ease-in-out',
     'hover:shadow-2xl',
-    'hover:scale-[1.03]',
+    // 'hover:-translate-y-1',
     'group'
   );
   // card.style.minHeight = '350px'; // Adjust as needed, or make it aspect ratio based
@@ -34,7 +35,7 @@ export function createProductCardElement(
   imageContainer.classList.add(
     'w-full',
     'h-48',
-    'bg-gray-100',
+    'bg-white',
     'overflow-hidden'
   );
   card.append(imageContainer);

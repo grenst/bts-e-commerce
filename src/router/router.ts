@@ -2,6 +2,7 @@ import {
   createEl as createElement,
   removeAllChild,
 } from '../utils/element-utilities';
+import { createCatalogPage } from '../pages/catalog/catalog';
 
 export interface Route {
   path: string;
@@ -169,6 +170,12 @@ let routerInstance: Router | undefined;
 export function createRouter(container: HTMLElement): Router {
   if (!routerInstance) {
     routerInstance = new Router(container);
+    // Add catalog route
+    routerInstance.addRoute({
+      path: '/catalog',
+      component: createCatalogPage,
+      preserveState: true
+    });
   }
   return routerInstance;
 }

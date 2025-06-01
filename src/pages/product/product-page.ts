@@ -140,7 +140,7 @@ export function createProductModal(): ProductModal {
       });
       const name =
         product?.name.en?.toUpperCase() ??
-        Object.values(product?.name ?? {})[0]?.toUpperCase() ??
+        (product?.name ? Object.values(product.name)[0]?.toUpperCase() : undefined) ??
         '';
 
       for (const word of name.split(/\s+/)) {
