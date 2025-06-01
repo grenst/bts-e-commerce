@@ -1,5 +1,6 @@
 import { createEl as h, body } from '../../utils/element-utilities';
-import { getProductById, Product } from '../../api/products/product-service';
+import { getProductById } from '../../api/products/product-service';
+import { Product } from '../../types/catalog-types';
 import './product-page.scss';
 
 type Point = { x: number; y: number };
@@ -140,7 +141,9 @@ export function createProductModal(): ProductModal {
       });
       const name =
         product?.name.en?.toUpperCase() ??
-        (product?.name ? Object.values(product.name)[0]?.toUpperCase() : undefined) ??
+        (product?.name
+          ? Object.values(product.name)[0]?.toUpperCase()
+          : undefined) ??
         '';
 
       for (const word of name.split(/\s+/)) {

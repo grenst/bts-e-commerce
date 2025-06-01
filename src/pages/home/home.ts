@@ -3,10 +3,9 @@ import {
   getAllPublishedProducts,
   getAllCategories,
 } from '../../api/products/product-service';
-import type { Product, Category } from '../../api/products/product-service';
+import { Product, Category } from '../../types/catalog-types';
 import { createProductCardElement } from '../../components/features/product-card';
 import { gsap, ScrollTrigger } from '../../animations/gsap-init';
-// import { Router } from '../../router/router';
 import { createProductModal, ProductModal } from '../product/product-page';
 
 // Interfaces for Actuality List
@@ -152,7 +151,15 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   // Create container for animated background
   const heroContainer = createElement({
     tag: 'div',
-    classes: ['absolute', 'inset-0', 'overflow-hidden', 'flex', 'justify-center', 'items-center', 'flex-col'],
+    classes: [
+      'absolute',
+      'inset-0',
+      'overflow-hidden',
+      'flex',
+      'justify-center',
+      'items-center',
+      'flex-col',
+    ],
     parent: heroSection,
   });
 
@@ -215,12 +222,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     );
   }
 
-  const catalogBtn = createElement({
-    tag: 'a',
+  createElement({
+    tag: 'a', // ← был button
     attributes: { id: 'hero-button', href: '/catalog' },
     text: 'Our drinks',
     classes: [
       'hero_btn',
+      'inline-block',
       'text-xl',
       'font-nexa-bold',
       'text-white',
@@ -232,9 +240,11 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       'rounded-full',
       'font-nexa-bold',
       'opacity-80',
-      'transition', 'duration-350', 'ease-in-out',
+      'transition',
+      'duration-350',
+      'ease-in-out',
       'hover:opacity-100',
-      'hover:scale-[1.07]'
+      'hover:scale-[1.07]',
     ],
     parent: heroContainer,
   });
@@ -706,4 +716,3 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
 }
 
 export default createHomePage;
-

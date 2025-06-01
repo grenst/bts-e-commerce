@@ -174,7 +174,7 @@ export function createRouter(container: HTMLElement): Router {
     routerInstance.addRoute({
       path: '/catalog',
       component: createCatalogPage,
-      preserveState: true
+      preserveState: true,
     });
   }
   return routerInstance;

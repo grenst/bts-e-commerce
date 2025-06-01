@@ -5,9 +5,6 @@ import { getAnonymousToken } from '../../components/auth-services/token.service'
 
 import { Product, Category } from '../../types/catalog-types';
 
-export type { Product, Category };
-
-// Alias the existing getAllPublishedProducts as getAllProducts
 export const getAllProducts = getAllPublishedProducts;
 
 interface CategoryPagedQueryResponse {

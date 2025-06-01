@@ -10,7 +10,7 @@ export function applyFilters(
   return products.filter((product) => {
     /* ---------- 1. filter by category ---------- */
     const categoryOk =
-      activeCategoryIds.size !== 0 &&
+      activeCategoryIds.size > 0 &&
       product.categories.some((c) => activeCategoryIds.has(c.id));
 
     /* ---------- 2. filter by search ---------- */

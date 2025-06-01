@@ -1,4 +1,4 @@
-import { gsap, setupBackgroundAnimations } from '../../animations/gsap-init';
+import { setupBackgroundAnimations } from '../../animations/gsap-init';
 import circleBg1Path from '../../assets/images/circle_bg_1.webp';
 import circleBg2Path from '../../assets/images/circle_bg_2.webp';
 import circleBg3Path from '../../assets/images/circle_bg_3.webp';

@@ -32,12 +32,7 @@ export function createProductCardElement(
 
   // Image container
   const imageContainer = document.createElement('div');
-  imageContainer.classList.add(
-    'w-full',
-    'h-48',
-    'bg-white',
-    'overflow-hidden'
-  );
+  imageContainer.classList.add('w-full', 'h-48', 'bg-white', 'overflow-hidden');
   card.append(imageContainer);
 
   const productImage = document.createElement('img');
