@@ -14,40 +14,98 @@ import { triggerHeaderUpdate } from '../../index';
 import createModalContainer from '../../components/layout/modal/modal-container';
 import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown';
 import { COUNTRIES } from '../../data/countries';
+import {
+  getInputValue,
+  getDropdownValue,
+  showFieldError,
+  hideFieldError,
+  setInputBorder,
+} from './auth-form-utilites';
+import {
+  REGISTRATION_FIELDS,
+  BILLING_FIELDS,
+  BASIC_FIELDS,
+} from './auth-form-config';
+
+// import {
+//   createInputField,
+//   createPageContainer,
+//   createPasswordField,
+// } from './auth-form-elements';
+import { AuthFormState, initializeAuthForm, dirty } from './auth-form-state';
+// import { initializeAuthForm, dirty } from './auth-form-state';
+
+const NAME_CITY_REGEX = /^[A-Za-zÀ-ÿ]+(?: [A-Za-zÀ-ÿ]+)*$/u;
+
+const POSTAL_CODE_PATTERNS: Record<string, RegExp> = {
+  // Северная Америка
+  US: /^\d{5}(?:-\d{4})?$/,
+  CA: /^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$/,
+
+  // Европа (топ-10 e-commerce)
+  GB: /^[A-Za-z]{1,2}\d[A-Za-z\d]?\s?\d[A-Za-z]{2}$/,
+  DE: /^\d{5}$/,
+  FR: /^\d{5}$/,
+  IT: /^\d{5}$/,
+  ES: /^\d{5}$/,
+  NL: /^\d{4}\s?[A-Za-z]{2}$/,
+  BE: /^\d{4}$/,
+  CH: /^\d{4}$/,
+  AT: /^\d{4}$/,
+  AU: /^\d{4}$/,
+  RU: /^\d{6}$/,
+  UA: /^\d{5}$/,
+  PL: /^\d{2}-\d{3}$/,
+  BY: /^\d{6}$/,
+};
+
+function isPostalCodeValid(code: string, country: string): boolean {
+  const cc = country.toUpperCase();
+  const pattern = POSTAL_CODE_PATTERNS[cc];
+
+  if (!pattern) {
+    // Фолбэк для «экзотических» стран: 3-10 символов, ≤1 пробела
+    return /^[A-Za-z0-9-]+(?: [A-Za-z0-9-]+)?$/.test(code);
+  }
+
+  return pattern.test(code);
+}
 
 const emailSchema = z
   .string()
   .min(1, { message: 'Please enter your email' })
-  .email({ message: 'Please enter a valid email (e.g., user@example.com)' });
-
-// const passwordSchema = z
-//   .string()
-//   .min(8, { message: 'Password must be at least 8 characters' })
-//   .regex(/[A-Z]/, {
-//     message: 'Password must contain at least one uppercase letter',
-//   })
-//   .regex(/[a-z]/, {
-//     message: 'Password must contain at least one lowercase letter',
-//   })
-//   .regex(/[0-9]/, { message: 'Password must contain at least one number' });
+  .email({ message: 'Please enter a valid email (e.g., user@example.com)' })
+  // запрещаем пробелы в начале/конце
+  .refine((v: string) => v === v.trim(), {
+    message: 'Email must not start or end with spaces',
+  })
+  // запрещаем пробелы внутри
+  .refine((v: string) => !/\s/.test(v), {
+    message: 'Email must not contain spaces',
+  });
 
 const passwordSchema = z
   .string()
-  .min(8, { message: 'Use at least 8 characters' }) // Короче и понятнее
+  .min(8, { message: 'Use at least 8 characters' })
   .regex(/[A-Z]/, {
-    message: 'Add at least one uppercase letter (A-Z)', // Уточнение в скобках
+    message: 'Add at least one uppercase letter (A-Z)',
   })
   .regex(/[a-z]/, {
     message: 'Add at least one lowercase letter (a-z)',
   })
   .regex(/[0-9]/, {
     message: 'Include a number (0-9)',
+  })
+  // запрещаем пробелы в начале/конце
+  .refine((v: string) => v === v.trim(), {
+    message: 'Password must not start or end with a space',
   });
 
 const nameSchema = z
   .string()
-  .min(1, { message: 'Name is required' })
-  .max(50, { message: 'Name must be less than 50 characters' });
+  .min(3, { message: 'Name is required' })
+  .regex(NAME_CITY_REGEX, { message: 'Only letters and spaces allowed' })
+  .max(50, { message: 'Max 50 characters' });
 
 const dateOfBirthSchema = z
   .string()
@@ -74,18 +132,26 @@ const dateOfBirthSchema = z
 const streetNameSchema = z
   .string()
   .min(1, { message: 'Street name is required' })
+  .regex(NAME_CITY_REGEX, { message: 'Only letters and single spaces allowed' })
   .max(100, { message: 'Street name must be less than 100 characters' });
 
 const citySchema = z
   .string()
   .min(1, { message: 'City is required' })
-  .max(50, { message: 'City must be less than 50 characters' });
+  .regex(NAME_CITY_REGEX, { message: 'Only letters and spaces allowed' })
+  .max(50, { message: 'Max 50 characters' });
 
 const postalCodeSchema = z
   .string()
   .min(1, { message: 'Postal code is required' })
-  .regex(/^[a-zA-Z0-9\s-]{3,10}$/, {
-    message: 'Invalid postal code format',
+  // допускаем символы A-Z / 0-9 / «-» и максимум ОДИН пробел
+  .regex(/^[A-Za-z0-9-]+(?: [A-Za-z0-9-]+)?$/, {
+    message:
+      'Use digits, Latin letters and “-”. Only one internal space allowed',
+  })
+  // без пробелов по краям
+  .refine((v) => v.trim() === v, {
+    message: 'Postal code must not start or end with a space',
   });
 
 const countrySchema = z
@@ -98,11 +164,17 @@ const countrySchema = z
 const houseNumberSchema = z
   .string()
   .min(1, { message: 'House number is required' })
-  .max(10, { message: 'House number must be ≤ 10 chars' });
+  .max(10, { message: 'House number must be ≤ 10 chars' })
+  .refine((v) => v.trim() === v, {
+    message: 'No leading or trailing spaces',
+  });
 
 const apartmentSchema = z
   .string()
   .max(10, { message: 'Apartment must be ≤ 10 chars' })
+  .refine((v) => v.trim() === v, {
+    message: 'No leading or trailing spaces',
+  })
   .optional();
 
 const loginFormSchema = z.object({
@@ -110,26 +182,57 @@ const loginFormSchema = z.object({
   password: passwordSchema,
 });
 
-const registerFormSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-  firstName: nameSchema,
-  lastName: nameSchema,
-  dateOfBirth: dateOfBirthSchema,
-  streetName: streetNameSchema,
-  houseNumber: houseNumberSchema,
-  apartment: apartmentSchema,
-  city: citySchema,
-  postalCode: postalCodeSchema,
-  country: countrySchema,
-  // Optional billing address fields
-  billingStreetName: streetNameSchema.optional(),
-  billingHouseNumber: houseNumberSchema.optional(),
-  billingApartment: apartmentSchema.optional(),
-  billingCity: citySchema.optional(),
-  billingPostalCode: postalCodeSchema.optional(),
-  billingCountry: countrySchema.optional(),
-});
+const FALLBACK_POSTAL_RE = /^(?=.{3,10}$)[A-Za-z0-9-]+(?: [A-Za-z0-9-]+)?$/;
+
+const registerFormSchema = z
+  .object({
+    email: emailSchema,
+    password: passwordSchema,
+    firstName: nameSchema,
+    lastName: nameSchema,
+    dateOfBirth: dateOfBirthSchema,
+    streetName: streetNameSchema,
+    houseNumber: houseNumberSchema,
+    apartment: apartmentSchema,
+    city: citySchema,
+    postalCode: postalCodeSchema, // базовая проверка (символы + пробелы)
+    country: countrySchema,
+
+    // --- billing (все optional) ---
+    billingStreetName: streetNameSchema.optional(),
+    billingHouseNumber: houseNumberSchema.optional(),
+    billingApartment: apartmentSchema.optional(),
+    billingCity: citySchema.optional(),
+    billingPostalCode: postalCodeSchema.optional(),
+    billingCountry: countrySchema.optional(),
+  })
+  .superRefine((data, context) => {
+    // --- shipping ---
+    const shippingPattern =
+      POSTAL_CODE_PATTERNS[data.country] ?? FALLBACK_POSTAL_RE;
+
+    if (!shippingPattern.test(data.postalCode)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['postalCode'],
+        message: 'Invalid postal code for selected country',
+      });
+    }
+
+    // --- billing (если страна указана) ---
+    if (data.billingPostalCode) {
+      const cc = data.billingCountry || data.country;
+      const billingPattern = POSTAL_CODE_PATTERNS[cc] ?? FALLBACK_POSTAL_RE;
+
+      if (!billingPattern.test(data.billingPostalCode)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['billingPostalCode'],
+          message: 'Invalid billing postal code for selected country',
+        });
+      }
+    }
+  });
 
 type ValidationResult = {
   success: boolean;
@@ -171,6 +274,16 @@ const inputParameters = [
   'focus:ring-none',
   'focus:border-b-10',
 ];
+
+function touch(field: string): void {
+  dirty[field] = true;
+}
+
+function markInvalidFieldsDirty(validation: ValidationResult): void {
+  for (const field of Object.keys(validation.errors)) {
+    dirty[field] = true; // теперь updateFieldErrors будет их подсвечивать
+  }
+}
 
 function validateLoginForm(email: string, password: string): ValidationResult {
   try {
@@ -241,6 +354,58 @@ function validateRegisterForm(
     }
 
     registerFormSchema.parse(dataToValidate);
+    // const cc = (dataToValidate.country || '').toUpperCase();
+    // const pcPattern = POSTAL_CODE_PATTERNS[cc] ?? /^[A-Za-z0-9\s-]{3,10}$/;
+    if (dataToValidate.postalCode !== dataToValidate.postalCode.trim()) {
+      return {
+        success: false,
+        errors: {
+          postalCode: 'Postal code must not start or end with a space',
+        },
+      };
+    }
+
+    if (
+      !isPostalCodeValid(
+        dataToValidate.postalCode.trim(),
+        dataToValidate.country
+      )
+    ) {
+      return {
+        success: false,
+        errors: { postalCode: 'Invalid postal code for selected country' },
+      };
+    }
+
+    if (billingAddress && billingAddress.billingPostalCode) {
+      if (
+        billingAddress.billingPostalCode !==
+        billingAddress.billingPostalCode.trim()
+      ) {
+        return {
+          success: false,
+          errors: {
+            billingPostalCode: 'Postal code must not start or end with a space',
+          },
+        };
+      }
+
+      if (
+        !isPostalCodeValid(
+          billingAddress.billingPostalCode.trim(),
+          billingAddress.billingCountry ?? dataToValidate.country
+        )
+      ) {
+        return {
+          success: false,
+          errors: {
+            billingPostalCode:
+              'Invalid billing postal code for selected country',
+          },
+        };
+      }
+    }
+
     return { success: true, errors: {} };
   } catch (error) {
     const formattedErrors: Record<string, string> = {};
@@ -261,151 +426,28 @@ export function createLoginPage(container: HTMLElement): void {
     return;
   }
 
-  const pageContainer = createElement({
-    tag: 'div',
-    parent: container,
-    classes: [
-      'auth-page',
-      'max-w-md',
-      'mx-auto',
-      'mt-20',
-      'p-6',
-      'bg-white',
-      'shadow-md',
-      '-z-0',
-      'relative',
-    ],
-  });
+  // Инициализация состояния
+  const state = initializeAuthForm(container);
+  for (const key of Object.keys(state.inputs)) {
+    if (!dirty[key]) dirty[key] = false;
+  }
 
-  createElement({
-    tag: 'h1',
-    text: 'Login',
-    parent: pageContainer,
-    classes: [
-      'text-2xl',
-      'font-bold',
-      'mb-6',
-      'z-30',
-      'text-center',
-      'text-gray-800',
-      "before:content-['']",
-      'before:absolute',
-      'before:h-6',
-      'before:w-20',
-      'before:bg-yellow-400',
-      'before:-z-1',
-      'login-name',
-    ],
-  });
+  // Получаем элементы из состояния
+  const { title, basicFields } = state;
+  // const { title, basicFields, inputs, containers, errors } = state;
 
-  const formContainer = createElement({
-    tag: 'form',
-    parent: pageContainer,
-    classes: ['space-y-4'],
-  });
+  const { element: titleLogin, loginText, registerText } = title;
 
-  const emailContainer = createElement({
-    tag: 'div',
-    parent: formContainer,
-    classes: ['mb-4'],
-  });
-
-  createElement({
-    tag: 'label',
-    text: 'Email',
-    parent: emailContainer,
-    classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
-    attributes: { for: 'email' },
-  });
-
-  const emailInput = createElement({
-    tag: 'input',
-    parent: emailContainer,
-    classes: inputParameters,
-    attributes: { type: 'email', id: 'email', placeholder: 'Enter your email' },
-  }) as HTMLInputElement;
-
-  const emailError = createElement({
-    tag: 'p',
-    parent: emailContainer,
-    classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
-  });
-
-  // Password field
-  const passwordContainer = createElement({
-    tag: 'div',
-    parent: formContainer,
-    classes: ['mb-4'],
-  });
-
-  createElement({
-    tag: 'label',
-    text: 'Password',
-    parent: passwordContainer,
-    classes: ['block', 'text-sm', 'font-large', 'text-gray-700', 'mb-1'],
-    attributes: { for: 'password' },
-  });
-
-  const passwordInputContainer = createElement({
-    parent: passwordContainer,
-    classes: ['relative'],
-  });
-
-  const passwordInput = createElement({
-    tag: 'input',
-    parent: passwordInputContainer,
-    classes: [
-      'w-full',
-      'px-3',
-      'py-2',
-      'mb-2',
-      'border-gray-300',
-      'focus:outline-none',
-      'focus:pb-2',
-      'focus:mb-1',
-      'pr-8',
-    ],
-    attributes: {
-      type: 'password',
-      id: 'password',
-      // placeholder: 'Enter your password',
-      // placeholder: 'Enter your password (Use 8+ chars with A-Z, a-z, 0-9)',
-      placeholder: 'Use A-Z a-z 0-9',
-    },
-  }) as HTMLInputElement;
-
-  const eyeButton = createElement({
-    tag: 'button',
-    parent: passwordInputContainer,
-    classes: ['button-eye'],
-    attributes: { type: 'button', 'aria-label': 'Toggle password visibility' },
-  });
-
-  const eyeInvisible = createSvgUse('#eye-invisible', 'eye');
-  const eyeVisible = createSvgUse('#eye-visible', 'eye');
-
-  eyeButton.append(eyeInvisible, eyeVisible);
-  eyeInvisible.classList.add('eye_active');
-
-  eyeButton.addEventListener('click', () => {
-    const isPassword = passwordInput.type === 'password';
-    passwordInput.type = isPassword ? 'text' : 'password';
-
-    eyeInvisible.classList.toggle('eye_active');
-    eyeVisible.classList.toggle('eye_active');
-  });
-
-  const passwordError = createElement({
-    tag: 'p',
-    parent: passwordContainer,
-    classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
-  });
-
-  const errorContainer = createElement({
-    tag: 'div',
-    parent: formContainer,
-    classes: ['mt-4', 'p-3', 'bg-red-100', 'text-red-700', 'hidden'],
-  });
+  const {
+    pageContainer,
+    formContainer,
+    emailContainer,
+    emailInput,
+    passwordInput,
+    emailError,
+    passwordError,
+    errorContainer,
+  } = basicFields;
 
   const buttonContainer = createElement({
     tag: 'div',
@@ -455,45 +497,6 @@ export function createLoginPage(container: HTMLElement): void {
     ],
   });
 
-  let isLoginForm = true;
-  let firstNameInput: HTMLInputElement | undefined;
-  let lastNameInput: HTMLInputElement | undefined;
-  let dateOfBirthInput: HTMLInputElement | undefined;
-  let streetNameInput: HTMLInputElement | undefined;
-  let houseNumberInput: HTMLInputElement | undefined;
-  let apartmentInput: HTMLInputElement | undefined;
-  let cityInput: HTMLInputElement | undefined;
-  let postalCodeInput: HTMLInputElement | undefined;
-  let countryInput: FilterableDropdown | undefined;
-  let billingAddressSameAsShippingCheckbox: HTMLInputElement | undefined;
-  let billingAddressSectionContainer: HTMLElement | undefined;
-  let billingStreetNameInput: HTMLInputElement | undefined;
-  let billingHouseNumberInput: HTMLInputElement | undefined;
-  let billingApartmentInput: HTMLInputElement | undefined;
-  let billingCityInput: HTMLInputElement | undefined;
-  let billingPostalCodeInput: HTMLInputElement | undefined;
-  let billingCountryInput: FilterableDropdown | undefined;
-
-  let firstNameError: HTMLElement | undefined;
-  let lastNameError: HTMLElement | undefined;
-  let dateOfBirthError: HTMLElement | undefined;
-  let streetNameError: HTMLElement | undefined;
-  let houseNumberError: HTMLElement | undefined;
-  let apartmentError: HTMLElement | undefined;
-  let cityError: HTMLElement | undefined;
-  let postalCodeError: HTMLElement | undefined;
-  let countryError: HTMLElement | undefined;
-  let countryContainerElement: HTMLDivElement | undefined;
-  let shippingAddressSectionContainer: HTMLElement | undefined;
-
-  let billingStreetNameError: HTMLElement | undefined;
-  let billingHouseNumberError: HTMLElement | undefined;
-  let billingApartmentError: HTMLElement | undefined;
-  let billingCityError: HTMLElement | undefined;
-  let billingPostalCodeError: HTMLElement | undefined;
-  let billingCountryError: HTMLElement | undefined;
-  let billingCountryContainerElement: HTMLDivElement | undefined;
-
   function clearErrorMessagesAndInputs(): void {
     emailError.classList.add('hidden');
     passwordError.classList.add('hidden');
@@ -501,107 +504,142 @@ export function createLoginPage(container: HTMLElement): void {
     emailInput.value = '';
     passwordInput.value = '';
 
-    if (firstNameError) firstNameError.classList.add('hidden');
-    if (lastNameError) lastNameError.classList.add('hidden');
-    if (dateOfBirthError) dateOfBirthError.classList.add('hidden');
-    if (streetNameError) streetNameError.classList.add('hidden');
-    if (houseNumberError) houseNumberError.classList.add('hidden');
-    if (apartmentError) apartmentError.classList.add('hidden');
-    if (cityError) cityError.classList.add('hidden');
-    if (postalCodeError) postalCodeError.classList.add('hidden');
-    if (countryError) countryError.classList.add('hidden');
+    for (const error of Object.values(state.errors)) {
+      error?.classList.add('hidden');
+    }
 
-    if (billingStreetNameError) billingStreetNameError.classList.add('hidden');
-    if (billingHouseNumberError)
-      billingHouseNumberError.classList.add('hidden');
-    if (billingApartmentError) billingApartmentError.classList.add('hidden');
-    if (billingCityError) billingCityError.classList.add('hidden');
-    if (billingPostalCodeError) billingPostalCodeError.classList.add('hidden');
-    if (billingCountryError) billingCountryError.classList.add('hidden');
+    for (const input of Object.values(state.inputs)) {
+      if (!input) continue;
+      if (input instanceof HTMLInputElement) {
+        input.value = '';
+      } else if (input instanceof FilterableDropdown) {
+        input.setSelectedValue(undefined);
+      }
+    }
 
-    if (firstNameInput) firstNameInput.value = '';
-    if (lastNameInput) lastNameInput.value = '';
-    if (dateOfBirthInput) dateOfBirthInput.value = '';
-    if (streetNameInput) streetNameInput.value = '';
-    if (houseNumberInput) houseNumberInput.value = '';
-    if (apartmentInput) apartmentInput.value = '';
-    if (cityInput) cityInput.value = '';
-    if (postalCodeInput) postalCodeInput.value = '';
-    if (countryInput) countryInput.setSelectedValue(undefined);
-
-    if (billingStreetNameInput) billingStreetNameInput.value = '';
-    if (billingHouseNumberInput) billingHouseNumberInput.value = '';
-    if (billingApartmentInput) billingApartmentInput.value = '';
-    if (billingCityInput) billingCityInput.value = '';
-    if (billingPostalCodeInput) billingPostalCodeInput.value = '';
-    if (billingCountryInput) billingCountryInput.setSelectedValue(undefined);
+    for (const key of Object.keys(dirty)) {
+      dirty[key] = false;
+    }
   }
 
   function toggleForm(): void {
-    isLoginForm = !isLoginForm;
+    const { isLoginForm } = state;
+    state.isLoginForm = !isLoginForm;
+
+    const {
+      firstName: firstNameInput,
+      lastName: lastNameInput,
+      dateOfBirth: dateOfBirthInput,
+      streetName: streetNameInput,
+      houseNumber: houseNumberInput,
+      apartment: apartmentInput,
+      city: cityInput,
+      postalCode: postalCodeInput,
+      // country: countryInput,
+      billingStreetName: billingStreetNameInput,
+      billingHouseNumber: billingHouseNumberInput,
+      billingApartment: billingApartmentInput,
+      billingCity: billingCityInput,
+      billingPostalCode: billingPostalCodeInput,
+      billingCountry: billingCountryInput,
+      billingAddressSameAsShipping: billingAddressSameAsShippingCheckbox,
+    } = state.inputs;
+
+    const {
+      shippingAddress: shippingAddressSectionContainer,
+      billingAddress: billingAddressSectionContainer,
+      // country: countryContainerElement,
+      // billingCountry: billingCountryContainerElement,
+    } = state.containers;
+
+    const {
+      firstName: firstNameError,
+      lastName: lastNameError,
+      dateOfBirth: dateOfBirthError,
+      streetName: streetNameError,
+      houseNumber: houseNumberError,
+      apartment: apartmentError,
+      city: cityError,
+      postalCode: postalCodeError,
+      country: countryError,
+      billingStreetName: billingStreetNameError,
+      billingHouseNumber: billingHouseNumberError,
+      billingApartment: billingApartmentError,
+      billingCity: billingCityError,
+      billingPostalCode: billingPostalCodeError,
+      billingCountry: billingCountryError,
+    } = state.errors;
+
+    // for (const k of Object.keys(dirty)) {
+    //   dirty[k] = false;
+    // }
+
     clearErrorMessagesAndInputs();
 
-    const title = pageContainer.querySelector('h1') as HTMLElement;
-    title.textContent = isLoginForm ? 'Login' : 'Register';
+    titleLogin.textContent = state.isLoginForm ? loginText : registerText;
 
-    loginButton.textContent = isLoginForm ? 'Login' : 'Register';
+    loginButton.textContent = state.isLoginForm ? loginText : registerText;
     loginButton.prepend(svgSpinner);
 
-    registerLink.textContent = isLoginForm ? 'Register' : 'Login';
+    registerLink.textContent = state.isLoginForm ? registerText : loginText;
 
-    if (isLoginForm) {
+    if (state.isLoginForm) {
       if (firstNameInput?.parentElement) {
         firstNameInput?.parentElement?.remove();
         lastNameInput?.parentElement?.remove();
         dateOfBirthInput?.parentElement?.remove();
 
         shippingAddressSectionContainer?.remove();
-        shippingAddressSectionContainer = undefined;
+        state.containers.shippingAddress = undefined;
+
         billingAddressSameAsShippingCheckbox?.parentElement?.remove();
-        billingAddressSameAsShippingCheckbox = undefined;
+        state.inputs.billingAddressSameAsShipping = undefined;
+
         billingAddressSectionContainer?.remove();
-        billingAddressSectionContainer = undefined;
+        state.containers.billingAddress = undefined;
 
-        firstNameInput = undefined;
-        lastNameInput = undefined;
-        dateOfBirthInput = undefined;
-        streetNameInput = undefined;
-        houseNumberInput = undefined;
-        apartmentInput = undefined;
-        cityInput = undefined;
-        postalCodeInput = undefined;
-        countryInput = undefined;
-        countryContainerElement = undefined;
-        billingStreetNameInput = undefined;
-        billingHouseNumberInput = undefined;
-        billingApartmentInput = undefined;
-        billingCityInput = undefined;
-        billingPostalCodeInput = undefined;
-        billingCountryInput = undefined;
-        billingCountryContainerElement = undefined;
+        state.inputs.firstName = undefined;
+        state.inputs.lastName = undefined;
+        state.inputs.dateOfBirth = undefined;
+        state.inputs.streetName = undefined;
+        state.inputs.houseNumber = undefined;
+        state.inputs.apartment = undefined;
+        state.inputs.city = undefined;
+        state.inputs.postalCode = undefined;
+        state.inputs.country = undefined;
 
-        firstNameError = undefined;
-        lastNameError = undefined;
-        dateOfBirthError = undefined;
-        streetNameError = undefined;
-        houseNumberError = undefined;
-        apartmentError = undefined;
-        cityError = undefined;
-        postalCodeError = undefined;
-        countryError = undefined;
-        billingStreetNameError = undefined;
-        billingHouseNumberError = undefined;
-        billingApartmentError = undefined;
-        billingCityError = undefined;
-        billingPostalCodeError = undefined;
-        billingCountryError = undefined;
+        state.inputs.billingStreetName = undefined;
+        state.inputs.billingHouseNumber = undefined;
+        state.inputs.billingApartment = undefined;
+        state.inputs.billingCity = undefined;
+        state.inputs.billingPostalCode = undefined;
+        state.inputs.billingCountry = undefined;
 
-        title.classList.add('before:w-20');
-        title.classList.remove('before:w-29');
+        state.containers.country = undefined;
+        state.containers.billingCountry = undefined;
 
-        title.classList.add('reset-animation');
-        void title.offsetWidth;
-        title.classList.remove('reset-animation');
+        state.errors.firstName = undefined;
+        state.errors.lastName = undefined;
+        state.errors.dateOfBirth = undefined;
+        state.errors.streetName = undefined;
+        state.errors.houseNumber = undefined;
+        state.errors.apartment = undefined;
+        state.errors.city = undefined;
+        state.errors.postalCode = undefined;
+        state.errors.country = undefined;
+        state.errors.billingStreetName = undefined;
+        state.errors.billingHouseNumber = undefined;
+        state.errors.billingApartment = undefined;
+        state.errors.billingCity = undefined;
+        state.errors.billingPostalCode = undefined;
+        state.errors.billingCountry = undefined;
+
+        titleLogin.classList.add('before:w-20');
+        titleLogin.classList.remove('before:w-29');
+
+        titleLogin.classList.add('reset-animation');
+        void titleLogin.offsetWidth;
+        titleLogin.classList.remove('reset-animation');
       }
     } else {
       if (!firstNameInput) {
@@ -610,11 +648,11 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['mb-4'],
         });
         // emailContainer.before(firstNameContainer); // Will be reordered
-        title.classList.add('before:w-29');
-        title.classList.remove('before:w-20', 'login-name::before');
-        title.classList.add('reset-animation');
-        void title.offsetWidth;
-        title.classList.remove('reset-animation');
+        titleLogin.classList.add('before:w-29');
+        titleLogin.classList.remove('before:w-20', 'login-name::before');
+        titleLogin.classList.add('reset-animation');
+        void titleLogin.offsetWidth;
+        titleLogin.classList.remove('reset-animation');
         createElement({
           tag: 'label',
           text: 'First Name',
@@ -622,7 +660,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'firstName' },
         });
-        firstNameInput = createElement({
+        state.inputs.firstName = createElement({
           tag: 'input',
           parent: firstNameContainer,
           classes: inputParameters,
@@ -632,7 +670,7 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'Enter your first name',
           },
         }) as HTMLInputElement;
-        firstNameError = createElement({
+        state.errors.firstName = createElement({
           tag: 'p',
           parent: firstNameContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
@@ -650,7 +688,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'lastName' },
         });
-        lastNameInput = createElement({
+        state.inputs.lastName = createElement({
           tag: 'input',
           parent: lastNameContainer,
           classes: inputParameters,
@@ -660,7 +698,7 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'Enter your last name',
           },
         }) as HTMLInputElement;
-        lastNameError = createElement({
+        state.errors.lastName = createElement({
           tag: 'p',
           parent: lastNameContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
@@ -684,7 +722,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'dateOfBirth' },
         });
-        dateOfBirthInput = createElement({
+        state.inputs.dateOfBirth = createElement({
           tag: 'input',
           parent: dateOfBirthContainer,
           classes: inputParameters,
@@ -694,23 +732,24 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'YYYY-MM-DD',
           },
         }) as HTMLInputElement;
-        dateOfBirthError = createElement({
+        state.errors.dateOfBirth = createElement({
           tag: 'p',
           parent: dateOfBirthContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
         // Shipping Address Section
-        shippingAddressSectionContainer = createElement({
+        state.containers.shippingAddress = createElement({
           tag: 'div',
           classes: ['space-y-4', 'address-section', 'mt-6'],
         });
-        buttonContainer.before(shippingAddressSectionContainer);
+        buttonContainer.before(state.containers.shippingAddress);
 
         createElement({
           tag: 'h2',
           text: 'Address',
-          parent: shippingAddressSectionContainer,
+          parent: state.containers.shippingAddress,
+          // parent: shippingAddressSectionContainer,
           classes: [
             'address-title',
             'font-bold',
@@ -730,7 +769,8 @@ export function createLoginPage(container: HTMLElement): void {
 
         const streetNameContainer = createElement({
           tag: 'div',
-          parent: shippingAddressSectionContainer,
+          parent: state.containers.shippingAddress,
+          // parent: shippingAddressSectionContainer,
           classes: ['mb-4'],
         });
         createElement({
@@ -740,7 +780,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'streetName' },
         });
-        streetNameInput = createElement({
+        state.inputs.streetName = createElement({
           tag: 'input',
           parent: streetNameContainer,
           classes: inputParameters,
@@ -750,7 +790,7 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'Enter street name',
           },
         }) as HTMLInputElement;
-        streetNameError = createElement({
+        state.errors.streetName = createElement({
           tag: 'p',
           parent: streetNameContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
@@ -758,7 +798,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const houseNumberContainer = createElement({
           tag: 'div',
-          parent: shippingAddressSectionContainer,
+          parent: state.containers.shippingAddress,
           classes: ['mb-4'],
         });
         createElement({
@@ -768,7 +808,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'houseNumber' },
         });
-        houseNumberInput = createElement({
+        state.inputs.houseNumber = createElement({
           tag: 'input',
           parent: houseNumberContainer,
           classes: inputParameters,
@@ -778,7 +818,7 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'e.g., 123A',
           },
         }) as HTMLInputElement;
-        houseNumberError = createElement({
+        state.errors.houseNumber = createElement({
           tag: 'p',
           parent: houseNumberContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
@@ -786,7 +826,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const apartmentContainer = createElement({
           tag: 'div',
-          parent: shippingAddressSectionContainer,
+          parent: state.containers.shippingAddress,
           classes: ['mb-4'],
         });
         createElement({
@@ -796,7 +836,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'apartment' },
         });
-        apartmentInput = createElement({
+        state.inputs.apartment = createElement({
           tag: 'input',
           parent: apartmentContainer,
           classes: inputParameters,
@@ -806,7 +846,7 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'e.g., Apt 4B',
           },
         }) as HTMLInputElement;
-        apartmentError = createElement({
+        state.errors.apartment = createElement({
           tag: 'p',
           parent: apartmentContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
@@ -814,7 +854,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const cityContainer = createElement({
           tag: 'div',
-          parent: shippingAddressSectionContainer,
+          parent: state.containers.shippingAddress,
           classes: ['mb-4'],
         });
         createElement({
@@ -824,7 +864,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'city' },
         });
-        cityInput = createElement({
+        state.inputs.city = createElement({
           tag: 'input',
           parent: cityContainer,
           classes: inputParameters,
@@ -834,7 +874,7 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'Enter your city',
           },
         }) as HTMLInputElement;
-        cityError = createElement({
+        state.errors.city = createElement({
           tag: 'p',
           parent: cityContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
@@ -842,7 +882,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const postalCodeContainer = createElement({
           tag: 'div',
-          parent: shippingAddressSectionContainer,
+          parent: state.containers.shippingAddress,
           classes: ['mb-4'],
         });
         createElement({
@@ -852,7 +892,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'postalCode' },
         });
-        postalCodeInput = createElement({
+        state.inputs.postalCode = createElement({
           tag: 'input',
           parent: postalCodeContainer,
           classes: inputParameters,
@@ -862,39 +902,42 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'Enter your postal code',
           },
         }) as HTMLInputElement;
-        postalCodeError = createElement({
+        state.errors.postalCode = createElement({
           tag: 'p',
           parent: postalCodeContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
         // Country - Corrected Section
-        countryContainerElement = createElement({
+        state.containers.country = createElement({
           tag: 'div',
-          parent: shippingAddressSectionContainer,
+          parent: state.containers.shippingAddress,
           classes: ['mb-4'],
         }) as HTMLDivElement;
         createElement({
           tag: 'label',
           text: 'Country',
-          parent: countryContainerElement,
+          parent: state.containers.country,
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'country-dropdown' },
         });
-        countryInput = new FilterableDropdown(COUNTRIES, (selectedCountry) => {
-          if (countryError && selectedCountry) {
-            countryError.classList.add('hidden');
-            countryError.textContent = '';
+        state.inputs.country = new FilterableDropdown(
+          COUNTRIES,
+          (selectedCountry) => {
+            if (countryError && selectedCountry) {
+              countryError.classList.add('hidden');
+              countryError.textContent = '';
+            }
           }
-        });
+        );
 
-        const dropdownElement = countryInput.getElement();
-        if (countryContainerElement) {
-          countryContainerElement.append(dropdownElement);
+        const dropdownElement = state.inputs.country.getElement();
+        if (state.containers.country) {
+          state.containers.country.append(dropdownElement);
         }
-        countryError = createElement({
+        state.errors.country = createElement({
           tag: 'p',
-          parent: countryContainerElement,
+          parent: state.containers.country,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
@@ -904,9 +947,9 @@ export function createLoginPage(container: HTMLElement): void {
           parent: formContainer,
           classes: ['mb-4', 'flex', 'items-center'],
         });
-        shippingAddressSectionContainer.after(checkboxContainer);
+        state.containers.shippingAddress.after(checkboxContainer);
 
-        billingAddressSameAsShippingCheckbox = createElement({
+        state.inputs.billingAddressSameAsShipping = createElement({
           tag: 'input',
           parent: checkboxContainer,
           classes: ['mr-2'],
@@ -926,16 +969,17 @@ export function createLoginPage(container: HTMLElement): void {
         });
 
         // Billing Address Section
-        billingAddressSectionContainer = createElement({
+        state.containers.billingAddress = createElement({
           tag: 'div',
           classes: ['space-y-4', 'address-section', 'mt-6', 'hidden'], // Initially hidden
         });
-        buttonContainer.before(billingAddressSectionContainer); // before the register button
+        buttonContainer.before(state.containers.billingAddress); // before the register button
+        // buttonContainer.before(billingAddressSectionContainer); // before the register button
 
         createElement({
           tag: 'h2',
           text: 'Billing address',
-          parent: billingAddressSectionContainer,
+          parent: state.containers.billingAddress,
           classes: [
             'address-title',
             'font-bold',
@@ -947,7 +991,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const billingStreetNameContainer = createElement({
           tag: 'div',
-          parent: billingAddressSectionContainer,
+          parent: state.containers.billingAddress,
           classes: ['mb-4'],
         });
         createElement({
@@ -957,7 +1001,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingStreetName' },
         });
-        billingStreetNameInput = createElement({
+        state.inputs.billingStreetName = createElement({
           tag: 'input',
           parent: billingStreetNameContainer,
           classes: inputParameters,
@@ -967,7 +1011,7 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'Enter street name',
           },
         }) as HTMLInputElement;
-        billingStreetNameError = createElement({
+        state.errors.billingStreetName = createElement({
           tag: 'p',
           parent: billingStreetNameContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
@@ -975,7 +1019,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const billingHouseNumberContainer = createElement({
           tag: 'div',
-          parent: billingAddressSectionContainer,
+          parent: state.containers.billingAddress,
           classes: ['mb-4'],
         });
         createElement({
@@ -985,7 +1029,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingHouseNumber' },
         });
-        billingHouseNumberInput = createElement({
+        state.inputs.billingHouseNumber = createElement({
           tag: 'input',
           parent: billingHouseNumberContainer,
           classes: inputParameters,
@@ -995,7 +1039,7 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'e.g., 123A',
           },
         }) as HTMLInputElement;
-        billingHouseNumberError = createElement({
+        state.errors.billingHouseNumber = createElement({
           tag: 'p',
           parent: billingHouseNumberContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
@@ -1003,7 +1047,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const billingApartmentContainer = createElement({
           tag: 'div',
-          parent: billingAddressSectionContainer,
+          parent: state.containers.billingAddress,
           classes: ['mb-4'],
         });
         createElement({
@@ -1013,7 +1057,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingApartment' },
         });
-        billingApartmentInput = createElement({
+        state.inputs.billingApartment = createElement({
           tag: 'input',
           parent: billingApartmentContainer,
           classes: inputParameters,
@@ -1023,7 +1067,7 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'e.g., Apt 4B',
           },
         }) as HTMLInputElement;
-        billingApartmentError = createElement({
+        state.errors.billingApartment = createElement({
           tag: 'p',
           parent: billingApartmentContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
@@ -1031,7 +1075,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const billingCityContainer = createElement({
           tag: 'div',
-          parent: billingAddressSectionContainer,
+          parent: state.containers.billingAddress,
           classes: ['mb-4'],
         });
         createElement({
@@ -1041,7 +1085,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingCity' },
         });
-        billingCityInput = createElement({
+        state.inputs.billingCity = createElement({
           tag: 'input',
           parent: billingCityContainer,
           classes: inputParameters,
@@ -1051,7 +1095,7 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'Enter your city',
           },
         }) as HTMLInputElement;
-        billingCityError = createElement({
+        state.errors.billingCity = createElement({
           tag: 'p',
           parent: billingCityContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
@@ -1059,7 +1103,7 @@ export function createLoginPage(container: HTMLElement): void {
 
         const billingPostalCodeContainer = createElement({
           tag: 'div',
-          parent: billingAddressSectionContainer,
+          parent: state.containers.billingAddress,
           classes: ['mb-4'],
         });
         createElement({
@@ -1069,7 +1113,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingPostalCode' },
         });
-        billingPostalCodeInput = createElement({
+        state.inputs.billingPostalCode = createElement({
           tag: 'input',
           parent: billingPostalCodeContainer,
           classes: inputParameters,
@@ -1079,52 +1123,59 @@ export function createLoginPage(container: HTMLElement): void {
             placeholder: 'Enter your postal code',
           },
         }) as HTMLInputElement;
-        billingPostalCodeError = createElement({
+        state.errors.billingPostalCode = createElement({
           tag: 'p',
           parent: billingPostalCodeContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
-        billingCountryContainerElement = createElement({
+        state.containers.billingCountry = createElement({
           tag: 'div',
-          parent: billingAddressSectionContainer,
+          parent: state.containers.billingAddress,
           classes: ['mb-4'],
         }) as HTMLDivElement;
         createElement({
           tag: 'label',
           text: 'Country',
-          parent: billingCountryContainerElement,
+          parent: state.containers.billingCountry,
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingCountry-dropdown' },
         });
-        billingCountryInput = new FilterableDropdown(
+        state.inputs.billingCountry = new FilterableDropdown(
           COUNTRIES,
           (selectedCountry) => {
             if (billingCountryError && selectedCountry) {
               billingCountryError.classList.add('hidden');
               billingCountryError.textContent = '';
             }
+            validateForm();
           }
         );
-        const billingDropdownElement = billingCountryInput.getElement();
-        if (billingCountryContainerElement) {
-          billingCountryContainerElement.append(billingDropdownElement);
+        const billingDropdownElement = state.inputs.billingCountry.getElement();
+        if (state.containers.billingCountry) {
+          state.containers.billingCountry.append(billingDropdownElement);
         }
-        billingCountryError = createElement({
+        // if (billingCountryContainerElement) {
+        //   billingCountryContainerElement.append(billingDropdownElement);
+        // }
+        state.errors.billingCountry = createElement({
           tag: 'p',
-          parent: billingCountryContainerElement,
+          parent: state.containers.billingCountry,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
-        billingAddressSameAsShippingCheckbox.addEventListener('change', () => {
-          if (billingAddressSectionContainer) {
-            billingAddressSectionContainer.classList.toggle(
-              'hidden',
-              billingAddressSameAsShippingCheckbox?.checked
-            );
+        state.inputs.billingAddressSameAsShipping.addEventListener(
+          'change',
+          () => {
+            if (state.containers.billingAddress) {
+              state.containers.billingAddress.classList.toggle(
+                'hidden',
+                billingAddressSameAsShippingCheckbox?.checked
+              );
+            }
+            validateForm(); // Re-validate when checkbox state changes
           }
-          validateForm(); // Re-validate when checkbox state changes
-        });
+        );
 
         // Добавляем обработчики после создания элементов
         setupValidationHandlers();
@@ -1178,127 +1229,57 @@ export function createLoginPage(container: HTMLElement): void {
     if (billingCountryError) billingCountryError.classList.add('hidden');
   }
 
-  // registerLink.addEventListener('click', toggleForm);
-
+  /****************************************************************** */
   // Функция для настройки обработчиков (теряются про тогле)
+  // вспомогательная функция (попросил линтер)
+  const setupInputHandler = (
+    input: HTMLInputElement,
+    fieldName: string,
+    eventType: string = 'input'
+  ) => {
+    input.removeEventListener(eventType, validateForm);
+    input.addEventListener(eventType, () => {
+      if (fieldName) touch(fieldName);
+      validateForm();
+    });
+  };
+
   function setupValidationHandlers() {
-    // Удаляем старые обработчики, если они есть
-    emailInput.removeEventListener('input', validateForm);
-    passwordInput.removeEventListener('input', validateForm);
-    if (firstNameInput) {
-      firstNameInput.removeEventListener('input', validateForm);
-    }
-    if (lastNameInput) {
-      lastNameInput.removeEventListener('input', validateForm);
-    }
-    if (dateOfBirthInput) {
-      dateOfBirthInput.removeEventListener('input', validateForm);
-    }
-    if (streetNameInput) {
-      streetNameInput.removeEventListener('input', validateForm);
-    }
-    if (houseNumberInput) {
-      houseNumberInput.removeEventListener('input', validateForm);
-    }
-    if (apartmentInput) {
-      apartmentInput.removeEventListener('input', validateForm);
-    }
-    if (cityInput) {
-      cityInput.removeEventListener('input', validateForm);
-    }
-    if (postalCodeInput) {
-      postalCodeInput.removeEventListener('input', validateForm);
-    }
-    // if (countryInput) {
-    //   countryInput.removeEventListener('input', validateForm);
-    // }
+    const { emailInput, passwordInput } = state.basicFields;
 
-    if (billingStreetNameInput) {
-      billingStreetNameInput.removeEventListener('input', validateForm);
-    }
-    if (billingHouseNumberInput) {
-      billingHouseNumberInput.removeEventListener('input', validateForm);
-    }
-    if (billingApartmentInput) {
-      billingApartmentInput.removeEventListener('input', validateForm);
-    }
-    if (billingCityInput) {
-      billingCityInput.removeEventListener('input', validateForm);
-    }
-    if (billingPostalCodeInput) {
-      billingPostalCodeInput.removeEventListener('input', validateForm);
-    }
-    // if (billingCountryInput) {
-    //   billingCountryInput.removeEventListener('input', validateForm);
-    // }
+    // Обработка основных полей
+    setupInputHandler(emailInput, 'email');
+    setupInputHandler(passwordInput, 'password');
 
-    // Добавляем новые обработчики
-    emailInput.addEventListener('input', validateForm);
-    passwordInput.addEventListener('input', validateForm);
+    // Обработка обычных инпутов
+    for (const [fieldName, input] of Object.entries(state.inputs)) {
+      if (!input) continue;
 
-    // if (firstNameInput) {
-    //   firstNameInput.addEventListener('input', validateForm);
-    // }
+      // Пропускаем специальные поля
+      if (
+        fieldName === 'country' ||
+        fieldName === 'billingCountry' ||
+        fieldName === 'billingAddressSameAsShipping'
+      ) {
+        continue;
+      }
 
-    // if (lastNameInput) {
-    //   lastNameInput.addEventListener('input', validateForm);
-    // }
-    if (firstNameInput) {
-      firstNameInput.addEventListener('input', validateForm);
+      if (input instanceof HTMLInputElement) {
+        setupInputHandler(input, fieldName);
+      }
     }
-    if (lastNameInput) {
-      lastNameInput.addEventListener('input', validateForm);
-    }
-    if (dateOfBirthInput) {
-      dateOfBirthInput.addEventListener('input', validateForm);
-    }
-    if (streetNameInput) {
-      streetNameInput.addEventListener('input', validateForm);
-    }
-    if (houseNumberInput) {
-      houseNumberInput.addEventListener('input', validateForm);
-    }
-    if (apartmentInput) {
-      apartmentInput.addEventListener('input', validateForm);
-    }
-    if (cityInput) {
-      cityInput.addEventListener('input', validateForm);
-    }
-    if (postalCodeInput) {
-      postalCodeInput.addEventListener('input', validateForm);
-    }
-    // if (countryInput) {
-    //   countryInput.addEventListener('input', validateForm);
-    // }
 
-    if (billingStreetNameInput) {
-      billingStreetNameInput.addEventListener('input', validateForm);
+    // Обработка чекбокса
+    if (state.inputs.billingAddressSameAsShipping) {
+      setupInputHandler(
+        state.inputs.billingAddressSameAsShipping,
+        '', // Не помечаем как dirty
+        'change'
+      );
     }
-    if (billingHouseNumberInput) {
-      billingHouseNumberInput.addEventListener('input', validateForm);
-    }
-    if (billingApartmentInput) {
-      billingApartmentInput.addEventListener('input', validateForm);
-    }
-    if (billingCityInput) {
-      billingCityInput.addEventListener('input', validateForm);
-    }
-    if (billingPostalCodeInput) {
-      billingPostalCodeInput.addEventListener('input', validateForm);
-    }
-    // if (billingCountryInput) {
-    //   billingCountryInput.addEventListener('input', validateForm);
-    // }
   }
 
-  function showFieldError(field: HTMLElement, message: string): void {
-    field.textContent = message;
-    field.classList.remove('hidden');
-  }
-
-  function hideFieldError(field: HTMLElement): void {
-    field.classList.add('hidden');
-  }
+  /****************************************************************** */
 
   function showFormError(message: string): void {
     errorContainer.textContent = message;
@@ -1310,245 +1291,150 @@ export function createLoginPage(container: HTMLElement): void {
     errorContainer.classList.add('hidden');
   }
 
-  function validateForm() {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+  /************************************************** */
 
-    console.log('начал что-то вводить');
+  function validateForm(): ValidationResult {
+    const { isLoginForm, basicFields, inputs } = state;
+    const { emailInput, passwordInput } = basicFields;
+
+    console.log('Запустилась validateForm');
 
     if (isLoginForm) {
-      const validation = validateLoginForm(email, password);
-      updateFieldErrors(validation);
-    } else {
-      const firstName = firstNameInput?.value || '';
-      const lastName = lastNameInput?.value || '';
-      const dateOfBirth = dateOfBirthInput?.value || '';
-      const streetName = streetNameInput?.value || '';
-      const houseNumber = houseNumberInput?.value || '';
-      const apartment = apartmentInput?.value || '';
-      const city = cityInput?.value || '';
-      const postalCode = postalCodeInput?.value || '';
-      // const country = countryInput?.value || '';
-      const country = countryInput?.getSelectedValue() || '';
-
-      let billingStreetName = '';
-      let billingHouseNumber = '';
-      let billingApartment = '';
-      let billingCity = '';
-      let billingPostalCode = '';
-      let billingCountry = '';
-
-      if (
-        billingAddressSameAsShippingCheckbox &&
-        !billingAddressSameAsShippingCheckbox.checked
-      ) {
-        billingStreetName = billingStreetNameInput?.value || '';
-        billingHouseNumber = billingHouseNumberInput?.value || '';
-        billingApartment = billingApartmentInput?.value || '';
-        billingCity = billingCityInput?.value || '';
-        billingPostalCode = billingPostalCodeInput?.value || '';
-        billingCountry = billingCountryInput?.getSelectedValue() || '';
-      }
-
-      let billingDetails;
-      if (
-        billingAddressSameAsShippingCheckbox &&
-        !billingAddressSameAsShippingCheckbox.checked
-      ) {
-        billingDetails = {
-          billingStreetName,
-          billingHouseNumber,
-          billingApartment,
-          billingCity,
-          billingPostalCode,
-          billingCountry,
-        };
-      }
-
-      const validation = validateRegisterForm(
-        email,
-        password,
-        firstName,
-        lastName,
-        dateOfBirth,
-        streetName,
-        houseNumber,
-        apartment,
-        city,
-        postalCode,
-        country,
-        billingDetails
+      const validation = validateLoginForm(
+        emailInput.value,
+        passwordInput.value
       );
-      updateFieldErrors(validation);
+      updateFieldErrors(state, validation);
+      return validation;
     }
+
+    // Для формы регистрации
+    const billingDetails = inputs.billingAddressSameAsShipping?.checked
+      ? undefined
+      : {
+          billingStreetName: getInputValue(inputs.billingStreetName),
+          billingHouseNumber: getInputValue(inputs.billingHouseNumber),
+          billingApartment: getInputValue(inputs.billingApartment),
+          billingCity: getInputValue(inputs.billingCity),
+          billingPostalCode: getInputValue(inputs.billingPostalCode),
+          billingCountry: getDropdownValue(inputs.billingCountry),
+        };
+
+    const validation = validateRegisterForm(
+      emailInput.value,
+      passwordInput.value,
+      getInputValue(inputs.firstName),
+      getInputValue(inputs.lastName),
+      getInputValue(inputs.dateOfBirth),
+      getInputValue(inputs.streetName),
+      getInputValue(inputs.houseNumber),
+      getInputValue(inputs.apartment),
+      getInputValue(inputs.city),
+      getInputValue(inputs.postalCode),
+      getDropdownValue(inputs.country),
+      billingDetails
+    );
+
+    updateFieldErrors(state, validation);
+    return validation;
   }
 
-  // Функция для обновления ошибок полей
-  function updateFieldErrors(validation: ValidationResult) {
-    if (validation.errors.email) {
-      showFieldError(emailError, validation.errors.email);
-    } else {
-      hideFieldError(emailError);
-    }
+  function updateFieldErrors(
+    state: AuthFormState,
+    validation: ValidationResult
+  ): void {
+    const { isLoginForm, basicFields, inputs, errors, containers } = state;
 
-    if (validation.errors.password) {
-      showFieldError(passwordError, validation.errors.password);
-    } else {
-      hideFieldError(passwordError);
-    }
+    console.log('Validation errors:', validation.errors);
+    console.log('Dirty fields:', dirty);
+    // Хелпер для обработки ошибок
+    const handleFieldError = (
+      fieldName: string,
+      errorElement: HTMLElement | undefined,
+      inputElement: HTMLElement | undefined
+    ) => {
+      if (!errorElement || !inputElement) return;
+      // if (!dirty[fieldName] || !errorElement || !inputElement) return;
 
-    if (!isLoginForm) {
-      if (firstNameError) {
-        if (validation.errors.firstName) {
-          showFieldError(firstNameError, validation.errors.firstName);
-        } else {
-          hideFieldError(firstNameError);
-        }
-      }
-
-      if (lastNameError) {
-        if (validation.errors.lastName) {
-          showFieldError(lastNameError, validation.errors.lastName);
-        } else {
-          hideFieldError(lastNameError);
-        }
-      }
-
-      if (dateOfBirthError) {
-        if (validation.errors.dateOfBirth) {
-          showFieldError(dateOfBirthError, validation.errors.dateOfBirth);
-        } else {
-          hideFieldError(dateOfBirthError);
-        }
-      }
-
-      if (streetNameError) {
-        if (validation.errors.streetName) {
-          showFieldError(streetNameError, validation.errors.streetName);
-        } else {
-          hideFieldError(streetNameError);
-        }
-      }
-
-      if (houseNumberError) {
-        if (validation.errors.houseNumber) {
-          showFieldError(houseNumberError, validation.errors.houseNumber);
-        } else {
-          hideFieldError(houseNumberError);
-        }
-      }
-
-      if (apartmentError) {
-        if (validation.errors.apartment) {
-          showFieldError(apartmentError, validation.errors.apartment);
-        } else {
-          hideFieldError(apartmentError);
-        }
-      }
-
-      if (cityError) {
-        if (validation.errors.city) {
-          showFieldError(cityError, validation.errors.city);
-        } else {
-          hideFieldError(cityError);
-        }
-      }
-
-      if (postalCodeError) {
-        if (validation.errors.postalCode) {
-          showFieldError(postalCodeError, validation.errors.postalCode);
-        } else {
-          hideFieldError(postalCodeError);
-        }
-      }
-
-      if (countryError) {
-        if (validation.errors.country) {
-          showFieldError(countryError, validation.errors.country);
-        } else {
-          hideFieldError(countryError);
-        }
-      }
-
-      // Billing address errors (only if checkbox is unchecked)
-      if (
-        billingAddressSameAsShippingCheckbox &&
-        !billingAddressSameAsShippingCheckbox.checked
-      ) {
-        if (billingStreetNameError) {
-          if (validation.errors.billingStreetName) {
-            showFieldError(
-              billingStreetNameError,
-              validation.errors.billingStreetName
-            );
-          } else {
-            hideFieldError(billingStreetNameError);
-          }
-        }
-        if (billingHouseNumberError) {
-          if (validation.errors.billingHouseNumber) {
-            showFieldError(
-              billingHouseNumberError,
-              validation.errors.billingHouseNumber
-            );
-          } else {
-            hideFieldError(billingHouseNumberError);
-          }
-        }
-        if (billingApartmentError) {
-          if (validation.errors.billingApartment) {
-            showFieldError(
-              billingApartmentError,
-              validation.errors.billingApartment
-            );
-          } else {
-            hideFieldError(billingApartmentError);
-          }
-        }
-        if (billingCityError) {
-          if (validation.errors.billingCity) {
-            showFieldError(billingCityError, validation.errors.billingCity);
-          } else {
-            hideFieldError(billingCityError);
-          }
-        }
-        if (billingPostalCodeError) {
-          if (validation.errors.billingPostalCode) {
-            showFieldError(
-              billingPostalCodeError,
-              validation.errors.billingPostalCode
-            );
-          } else {
-            hideFieldError(billingPostalCodeError);
-          }
-        }
-        if (billingCountryError) {
-          if (validation.errors.billingCountry) {
-            showFieldError(
-              billingCountryError,
-              validation.errors.billingCountry
-            );
-          } else {
-            hideFieldError(billingCountryError);
-          }
-        }
+      const message = validation.errors[fieldName];
+      if (message) {
+        showFieldError(errorElement, message);
+        setInputBorder(inputElement, true);
       } else {
-        // Hide billing errors if checkbox is checked
-        if (billingStreetNameError) hideFieldError(billingStreetNameError);
-        if (billingHouseNumberError) hideFieldError(billingHouseNumberError);
-        if (billingApartmentError) hideFieldError(billingApartmentError);
-        if (billingCityError) hideFieldError(billingCityError);
-        if (billingPostalCodeError) hideFieldError(billingPostalCodeError);
-        if (billingCountryError) hideFieldError(billingCountryError);
+        hideFieldError(errorElement);
+        setInputBorder(inputElement, false);
+      }
+    };
+
+    // Обрабатываем основные поля
+    handleFieldError(
+      BASIC_FIELDS.email.name,
+      basicFields.emailError,
+      basicFields.emailInput
+    );
+    handleFieldError(
+      BASIC_FIELDS.password.name,
+      basicFields.passwordError,
+      basicFields.passwordInput
+    );
+
+    if (isLoginForm) return;
+
+    // Обрабатываем поля регистрации
+    for (const field of REGISTRATION_FIELDS) {
+      const input = field.isContainer
+        ? containers[field.inputKey as keyof typeof containers]
+        : inputs[field.inputKey];
+
+      handleFieldError(
+        field.name,
+        errors[field.errorKey],
+        input as HTMLElement | undefined
+      );
+    }
+
+    // Обрабатываем billing поля
+    if (
+      inputs.billingAddressSameAsShipping &&
+      !inputs.billingAddressSameAsShipping.checked
+    ) {
+      for (const field of BILLING_FIELDS) {
+        const input = field.isContainer
+          ? containers[field.inputKey as keyof typeof containers]
+          : inputs[field.inputKey];
+
+        handleFieldError(
+          field.name,
+          errors[field.errorKey],
+          input as HTMLElement | undefined
+        );
       }
     }
-    // loginButton.disabled = !validation.success;
   }
+
+  /******************************************************************** */
 
   loginButton.addEventListener('click', async () => {
     hideFormError();
     const { addNotification } = uiStore.getState();
     // const { setLoading, addNotification } = uiStore.getState();
+
+    const { isLoginForm } = state;
+    const {
+      streetName: streetNameInput,
+      houseNumber: houseNumberInput,
+      apartment: apartmentInput,
+      city: cityInput,
+      postalCode: postalCodeInput,
+      country: countryInput,
+      billingStreetName: billingStreetNameInput,
+      billingHouseNumber: billingHouseNumberInput,
+      billingApartment: billingApartmentInput,
+      billingCity: billingCityInput,
+      billingPostalCode: billingPostalCodeInput,
+      billingCountry: billingCountryInput,
+      billingAddressSameAsShipping: billingAddressSameAsShippingCheckbox,
+    } = state.inputs;
 
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -1594,18 +1480,6 @@ export function createLoginPage(container: HTMLElement): void {
         modalContainer.remove();
       }
     } else {
-      // Registration form
-      // const firstName = firstNameInput?.value || '';
-      // const lastName = lastNameInput?.value || '';
-      // const dateOfBirth = dateOfBirthInput?.value || '';
-      // const streetName = streetNameInput?.value || '';
-      // const houseNumber = houseNumberInput?.value || '';
-      // const apartment = apartmentInput?.value || '';
-      // const city = cityInput?.value || '';
-      // const postalCode = postalCodeInput?.value || '';
-      // // const country = countryInput?.value || ''; // Ensure country code is uppercase
-      // const country = countryInput?.getSelectedValue() || '';
-
       const shippingAddressData = {
         streetName: streetNameInput?.value || '',
         houseNumber: houseNumberInput?.value || '',
@@ -1651,9 +1525,10 @@ export function createLoginPage(container: HTMLElement): void {
       const validation = validateRegisterForm(
         emailInput.value,
         passwordInput.value,
-        firstNameInput?.value || '',
-        lastNameInput?.value || '',
-        dateOfBirthInput?.value || '',
+        state.inputs.firstName?.value || '',
+        // firstNameInput?.value || '',
+        state.inputs.lastName?.value || '',
+        state.inputs.dateOfBirth?.value || '',
         shippingAddressData.streetName,
         shippingAddressData.houseNumber,
         shippingAddressData.apartment,
@@ -1663,15 +1538,35 @@ export function createLoginPage(container: HTMLElement): void {
         billingDetailsForValidation
       );
 
-      updateFieldErrors(validation); // Update errors for all fields first
+      updateFieldErrors(state, validation); // Update errors for all fields first
 
       if (!validation.success) {
+        markInvalidFieldsDirty(validation);
+        updateFieldErrors(state, validation);
         addNotification(
           'warning',
           'Please fix the form errors before submitting.'
         );
         return;
       }
+
+      const {
+        firstName: firstNameError,
+        lastName: lastNameError,
+        dateOfBirth: dateOfBirthError,
+        streetName: streetNameError,
+        houseNumber: houseNumberError,
+        apartment: apartmentError,
+        city: cityError,
+        postalCode: postalCodeError,
+        country: countryError,
+        billingStreetName: billingStreetNameError,
+        billingHouseNumber: billingHouseNumberError,
+        billingApartment: billingApartmentError,
+        billingCity: billingCityError,
+        billingPostalCode: billingPostalCodeError,
+        billingCountry: billingCountryError,
+      } = state.errors;
 
       // Clear all errors if validation passes
       hideFieldError(emailError);
@@ -1725,9 +1620,10 @@ export function createLoginPage(container: HTMLElement): void {
         const success = await AuthService.register(
           emailInput.value,
           passwordInput.value,
-          firstNameInput?.value || '',
-          lastNameInput?.value || '',
-          dateOfBirthInput?.value || '',
+          state.inputs.firstName?.value || '',
+          // firstNameInput?.value || '',
+          state.inputs.lastName?.value || '',
+          state.inputs.dateOfBirth?.value || '',
           addresses
         );
         if (success) {
@@ -1759,7 +1655,7 @@ export function createLoginPage(container: HTMLElement): void {
   emailInput.addEventListener('keypress', handleEnterKey);
   passwordInput.addEventListener('keypress', handleEnterKey);
 
-  isLoginForm = false;
+  state.isLoginForm = false;
   toggleForm(); // Initialize as login form
   registerLink.addEventListener('click', toggleForm);
 }
