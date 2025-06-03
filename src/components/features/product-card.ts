@@ -5,6 +5,7 @@ import {
   ProductModal,
 } from '../../components/layout/modal/product-modal';
 import './product-card.scss';
+import priceHitImg from '@assets/images/price-hit.webp';
 
 let productModal: ProductModal;
 
@@ -53,7 +54,7 @@ export function createProductCardElement(product: Product): HTMLElement {
       tag: 'img',
       parent: imageContainer,
       attributes: {
-        src: 'src/assets/images/price-hit.webp',
+        src: priceHitImg,
         alt: 'Discount',
       },
       classes: ['absolute', 'top-0', 'right-0', 'w-12', 'z-10', 'price_hit'],
@@ -85,7 +86,7 @@ export function createProductCardElement(product: Product): HTMLElement {
     tag: 'h3',
     parent: contentContainer,
     text: product.name['en-US'] || 'N/A',
-    classes: ['text-xl', 'font-nexa-bold', 'mb-2', 'text-gray-800', 'truncate'],
+    classes: ['text-xl', 'mb-2', 'text-gray-800'],
   });
 
   if (product.description && product.description['en-US']) {
