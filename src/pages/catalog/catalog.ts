@@ -130,5 +130,39 @@ export function createCatalogPage(container: HTMLElement): void {
     renderOrUpdateProductList();
   });
 
+  // Handle apply-discount-filter event
+  navigation.addEventListener('apply-discount-filter', () => {
+    // Logic to filter products with discounts
+    const discountedProducts = allProducts.filter(
+      (product) => product.masterVariant.prices?.[0]?.discounted?.value
+    );
+    displayedProducts = sortProducts(discountedProducts, currentSortMode);
+
+    // Update product list
+    productListContainer.innerHTML = '';
+    const productListElement = createProductListElement(
+      displayedProducts,
+      allCategoriesMap
+    );
+    productListContainer.append(productListElement);
+  });
+
+  // Handle reset-filters event
+  navigation.addEventListener('reset-filters', () => {
+    // Reset all filters
+    activeCategoryIds = new Set(allCategoriesMap.keys());
+    currentSearchTerm = '';
+    currentSortMode = { key: 'name', asc: true };
+
+    // Reset search input
+    const searchInput = navigation.querySelector('input[type="text"]');
+    if (searchInput) {
+      (searchInput as HTMLInputElement).value = '';
+    }
+
+    // Re-render with all products
+    renderOrUpdateProductList();
+  });
+
   initializePage();
 }
