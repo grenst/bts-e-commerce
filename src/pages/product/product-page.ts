@@ -35,14 +35,8 @@ export function createProductModal(): ProductModal {
   const card = h({
     tag: 'div',
     parent: overlay,
-    // classes: ['product-modal-content'],
     classes: ['product-modal-content'],
   });
-
-  // h({ parent: card, classes: ['modal-corner', 'modal-corner_left'] });
-  // h({ parent: card, classes: ['modal-corner', 'modal-corner_right'] });
-  // h({ parent: card, classes: ['modal-corner', 'modal-corner_bottom-left'] });
-  // h({ parent: card, classes: ['modal-corner', 'modal-corner_bottom-right'] });
 
   const quitModalHelp = h({
     tag: 'button',
@@ -103,6 +97,16 @@ export function createProductModal(): ProductModal {
       overlay.style.display = 'flex';
       return;
     }
+
+    // Set up routing with slug or UUID
+    const routeName = product.slug
+      ? `/product/${product.slug}`
+      : `/product/${product.id}`;
+    globalThis.history.pushState(
+      { productId: product.id, productSlug: product.slug },
+      product.name.en,
+      routeName
+    );
 
     /* ===== 1.  HERO ===== */
 
@@ -219,8 +223,6 @@ export function createProductModal(): ProductModal {
       tag: 'div',
       parent: order,
       classes: [
-        // 'border',
-        // 'border-gray-500',
         'order-quantity',
         'flex',
         'items-stretch',
@@ -262,7 +264,6 @@ export function createProductModal(): ProductModal {
     });
     const plus = button('+');
 
-    // TODO next logic
     h({
       tag: 'button',
       parent: submitOrder,
@@ -316,15 +317,6 @@ export function createProductModal(): ProductModal {
 
     body.classList.add('lock');
   }
-
-  // h({
-  //   parent: card,
-  //   classes: ['modal-corner_bottom', 'modal-corner_bottom-left'],
-  // });
-  // h({
-  //   parent: card,
-  //   classes: ['modal-corner_bottom', 'modal-corner_bottom-right'],
-  // });
 
   function hideModal(): void {
     card.classList.remove('open');

@@ -1,12 +1,24 @@
 import { Product, Category } from '../../types/catalog-types';
 import { createProductCardElement } from '../features/product-card';
 import { createEl as createElement } from '../../utils/element-utilities';
+import {
+  createProductModal,
+  ProductModal,
+} from '../../components/layout/modal/product-modal';
+
+let productModal: ProductModal;
 
 export function createProductListElement(
   products: Product[],
   allCategories: Map<string, Category>
 ): HTMLElement {
   const container = createElement({ tag: 'div', classes: ['product-list'] });
+
+  // Initialize product modal if not already initialized
+  if (!productModal) {
+    productModal = createProductModal();
+    document.body.append(productModal.modalElement);
+  }
 
   // Handle empty product list
   if (products.length === 0) {
@@ -40,7 +52,7 @@ export function createProductListElement(
             : undefined;
 
           if (product) {
-            const card = createProductCardElement(product, () => {});
+            const card = createProductCardElement(product);
             card.classList.add(
               'opacity-0',
               'transition-opacity',
@@ -64,7 +76,7 @@ export function createProductListElement(
   for (const [categoryId, categoryProducts] of groupedProducts) {
     const category = allCategories.get(categoryId);
     const categoryName = category
-      ? category.name['en-US'] || // дефолтовая локаль в проекте
+      ? category.name['en-US'] || // дефолтная локаль в проекте
         category.name.en || // вдруг всё-таки есть
         Object.values(category.name)[0] || // любая доступная локализация
         'Unnamed category'
@@ -78,7 +90,6 @@ export function createProductListElement(
     // Create category header
     const header = createElement({
       tag: 'h2',
-      // classes: ['text-2xl', 'font-semibold', 'my-6', 'border-b', 'pb-2'],
       classes: ['text-2xl', 'font-semibold', 'mt-6', 'pb-2'],
       text: categoryName,
     });

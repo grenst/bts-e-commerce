@@ -4,6 +4,7 @@ export interface PriceValue {
 }
 
 export interface ProductVariant {
+  sku?: string;
   images?: { url: string }[];
   prices?: Array<{
     value: PriceValue;
@@ -12,6 +13,7 @@ export interface ProductVariant {
 
 export interface Product {
   id: string;
+  slug?: string;
   name: { [key: string]: string };
   description?: { [key: string]: string };
   masterVariant: ProductVariant;

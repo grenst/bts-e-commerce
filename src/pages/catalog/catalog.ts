@@ -7,6 +7,12 @@ import { sortProducts } from '../../logic/product-sort';
 import { getAllProducts } from '../../api/products/product-service';
 import { getAllCategories } from '../../api/products/product-service';
 import { Product, Category, ActiveSortMode } from '../../types/catalog-types';
+import {
+  createProductModal,
+  ProductModal,
+} from '../../components/layout/modal/product-modal';
+
+let productModal: ProductModal;
 
 export function createCatalogPage(container: HTMLElement): void {
   container.innerHTML = '';
@@ -38,6 +44,12 @@ export function createCatalogPage(container: HTMLElement): void {
   );
 
   container.append(section);
+
+  // Initialize product modal
+  if (!productModal) {
+    productModal = createProductModal();
+    document.body.append(productModal.modalElement);
+  }
 
   // State management variables
   let allProducts: Product[] = [];
