@@ -14,6 +14,9 @@ export function createProductCardElement(product: Product): HTMLElement {
     document.body.append(productModal.modalElement);
   }
 
+  // Get price information early to use in multiple places
+  const price = product.masterVariant.prices?.[0];
+
   const card = createElement({
     tag: 'div',
     classes: [
@@ -30,7 +33,7 @@ export function createProductCardElement(product: Product): HTMLElement {
   const imageContainer = createElement({
     tag: 'div',
     parent: card,
-    classes: ['w-full', 'h-48', 'bg-white', 'overflow-hidden'],
+    classes: ['w-full', 'h-48', 'bg-white', 'overflow-hidden', 'relative'],
   });
 
   createElement({
@@ -40,8 +43,21 @@ export function createProductCardElement(product: Product): HTMLElement {
       src: product.masterVariant.images?.[0]?.url ?? '',
       alt: product.name['en-US'] || 'Product Image',
     },
-    classes: ['object-cover', 'object-top', 'h-[140%]'],
+    classes: ['object-cover', 'object-top', 'h-[140%]', 'product_preview'],
   });
+
+  // Add discount badge if product has discount
+  if (price && price.discounted) {
+    createElement({
+      tag: 'img',
+      parent: imageContainer,
+      attributes: {
+        src: 'src/assets/images/price-hit.webp',
+        alt: 'Discount',
+      },
+      classes: ['absolute', 'top-0', 'right-0', 'w-12', 'z-10', 'price_hit'],
+    });
+  }
 
   const contentContainer = createElement({
     tag: 'div',
@@ -72,23 +88,74 @@ export function createProductCardElement(product: Product): HTMLElement {
     classes: ['mt-auto', 'pt-3', 'relative', '-z-0'],
   });
 
-  createElement({
-    tag: 'p',
-    parent: priceContainer,
-    text: product.masterVariant.prices?.[0]
-      ? `${(product.masterVariant.prices[0].value.centAmount / 100).toFixed(2)} ${product.masterVariant.prices[0].value.currencyCode}`
-      : 'Price not available',
-    classes: [
-      'text-xl',
-      'pricee',
-      'h-6',
-      'border',
-      'border-gray-300',
-      'bg-gray-50',
-      'text-gray-900',
-      'px-3',
-    ],
-  });
+  if (price && price.discounted) {
+    // Create container for both prices
+    const priceElement = createElement({
+      tag: 'p',
+      parent: priceContainer,
+      classes: [
+        'pricee',
+        'h-6',
+        'border',
+        'border-gray-300',
+        'bg-gray-50',
+        'px-3',
+        'flex',
+        'items-center',
+        'justify-between',
+      ],
+    });
+
+    // Original price with line-through
+    createElement({
+      tag: 'span',
+      parent: priceElement,
+      text: `${(price.value.centAmount / 100).toFixed(2)} ${price.value.currencyCode}`,
+      classes: ['line-through', 'text-gray-400', 'text-sm', 'pr-2'],
+    });
+
+    // Discounted price
+    createElement({
+      tag: 'span',
+      parent: priceElement,
+      text: `${(price.discounted.value.centAmount / 100).toFixed(2)} ${price.discounted.value.currencyCode}`,
+      classes: ['text-xl', 'text-gray-900'],
+    });
+  } else if (price) {
+    // Display regular price without discount
+    createElement({
+      tag: 'p',
+      parent: priceContainer,
+      text: `${(price.value.centAmount / 100).toFixed(2)} ${price.value.currencyCode}`,
+      classes: [
+        'text-xl',
+        'pricee',
+        'h-6',
+        'border',
+        'border-gray-300',
+        'bg-gray-50',
+        'text-gray-900',
+        'px-3',
+      ],
+    });
+  } else {
+    // Handle missing price
+    createElement({
+      tag: 'p',
+      parent: priceContainer,
+      text: 'Price not available',
+      classes: [
+        'text-xl',
+        'pricee',
+        'h-6',
+        'border',
+        'border-gray-300',
+        'bg-gray-50',
+        'text-gray-900',
+        'px-3',
+      ],
+    });
+  }
 
   card.addEventListener('click', (event_: MouseEvent) => {
     productModal.showModal(product.id, { x: event_.pageX, y: event_.pageY });

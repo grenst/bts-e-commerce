@@ -12,7 +12,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
-  img {
+  .product_preview {
     object-fit: cover;
     object-position: top;
     height: 140%;
@@ -65,5 +65,11 @@
         color: #f8fafc;
       }
     }
+  }
+}
+
+.disc_price{
+  &:hover {
+    color: #f8fafc;
   }
 }

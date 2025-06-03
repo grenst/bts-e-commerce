@@ -273,10 +273,10 @@ export function createProductModal(): ProductModal {
                 loading: 'lazy',
               },
             });
-            imgElement.addEventListener('click', (e) =>
+            imgElement.addEventListener('click', (event_) =>
               showModal(p.id, {
-                x: (e as MouseEvent).clientX,
-                y: (e as MouseEvent).clientY,
+                x: (event_ as MouseEvent).clientX,
+                y: (event_ as MouseEvent).clientY,
               })
             );
           }
