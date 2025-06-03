@@ -33,7 +33,8 @@ export function createProductCardElement(product: Product): HTMLElement {
   const imageContainer = createElement({
     tag: 'div',
     parent: card,
-    classes: ['w-full', 'h-48', 'bg-white', 'overflow-hidden', 'relative'],
+    classes: ['w-full', 'h-48', 'bg-white', 'relative'],
+    // classes: ['w-full', 'h-48', 'bg-white', 'overflow-hidden', 'relative'],
   });
 
   createElement({
@@ -62,7 +63,21 @@ export function createProductCardElement(product: Product): HTMLElement {
   const contentContainer = createElement({
     tag: 'div',
     parent: card,
-    classes: ['p-5', 'flex', 'flex-col', 'flex-grow', 'bg-white/30'],
+    classes: [
+      'p-5',
+      'pt-8',
+      'flex',
+      'flex-col',
+      'flex-grow',
+      'bg-gradient-to-b',
+      'from-white/0',
+      'from-10%',
+      'via-white/100',
+      'via-35%',
+      'to-white/100',
+      'to-90%',
+      'z-1',
+    ],
     // classes: ['p-5', 'flex', 'flex-col', 'flex-grow', 'bg-gray-200', 'bg-opacity-50'],
   });
 
@@ -85,7 +100,7 @@ export function createProductCardElement(product: Product): HTMLElement {
   const priceContainer = createElement({
     tag: 'div',
     parent: contentContainer,
-    classes: ['mt-auto', 'pt-3', 'relative', '-z-0'],
+    classes: ['mt-auto', 'pt-3', 'relative', 'z-10'],
   });
 
   if (price && price.discounted) {
@@ -111,7 +126,7 @@ export function createProductCardElement(product: Product): HTMLElement {
       tag: 'span',
       parent: priceElement,
       text: `${(price.value.centAmount / 100).toFixed(2)} ${price.value.currencyCode}`,
-      classes: ['line-through', 'text-gray-400', 'text-sm', 'pr-2'],
+      classes: ['line-through', 'text-sm', 'pr-2', 'old_price'],
     });
 
     // Discounted price
@@ -119,7 +134,7 @@ export function createProductCardElement(product: Product): HTMLElement {
       tag: 'span',
       parent: priceElement,
       text: `${(price.discounted.value.centAmount / 100).toFixed(2)} ${price.discounted.value.currencyCode}`,
-      classes: ['text-xl', 'text-gray-900'],
+      classes: ['text-xl', 'discount_price'],
     });
   } else if (price) {
     // Display regular price without discount

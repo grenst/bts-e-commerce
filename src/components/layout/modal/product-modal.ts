@@ -266,7 +266,18 @@ export function createProductModal(): ProductModal {
             const imgElement = createElement({
               tag: 'img',
               parent: categoryProductsContainer,
-              classes: ['category-product-img', 'w-1/5', 'cursor-pointer'],
+              classes: [
+                'category-product-img',
+                'w-1/5',
+                'cursor-pointer',
+                'bg-gradient-to-b',
+                'from-white/0',
+                'from-35%',
+                'via-white/100',
+                'via-65%',
+                'to-white/100',
+                'to-90%',
+              ],
               attributes: {
                 src: p.masterVariant.images?.[0]?.url ?? '',
                 alt: p.name.en ?? 'product image',

@@ -43,14 +43,14 @@
 .category-product-img {
   position: relative;
   // z-index: 10;
-  border: 1px solid gray;
+  // border: 1px solid gray;
   // top: clamp(2vw, 33vw, 210px);
   width: 14vw; /* 20% of screen width */
   max-width: 100px;
   object-fit: cover;
   // border-radius: 0.25rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background: #f8f8f8;
+  // background: #f8f8f8;
   transition: transform 0.2s ease-in-out;
 
   &:hover {
