@@ -3,12 +3,20 @@ export interface PriceValue {
   currencyCode: string;
 }
 
+export interface DiscountedPrice {
+  value: PriceValue;
+  discount: { id: string; typeId: 'product-discount' };
+}
+
+export interface Price {
+  value: PriceValue;
+  discounted?: DiscountedPrice;
+}
+
 export interface ProductVariant {
   sku?: string;
   images?: { url: string }[];
-  prices?: Array<{
-    value: PriceValue;
-  }>;
+  prices?: Price[];
 }
 
 export interface Product {

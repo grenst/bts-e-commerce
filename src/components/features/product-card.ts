@@ -46,7 +46,8 @@ export function createProductCardElement(product: Product): HTMLElement {
   const contentContainer = createElement({
     tag: 'div',
     parent: card,
-    classes: ['p-5', 'flex', 'flex-col', 'flex-grow'],
+    classes: ['p-5', 'flex', 'flex-col', 'flex-grow', 'bg-white/30'],
+    // classes: ['p-5', 'flex', 'flex-col', 'flex-grow', 'bg-gray-200', 'bg-opacity-50'],
   });
 
   createElement({

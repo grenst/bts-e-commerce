@@ -100,9 +100,10 @@ export function createProductListElement(
       tag: 'div',
       classes: [
         'grid',
-        'grid-cols-2',
-        'sm:grid-cols-3',
-        'md:grid-cols-4',
+        'grid-cols-1',
+        'min-[440px]:grid-cols-2',
+        'min-[610px]:grid-cols-3',
+        'min-[830px]:grid-cols-4',
         'gap-1',
       ],
     });

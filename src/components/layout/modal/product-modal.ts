@@ -7,7 +7,10 @@ import {
   getAllCategories,
   getProductsByCategory,
 } from '../../../api/products/product-service';
+import { Product } from '../../../types/catalog-types';
 import './product-modal.scss';
+
+const categoryCache = new Map<string, Product[]>();
 
 type Point = { x: number; y: number };
 
@@ -73,14 +76,13 @@ export function createProductModal(): ProductModal {
 
   const categoryNameElement = createElement({
     tag: 'div',
-    parent: quitModalHelp,
+    parent: card,
     classes: [
       'product-modal-category',
       'absolute',
       'top-0',
       'left-0',
       'ml-4',
-      'mt-4',
       'text-lg',
       'font-bold',
       'text-black',
@@ -103,6 +105,7 @@ export function createProductModal(): ProductModal {
   });
 
   let isCategoryModalOpen = false;
+  let shownCategoryId: string | undefined = undefined;
 
   categoryNameElement.addEventListener('click', (event) => {
     event.stopPropagation();
@@ -120,6 +123,36 @@ export function createProductModal(): ProductModal {
     parent: card,
     classes: ['product-modal-details'],
   });
+
+  function lockCardHeight(): void {
+    const { height } = card.getBoundingClientRect();
+    card.style.setProperty('--locked-height', `${height}px`);
+    card.classList.add('height-locked');
+  }
+
+  function unlockCardHeight(): void {
+    card.classList.remove('height-locked');
+    card.style.removeProperty('--locked-height');
+  }
+
+  let loader: HTMLElement | undefined;
+
+  function showLoader(): void {
+    lockCardHeight();
+    details.innerHTML = '';
+    details.classList.add('loading');
+
+    loader = createElement({ tag: 'span', parent: details, classes: ['dots'] });
+  }
+
+  function hideLoader(): void {
+    if (loader) {
+      details.classList.remove('loading');
+      loader.remove();
+      loader = undefined;
+      unlockCardHeight();
+    }
+  }
 
   let originalURL: string | undefined = undefined;
   let basePath: string | undefined = undefined;
@@ -161,9 +194,12 @@ export function createProductModal(): ProductModal {
     };
 
     const wasCategoryOpen = isCategoryModalOpen;
-    details.innerHTML = '';
-    categoryNameElement.textContent = '';
-    categoryProductsContainer.innerHTML = '';
+    // details.innerHTML = '';
+    // categoryNameElement.textContent = '';
+    // categoryProductsContainer.innerHTML = '';
+
+    showLoader();
+
     categoryProductsContainer.classList.toggle('show', wasCategoryOpen);
 
     const product = await getProductById(productId).catch(() => {});
@@ -208,29 +244,47 @@ export function createProductModal(): ProductModal {
           'Uncategorized';
         const sign = wasCategoryOpen ? '-' : '+';
         categoryNameElement.textContent = `[ ${categoryName} ${sign} ]`;
-        const categoryProducts = await getProductsByCategory(category.id).catch(
-          () => []
-        );
-        for (const p of categoryProducts) {
-          const imageUrl = p.masterVariant.images?.[0]?.url;
-          if (!imageUrl) return;
-          const imgElement = createElement({
-            tag: 'img',
-            parent: categoryProductsContainer,
-            classes: ['category-product-img', 'w-1/5', 'cursor-pointer'],
-            attributes: {
-              src: imageUrl,
-              alt: p.name.en ?? 'product image',
-              loading: 'lazy',
-            },
-          });
-          imgElement.addEventListener('click', (event) => {
-            event.stopPropagation();
-            showModal(p.id, { x: event.clientX, y: event.clientY });
-          });
+
+        if (category.id !== shownCategoryId) {
+          // новая категория для текущего сеанса → сбрасываем контейнер
+          categoryProductsContainer.innerHTML = '';
+          shownCategoryId = category.id;
+        }
+
+        let categoryProducts: Product[];
+        if (categoryCache.has(category.id)) {
+          categoryProducts = categoryCache.get(category.id)!;
+        } else {
+          categoryProducts = await getProductsByCategory(category.id).catch(
+            () => []
+          );
+          categoryCache.set(category.id, categoryProducts);
+        }
+
+        if (categoryProductsContainer.childElementCount === 0) {
+          for (const p of categoryProducts) {
+            const imgElement = createElement({
+              tag: 'img',
+              parent: categoryProductsContainer,
+              classes: ['category-product-img', 'w-1/5', 'cursor-pointer'],
+              attributes: {
+                src: p.masterVariant.images?.[0]?.url ?? '',
+                alt: p.name.en ?? 'product image',
+                loading: 'lazy',
+              },
+            });
+            imgElement.addEventListener('click', (e) =>
+              showModal(p.id, {
+                x: (e as MouseEvent).clientX,
+                y: (e as MouseEvent).clientY,
+              })
+            );
+          }
         }
       }
     }
+
+    hideLoader();
 
     const hero = createElement({
       tag: 'section',
@@ -364,8 +418,29 @@ export function createProductModal(): ProductModal {
     });
 
     let qty = 1;
-    const unitPrice =
-      (product.masterVariant.prices?.[0]?.value.centAmount ?? 0) / 100;
+    // const unitPrice =
+    //   (product.masterVariant.prices?.[0]?.value.centAmount ?? 0) / 100;
+    const first = product.masterVariant.prices?.[0];
+    const centAmount =
+      first?.discounted?.value.centAmount ?? first?.value.centAmount ?? 0;
+    const unitPrice = centAmount / 100;
+
+    const nooom =
+      product.name.en?.toUpperCase() ??
+      (product.name ? Object.values(product.name)[0]?.toUpperCase() : '') ??
+      '';
+
+    const pricelog = product.masterVariant.prices?.[0];
+
+    if (pricelog) {
+      if (pricelog.discounted) {
+        console.log(
+          `${nooom} ==> Зі знижкою: ${pricelog.discounted.value.centAmount}, Звичайна ціна: ${pricelog.value.centAmount}`
+        );
+      } else {
+        console.log(`${nooom} ==> Без знижки: ${pricelog.value.centAmount}`);
+      }
+    }
 
     const createQtyButton = (label: string) =>
       createElement({
@@ -439,6 +514,10 @@ export function createProductModal(): ProductModal {
       globalThis.removeEventListener('popstate', popStateHandler);
       popStateHandler = undefined;
     }
+
+    categoryProductsContainer.innerHTML = '';
+    shownCategoryId = undefined;
+
     isCategoryModalOpen = false;
     categoryProductsContainer.classList.remove('show');
     categoryNameElement.textContent = (
