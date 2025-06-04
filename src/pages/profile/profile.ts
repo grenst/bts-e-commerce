@@ -9,6 +9,51 @@ import { addNotification } from '../../store/store';
 import './profile-page.scss';
 import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown'; // Added
 import { COUNTRIES } from '../../data/countries';
+import { createPasswordField } from '../auth/auth-form-elements';
+import { getRouter } from '../../router/router'; // NEW
+
+/* ───────────── Password validation function ───────────── */
+function validatePassword(password: string): {
+  valid: boolean;
+  message?: string;
+} {
+  // Minimum length 8
+  if (password.length < 8) {
+    return {
+      valid: false,
+      message: 'Password must be at least 8 characters long',
+    };
+  }
+  // At least one uppercase letter
+  if (!/[A-Z]/.test(password)) {
+    return {
+      valid: false,
+      message: 'Password must contain at least one uppercase letter',
+    };
+  }
+  // At least one lowercase letter
+  if (!/[a-z]/.test(password)) {
+    return {
+      valid: false,
+      message: 'Password must contain at least one lowercase letter',
+    };
+  }
+  // At least one digit
+  if (!/\d/.test(password)) {
+    return {
+      valid: false,
+      message: 'Password must contain at least one digit',
+    };
+  }
+  // At least one special character
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    return {
+      valid: false,
+      message: 'Password must contain at least one special character',
+    };
+  }
+  return { valid: true };
+}
 
 function createFormField(
   labelText: string,
@@ -55,8 +100,11 @@ function createFormField(
 
 type AddressContext = 'shipping' | 'billing';
 
-export default function createProfilePage(container: HTMLElement): void {
+export default async function createProfilePage(
+  container: HTMLElement
+): Promise<void> {
   container.innerHTML = '';
+  await AuthService.loadSession();
 
   const profileContainer = createElement({
     tag: 'div',
@@ -141,7 +189,7 @@ export default function createProfilePage(container: HTMLElement): void {
   );
   // Age
   const ageInput = createFormField(
-    `Age ${'userName'}`,
+    `Age`,
     'date',
     'ageInput',
     customer.age || '',
@@ -197,33 +245,28 @@ export default function createProfilePage(container: HTMLElement): void {
     classes: ['grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-x-6', 'gap-y-4'],
     parent: personalInfoFormPassword,
   });
-  const actualPassInput = createFormField(
-    'Actual Password',
-    'password',
-    'actualPass',
-    customer.firstName || '',
-    formGridPassword
-  );
-  const newPassInput = createFormField(
-    'New Password',
-    'password',
-    'newPass',
-    customer.lastName || '',
-    formGridPassword
-  );
-  // Age
-  const replayNewPassInput = createFormField(
-    `Replay New Pass`,
-    'password',
-    'replayNewPass',
-    customer.age || '',
-    formGridPassword
-  );
-  // Age
+  const { input: actualPassInput } = createPasswordField({
+    container: formGridPassword,
+    id: 'actualPass',
+    placeholder: 'Current password',
+    label: 'Current Password',
+  });
+  const { input: newPassInput } = createPasswordField({
+    container: formGridPassword,
+    id: 'newPass',
+    placeholder: 'New password',
+    label: 'New Password',
+  });
+  const { input: replayNewPassInput } = createPasswordField({
+    container: formGridPassword,
+    id: 'replayNewPass',
+    placeholder: 'Repeat new password',
+    label: 'Repeat New Password',
+  });
 
   const savePersonalButtonPassword = createElement({
     tag: 'button',
-    text: 'Save Personal Info',
+    text: 'Save Password',
     attributes: { type: 'submit' },
     classes: [
       'mt-6',
@@ -244,7 +287,6 @@ export default function createProfilePage(container: HTMLElement): void {
     parent: personalInfoFormPassword,
   });
 
-
   personalInfoForm.addEventListener('submit', async (event_) => {
     event_.preventDefault();
     savePersonalButton.textContent = 'Saving…';
@@ -260,7 +302,7 @@ export default function createProfilePage(container: HTMLElement): void {
         });
       if (lastNameInput.value !== (currentCustomer.lastName || ''))
         actions.push({ action: 'setLastName', lastName: lastNameInput.value });
-        // Age
+      // Age
       if (ageInput.value !== currentCustomer.age)
         actions.push({ action: 'changeAge', age: ageInput.value });
       // Age
@@ -284,6 +326,69 @@ export default function createProfilePage(container: HTMLElement): void {
     } finally {
       savePersonalButton.textContent = 'Save Personal Info';
       savePersonalButton.removeAttribute('disabled');
+    }
+  });
+
+  /* ───────────── Password form submission ───────────── */
+  personalInfoFormPassword.addEventListener('submit', async (event_) => {
+    event_.preventDefault();
+    savePersonalButtonPassword.textContent = 'Saving…';
+    savePersonalButtonPassword.setAttribute('disabled', 'true');
+
+    const currentCustomer = useCustomerStore.getState().customer;
+    if (!currentCustomer) {
+      addNotification('error', 'You must be logged in to change your password');
+      savePersonalButtonPassword.textContent = 'Save Password';
+      savePersonalButtonPassword.removeAttribute('disabled');
+      return;
+    }
+
+    const currentPassword = actualPassInput.value;
+    const newPassword = newPassInput.value;
+    const replayPassword = replayNewPassInput.value;
+
+    // Validate new password
+    const validation = validatePassword(newPassword);
+    if (!validation.valid) {
+      addNotification('error', validation.message!);
+      savePersonalButtonPassword.textContent = 'Save Password';
+      savePersonalButtonPassword.removeAttribute('disabled');
+      return;
+    }
+
+    // Check password match
+    if (newPassword !== replayPassword) {
+      addNotification('error', 'New password and confirmation do not match');
+      savePersonalButtonPassword.textContent = 'Save Password';
+      savePersonalButtonPassword.removeAttribute('disabled');
+      return;
+    }
+
+    try {
+      await AuthService.changePassword(
+        currentCustomer.version,
+        currentPassword,
+        newPassword
+      );
+
+      addNotification('success', 'Password updated successfully');
+
+      // Logout and redirect after password change
+      await AuthService.logout();
+      getRouter().navigateTo('/login'); // Single-page transition
+      return;
+    } catch (error) {
+      if ((error as Error).message.includes('InvalidCredentials')) {
+        addNotification('error', 'Current password is incorrect');
+      } else {
+        addNotification(
+          'error',
+          (error as Error).message ?? 'Failed to update password'
+        );
+      }
+    } finally {
+      savePersonalButtonPassword.textContent = 'Save Password';
+      savePersonalButtonPassword.removeAttribute('disabled');
     }
   });
 
