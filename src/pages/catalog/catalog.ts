@@ -24,7 +24,9 @@ export function createCatalogPage(container: HTMLElement): void {
 
   const title = createElement({
     tag: 'h1',
-    attributes: { class: 'text-4xl font-impact text-center my-1 pt-8 min-[500px]:my-6' }, // TODO @451-490 wide is header UI-bug
+    attributes: {
+      class: 'text-4xl font-impact text-center my-1 pt-8 min-[500px]:my-6',
+    }, // TODO @451-490 wide is header UI-bug
     text: 'Grab your drink',
   });
 

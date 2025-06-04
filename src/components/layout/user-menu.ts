@@ -136,6 +136,25 @@ export function createUserDropdown(
     return { wrapper: itemWrapper, link: itemLink }; // link is still used for GSAP animation target
   };
 
+  const homeMenuItem = createAnimatedMenuItem('Home page', () => {
+    router.navigateTo('/main');
+    hideMenuAndRemoveListener();
+  });
+  const catalogMenuItem = createAnimatedMenuItem('Catalog', () => {
+    router.navigateTo('/catalog');
+    hideMenuAndRemoveListener();
+  });
+  const aboutMenuItem = createAnimatedMenuItem('About us', () => {
+    router.navigateTo('/about');
+    hideMenuAndRemoveListener();
+  });
+
+  createElement({
+    tag: 'hr',
+    classes: ['my-1', 'border-gray-400'],
+    parent: dropdownMenu,
+  });
+
   const profileMenuItem = createAnimatedMenuItem('My profile', () => {
     router.navigateTo('/profile');
     hideMenuAndRemoveListener();
@@ -144,6 +163,7 @@ export function createUserDropdown(
     router.navigateTo('/orders');
     hideMenuAndRemoveListener();
   });
+
   const profileLink = profileMenuItem.link;
   const ordersLink = ordersMenuItem.link;
 
@@ -209,7 +229,14 @@ export function createUserDropdown(
   });
 
   const animateDropdownItems = () => {
-    const itemsToAnimate = [profileLink, ordersLink, logoutButton];
+    const itemsToAnimate = [
+      homeMenuItem.link,
+      catalogMenuItem.link,
+      aboutMenuItem.link,
+      profileLink,
+      ordersLink,
+      logoutButton,
+    ];
     gsap.fromTo(
       itemsToAnimate,
       { opacity: 0, x: '-100%' },
