@@ -145,6 +145,9 @@
   transition:
     transform .4s cubic-bezier(.22,1,.36,1),
     opacity .25s ease-out;
+  
+  /* Add animation delay for modal content */
+  transition-delay: 0.1s;
 
   &.open {
     opacity: 1;

@@ -193,10 +193,18 @@ export function createProductModal(): ProductModal {
       y: globalThis.innerHeight / 2,
     };
 
+    // Show background immediately
+    overlay.style.display = 'flex';
+    // Add open class to trigger background fade-in
+    overlay.classList.add('open');
+
+    // Set transform origin to click position
+    card.style.setProperty('--ox', `${currentOrigin.x}px`);
+    card.style.setProperty('--oy', `${currentOrigin.y}px`);
+    // Add open class to trigger modal animation
+    card.classList.add('open');
+
     const wasCategoryOpen = isCategoryModalOpen;
-    // details.innerHTML = '';
-    // categoryNameElement.textContent = '';
-    // categoryProductsContainer.innerHTML = '';
 
     showLoader();
 
@@ -279,7 +287,7 @@ export function createProductModal(): ProductModal {
                 'to-90%',
               ],
               attributes: {
-                src: p.masterVariant.images?.[0]?.url ?? '',
+                src: p.masterVariant.images?.[1]?.url ?? '',
                 alt: p.name.en ?? 'product image',
                 loading: 'lazy',
               },
@@ -346,7 +354,7 @@ export function createProductModal(): ProductModal {
 
     buildHeadline(['headline-bg', 'z-15', 'text-black']);
 
-    const origImgUrl = product.masterVariant.images?.[0]?.url;
+    const origImgUrl = product.masterVariant.images?.[1]?.url;
     const smallImgUrl = origImgUrl
       ? `${origImgUrl}?format=webp`
       : '../../assets/images/placeholder.webp';
