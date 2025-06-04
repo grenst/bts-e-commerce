@@ -9,6 +9,8 @@ import {
 } from '../../../api/products/product-service';
 import { Product } from '../../../types/catalog-types';
 import './product-modal.scss';
+import leftSvg from '@assets/images/left.svg';
+import rightSvg from '@assets/images/right.svg';
 
 const categoryCache = new Map<string, Product[]>();
 
@@ -354,21 +356,111 @@ export function createProductModal(): ProductModal {
 
     buildHeadline(['headline-bg', 'z-15', 'text-black']);
 
-    const origImgUrl = product.masterVariant.images?.[1]?.url;
-    const smallImgUrl = origImgUrl
-      ? `${origImgUrl}?format=webp`
-      : '../../assets/images/placeholder.webp';
-
-    createElement({
-      tag: 'img',
+    // Create hero-slider container
+    const heroSlider = createElement({
+      tag: 'div',
       parent: heroLeft,
-      classes: ['hero-img', 'z-10'],
-      attributes: {
-        src: smallImgUrl,
-        alt: product.name.en ?? 'product photo',
-        loading: 'lazy',
-      },
+      classes: ['hero-slider', 'w-full', 'h-full', 'relative'],
     });
+
+    // Add all product images except index 0
+    const images = product.masterVariant.images?.slice(1) || [];
+    let currentSlideIndex = 0;
+    const slideElements: HTMLElement[] = [];
+
+    images.forEach((img, index) => {
+      const slide = createElement({
+        tag: 'div',
+        parent: heroSlider,
+        classes: ['slide', 'absolute', 'inset-0', 'w-full', 'h-full'],
+      });
+      if (index !== 0) slide.style.display = 'none';
+
+      const imgUrl = img.url ? `${img.url}?format=webp` : '../../assets/images/placeholder.webp';
+      createElement({
+        tag: 'img',
+        parent: slide,
+        classes: ['w-full', 'h-full', 'object-contain'],
+        attributes: {
+          src: imgUrl,
+          alt: product.name.en ?? 'product photo',
+          loading: 'lazy',
+        },
+      });
+      slideElements.push(slide);
+    });
+
+    // Create navigation buttons
+    const createNavButton = (icon: string, direction: 'left'|'right') => {
+      const button = createElement({
+        tag: 'button',
+        parent: heroSlider,
+        classes: [
+          'slider-nav',
+          `nav-${direction}`,
+          'absolute',
+          'top-1/2',
+          direction === 'left' ? 'left-4' : 'right-4',
+          'z-20',
+          'opacity-0',
+          'transition-opacity',
+          'duration-300',
+        ],
+        attributes: {
+          'aria-label': `${direction} navigation`,
+        },
+      });
+
+      createElement({
+        tag: 'img',
+        parent: button,
+        attributes: {
+          src: icon,
+          alt: `${direction} arrow`,
+        },
+      });
+
+      return button;
+    };
+
+    const leftButton = createNavButton(leftSvg, 'left');
+    const rightButton = createNavButton(rightSvg, 'right');
+
+    // Show buttons on hover
+    heroSlider.addEventListener('mouseenter', () => {
+      leftButton.style.opacity = '1';
+      rightButton.style.opacity = '1';
+    });
+
+    heroSlider.addEventListener('mouseleave', () => {
+      leftButton.style.opacity = '0';
+      rightButton.style.opacity = '0';
+    });
+
+    // Navigation functions
+    const showSlide = (index: number) => {
+      slideElements.forEach((slide, i) => {
+        slide.style.display = i === index ? 'block' : 'none';
+      });
+      currentSlideIndex = index;
+    };
+
+    leftButton.addEventListener('click', () => {
+      let newIndex = currentSlideIndex - 1;
+      if (newIndex < 0) newIndex = slideElements.length - 1;
+      showSlide(newIndex);
+    });
+
+    rightButton.addEventListener('click', () => {
+      let newIndex = currentSlideIndex + 1;
+      if (newIndex >= slideElements.length) newIndex = 0;
+      showSlide(newIndex);
+    });
+
+    // Initialize first slide
+    if (slideElements.length > 0) {
+      showSlide(0);
+    }
 
     buildHeadline(['headline-fx', 'z-200']);
 
