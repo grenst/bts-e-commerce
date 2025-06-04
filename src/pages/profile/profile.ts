@@ -139,6 +139,15 @@ export default function createProfilePage(container: HTMLElement): void {
     customer.lastName || '',
     formGrid
   );
+  // Age
+  const ageInput = createFormField(
+    `Age ${'userName'}`,
+    'date',
+    'ageInput',
+    customer.age || '',
+    formGrid
+  );
+  // Age
   const emailInput = createFormField(
     'Email',
     'email',
@@ -171,6 +180,71 @@ export default function createProfilePage(container: HTMLElement): void {
     parent: personalInfoForm,
   });
 
+  /* ───────────── Personal information form Password (unchanged logic) ───────────── */
+
+  const personalInfoFormPassword = createElement({
+    tag: 'form',
+    parent: profileContainer,
+  });
+  createElement({
+    tag: 'h2',
+    text: 'Password change field',
+    classes: ['text-2xl', 'font-nexa-bold', 'mt-10', 'text-gray-700'],
+    parent: personalInfoFormPassword,
+  });
+  const formGridPassword = createElement({
+    tag: 'div',
+    classes: ['grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-x-6', 'gap-y-4'],
+    parent: personalInfoFormPassword,
+  });
+  const actualPassInput = createFormField(
+    'Actual Password',
+    'password',
+    'actualPass',
+    customer.firstName || '',
+    formGridPassword
+  );
+  const newPassInput = createFormField(
+    'New Password',
+    'password',
+    'newPass',
+    customer.lastName || '',
+    formGridPassword
+  );
+  // Age
+  const replayNewPassInput = createFormField(
+    `Replay New Pass`,
+    'password',
+    'replayNewPass',
+    customer.age || '',
+    formGridPassword
+  );
+  // Age
+
+  const savePersonalButtonPassword = createElement({
+    tag: 'button',
+    text: 'Save Personal Info',
+    attributes: { type: 'submit' },
+    classes: [
+      'mt-6',
+      'px-6',
+      'py-2.5',
+      'bg-gray-900',
+      'text-white',
+      'font-nexa-bold',
+      'hover:bg-gray-700',
+      'focus:outline-none',
+      'focus:ring-2',
+      'focus:ring-gray-800',
+      'focus:ring-offset-2',
+      'transition-colors',
+      'w-full',
+      'md:w-auto',
+    ],
+    parent: personalInfoFormPassword,
+  });
+
+
   personalInfoForm.addEventListener('submit', async (event_) => {
     event_.preventDefault();
     savePersonalButton.textContent = 'Saving…';
@@ -186,6 +260,10 @@ export default function createProfilePage(container: HTMLElement): void {
         });
       if (lastNameInput.value !== (currentCustomer.lastName || ''))
         actions.push({ action: 'setLastName', lastName: lastNameInput.value });
+        // Age
+      if (ageInput.value !== currentCustomer.age)
+        actions.push({ action: 'changeAge', age: ageInput.value });
+      // Age
       if (emailInput.value !== currentCustomer.email)
         actions.push({ action: 'changeEmail', email: emailInput.value });
 

@@ -7,6 +7,7 @@ export interface Customer {
   email: string;
   firstName?: string;
   lastName?: string;
+  age?: string;
   version: number;
   addresses: Address[];
   defaultShippingAddressId?: string;
