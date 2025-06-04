@@ -2,7 +2,12 @@ import { Product, Category, ActiveSortMode } from '../types/catalog-types';
 
 function getSafeName(p: Product): string {
   const raw = p.name?.en ?? Object.values(p.name ?? {})[0] ?? '';
-  return raw.toLowerCase(); // приводим к одному регистру
+  return raw.toLowerCase();
+}
+function safeCategoryName(c: Category): string {
+  const raw =
+    c.name?.en ?? (Object.values(c.name ?? {})[0] as string | undefined) ?? '';
+  return raw.toLowerCase();
 }
 
 export function sortProducts(
@@ -94,14 +99,11 @@ export function sortCategories(
   categories: Category[],
   asc: boolean
 ): Category[] {
-  // Create a shallow copy to avoid mutating the original array
-  const sortedCategories = [...categories];
-
-  sortedCategories.sort((a, b) => {
-    const nameA = a.name?.en || '';
-    const nameB = b.name?.en || '';
-    return asc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+  return [...categories].sort((a, b) => {
+    const nameA = safeCategoryName(a);
+    const nameB = safeCategoryName(b);
+    return asc
+      ? nameA.localeCompare(nameB, 'en')
+      : nameB.localeCompare(nameA, 'en');
   });
-
-  return sortedCategories;
 }
