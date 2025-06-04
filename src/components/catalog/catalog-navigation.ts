@@ -178,6 +178,38 @@ export function createCatalogNavigationElement(): HTMLElement {
   buttonsContainer.append(filtersButton);
   buttonsContainer.append(sortButton);
 
+  // Add Actions button
+  const actionsButton = createElement({
+    tag: 'button',
+    attributes: {
+      class:
+        'px-4 py-2 bg-gray-800 text-white rounded-3xl hover:bg-gray-900 cursor-pointer',
+    },
+    text: 'Actions',
+  });
+
+  actionsButton.addEventListener('click', () => {
+    nav.dispatchEvent(new CustomEvent('apply-discount-filter'));
+  });
+
+  buttonsContainer.append(actionsButton);
+
+  // Add Reset button
+  const resetButton = createElement({
+    tag: 'button',
+    attributes: {
+      class:
+        'px-4 py-2 bg-gray-800 text-white rounded-3xl hover:bg-gray-900 cursor-pointer',
+    },
+    text: 'Reset',
+  });
+
+  resetButton.addEventListener('click', () => {
+    nav.dispatchEvent(new CustomEvent('reset-filters'));
+  });
+
+  buttonsContainer.append(resetButton);
+
   nav.append(searchContainer);
   nav.append(buttonsContainer);
   return nav;

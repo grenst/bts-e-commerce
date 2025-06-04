@@ -1,0 +1,74 @@
+.product-card {
+  background-color: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .product_preview {
+    object-fit: cover;
+    object-position: top;
+    height: 140%;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-family: 'nexa-bold';
+    margin-bottom: 0.5rem;
+    color: #061328;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: #718096;
+    margin-bottom: 0.75rem;
+    // display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .pricee {
+    font-size: 1.25rem;
+    color: #2d3748;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem;
+    position: relative;
+
+    &::before {
+      content: 'ADD';
+      padding-right: 0.75rem;
+      padding-left: 0.55rem;
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      z-index: 10;
+      transition: color 0.3s, background-color 0.3s;
+    }
+
+    &:hover {
+      background-color: #2d3748;
+      color: #f8fafc;
+
+      &::before {
+        color: #f8fafc;
+      }
+    }
+  }
+}
+
+.disc_price{
+  &:hover {
+    color: #f8fafc;
+  }
+}

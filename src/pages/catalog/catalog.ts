@@ -7,6 +7,12 @@ import { sortProducts } from '../../logic/product-sort';
 import { getAllProducts } from '../../api/products/product-service';
 import { getAllCategories } from '../../api/products/product-service';
 import { Product, Category, ActiveSortMode } from '../../types/catalog-types';
+import {
+  createProductModal,
+  ProductModal,
+} from '../../components/layout/modal/product-modal';
+
+let productModal: ProductModal;
 
 export function createCatalogPage(container: HTMLElement): void {
   container.innerHTML = '';
@@ -18,7 +24,7 @@ export function createCatalogPage(container: HTMLElement): void {
 
   const title = createElement({
     tag: 'h1',
-    attributes: { class: 'text-4xl font-impact text-center my-8 pt-8' },
+    attributes: { class: 'text-4xl font-impact text-center my-8 pt-8' }, // TODO @451-490 wide is header UI-bug
     text: 'Grab your drink',
   });
 
@@ -38,6 +44,12 @@ export function createCatalogPage(container: HTMLElement): void {
   );
 
   container.append(section);
+
+  // Initialize product modal
+  if (!productModal) {
+    productModal = createProductModal();
+    document.body.append(productModal.modalElement);
+  }
 
   // State management variables
   let allProducts: Product[] = [];
@@ -115,6 +127,40 @@ export function createCatalogPage(container: HTMLElement): void {
   subNavControl.element.addEventListener('sort-changed', (event: Event) => {
     const customEvent = event as CustomEvent<ActiveSortMode>;
     currentSortMode = customEvent.detail;
+    renderOrUpdateProductList();
+  });
+
+  // Handle apply-discount-filter event
+  navigation.addEventListener('apply-discount-filter', () => {
+    // Logic to filter products with discounts
+    const discountedProducts = allProducts.filter(
+      (product) => product.masterVariant.prices?.[0]?.discounted?.value
+    );
+    displayedProducts = sortProducts(discountedProducts, currentSortMode);
+
+    // Update product list
+    productListContainer.innerHTML = '';
+    const productListElement = createProductListElement(
+      displayedProducts,
+      allCategoriesMap
+    );
+    productListContainer.append(productListElement);
+  });
+
+  // Handle reset-filters event
+  navigation.addEventListener('reset-filters', () => {
+    // Reset all filters
+    activeCategoryIds = new Set(allCategoriesMap.keys());
+    currentSearchTerm = '';
+    currentSortMode = { key: 'name', asc: true };
+
+    // Reset search input
+    const searchInput = navigation.querySelector('input[type="text"]');
+    if (searchInput) {
+      (searchInput as HTMLInputElement).value = '';
+    }
+
+    // Re-render with all products
     renderOrUpdateProductList();
   });
 

@@ -1,28 +1,12 @@
 import { getAllPublishedProducts } from '../../api/products/product-service';
 import { createProductCardElement } from '../features/product-card';
-
-interface Product {
-  id: string;
-  name: { [key: string]: string };
-  description?: { [key: string]: string };
-  masterVariant: {
-    images?: { url: string }[];
-    prices?: { value: { centAmount: number; currencyCode: string } }[];
-  };
-}
+import { Product } from '../../types/catalog-types';
 
 export async function createCommerceTestComponent(
-  container: HTMLElement,
-  showModal: (productId: string) => Promise<void>
+  container: HTMLElement
 ): Promise<void> {
   const componentDiv = document.createElement('div');
-  componentDiv.classList.add(
-    'commerce-test-component',
-    'p-4'
-    // 'border', // Removing border for a cleaner look with cards
-    // 'rounded',
-    // 'shadow'
-  );
+  componentDiv.classList.add('commerce-test-component', 'p-4');
 
   const title = document.createElement('h2');
   title.textContent = 'Published Products';
@@ -38,11 +22,11 @@ export async function createCommerceTestComponent(
   const productsGrid = document.createElement('div');
   productsGrid.classList.add(
     'grid',
-    'grid-cols-1', // 1 column by default
-    'sm:grid-cols-2', // 2 columns on small screens
-    'md:grid-cols-3', // 3 columns on medium screens
-    'lg:grid-cols-4', // 4 columns on large screens
-    'gap-4', // Gap between cards
+    'grid-cols-1',
+    'sm:grid-cols-2',
+    'md:grid-cols-3',
+    'lg:grid-cols-4',
+    'gap-4',
     'p-4'
   );
   componentDiv.append(productsGrid);
@@ -56,7 +40,7 @@ export async function createCommerceTestComponent(
 
   try {
     const products: Product[] = await getAllPublishedProducts();
-    loadingMessage.remove(); // Remove loading message
+    loadingMessage.remove();
 
     if (products.length === 0) {
       const noProductsMessage = document.createElement('p');
@@ -67,11 +51,11 @@ export async function createCommerceTestComponent(
     }
 
     for (const product of products) {
-      const productCard = createProductCardElement(product, showModal);
+      const productCard = createProductCardElement(product);
       productsGrid.append(productCard);
     }
   } catch (error) {
-    loadingMessage.remove(); // Remove loading message
+    loadingMessage.remove();
     console.error('Failed to load products for CommerceTestComponent:', error);
     const errorMessage = document.createElement('p');
     errorMessage.textContent =

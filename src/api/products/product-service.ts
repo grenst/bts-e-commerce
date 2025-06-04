@@ -125,7 +125,15 @@ export async function getProductById(
       }
     );
 
-    return response.data;
+    const product = response.data;
+    // Add slug from master variant if available
+    if (product.masterVariant.sku) {
+      product.slug = product.masterVariant.sku
+        .toLowerCase()
+        .replaceAll(/[^a-z0-9]+/g, '-');
+    }
+
+    return product;
   } catch (error_) {
     const error = error_ as AxiosError | Error;
     console.error(
@@ -177,6 +185,24 @@ export async function getDrinkProducts(): Promise<DrinkProduct[]> {
     const error = error_ as AxiosError | Error;
     console.error(
       'Error transforming products to DrinkProduct format:',
+      error.message
+    );
+    throw error;
+  }
+}
+
+export async function getProductsByCategory(
+  categoryId: string
+): Promise<Product[]> {
+  try {
+    const allProducts = await getAllPublishedProducts();
+    return allProducts.filter((product) =>
+      product.categories.some((category) => category.id === categoryId)
+    );
+  } catch (error_) {
+    const error = error_ as AxiosError | Error;
+    console.error(
+      `Error fetching products for category ${categoryId}:`,
       error.message
     );
     throw error;
