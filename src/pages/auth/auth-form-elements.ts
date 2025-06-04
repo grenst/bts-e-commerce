@@ -141,10 +141,12 @@ export function createPasswordField({
   container,
   id,
   placeholder,
+  label,
 }: {
   container: HTMLElement;
   id: string;
   placeholder: string;
+  label: string;
 }) {
   const fieldContainer = createElement({
     tag: 'div',
@@ -154,7 +156,7 @@ export function createPasswordField({
 
   createElement({
     tag: 'label',
-    text: 'Password',
+    text: label,
     parent: fieldContainer,
     classes: ['block', 'text-sm', 'font-large', 'text-gray-700', 'mb-1'],
     attributes: { for: id },

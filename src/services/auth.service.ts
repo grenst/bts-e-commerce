@@ -113,6 +113,22 @@ export const AuthService = {
     }
   },
 
+  async loadSession(): Promise<void> {
+    const { customer } = useCustomerStore.getState();
+    if (customer) return;
+
+    const { accessToken } = useTokenStore.getState();
+    if (!accessToken) return;
+
+    try {
+      const me = await fetchMyCustomer(accessToken);
+      useCustomerStore.getState().setCustomer(me);
+    } catch (error) {
+      debug('loadSession error', error);
+      await this.logout();
+    }
+  },
+
   async updateCurrentCustomer(
     version: number,
     actions: { action: string; [key: string]: unknown }[]
@@ -141,6 +157,30 @@ export const AuthService = {
           'error',
           `Customer update failed: ${(error as Error).message}`
         );
+      throw error;
+    }
+  },
+
+  async changePassword(
+    version: number,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<CommercetoolsCustomer> {
+    const { accessToken } = useTokenStore.getState();
+    if (!accessToken) {
+      throw new Error('No access token available for changing password.');
+    }
+
+    try {
+      const { data } = await apiInstance.post<CommercetoolsCustomer>(
+        '/me/password',
+        { version, currentPassword, newPassword },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      useCustomerStore.getState().setCustomer(data);
+      return data;
+    } catch (error) {
+      debug('Change-password error', error);
       throw error;
     }
   },

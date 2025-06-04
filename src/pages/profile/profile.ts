@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import {
   createEl as createElement,
   removeAllChild,
@@ -7,8 +8,118 @@ import { AuthService } from '../../services/auth.service';
 import type { Address } from '../../types/commercetools';
 import { addNotification } from '../../store/store';
 import './profile-page.scss';
-import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown'; // Added
+import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown';
 import { COUNTRIES } from '../../data/countries';
+import { createPasswordField } from '../auth/auth-form-elements';
+import { getRouter } from '../../router/router';
+import { triggerHeaderUpdate } from '../../index'; // Added for header update
+
+/* ───────────── Zod Validation Schemas ───────────── */
+const NAME_REGEX = /^[A-Za-zÀ-ÿ]+(?: [A-Za-zÀ-ÿ]+)*$/u;
+
+const emailSchema = z
+  .string()
+  .min(1, { message: 'Please enter your email' })
+  .email({ message: 'Please enter a valid email (e.g., user@example.com)' })
+  .refine((v: string) => v === v.trim(), {
+    message: 'Email must not start or end with spaces',
+  })
+  .refine((v: string) => !/\s/.test(v), {
+    message: 'Email must not contain spaces',
+  });
+
+const passwordSchema = z
+  .string()
+  .min(8, { message: 'Use at least 8 characters' })
+  .regex(/[A-Z]/, {
+    message: 'Add at least one uppercase letter (A-Z)',
+  })
+  .regex(/[a-z]/, {
+    message: 'Add at least one lowercase letter (a-z)',
+  })
+  .regex(/[0-9]/, {
+    message: 'Include a number (0-9)',
+  })
+  .refine((v: string) => v === v.trim(), {
+    message: 'Password must not start or end with a space',
+  });
+
+const nameSchema = z
+  .string()
+  .min(3, { message: 'Name is required' })
+  .regex(NAME_REGEX, { message: 'Only letters and spaces allowed' })
+  .max(50, { message: 'Max 50 characters' });
+
+const dateOfBirthSchema = z
+  .string()
+  .min(1, { message: 'Date of birth is required' })
+  .regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'Date of birth must be in YYYY-MM-DD format',
+  })
+  .refine(
+    (date) => {
+      const year = Number.parseInt(date.slice(0, 4), 10);
+      const currentYear = new Date().getFullYear();
+      return year <= currentYear - 18;
+    },
+    { message: 'You must be at least 18 years old' }
+  )
+  .refine(
+    (date) => {
+      const year = Number.parseInt(date.slice(0, 4), 10);
+      return year >= 1900;
+    },
+    { message: 'Date of birth year seems incorrect' }
+  );
+
+const personalInfoSchema = z.object({
+  firstName: nameSchema,
+  lastName: nameSchema,
+  dateOfBirth: dateOfBirthSchema,
+  email: emailSchema,
+});
+
+type ValidationResult = {
+  success: boolean;
+  errors: Record<string, string>;
+};
+
+function validatePersonalInfo(data: {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  email: string;
+}): ValidationResult {
+  try {
+    personalInfoSchema.parse(data);
+    return { success: true, errors: {} };
+  } catch (error) {
+    const formattedErrors: Record<string, string> = {};
+    if (error instanceof z.ZodError) {
+      for (const error_ of error.errors) {
+        const field = error_.path[0] as string;
+        formattedErrors[field] = error_.message;
+      }
+    }
+    return { success: false, errors: formattedErrors };
+  }
+}
+
+function validatePassword(password: string): ValidationResult {
+  try {
+    passwordSchema.parse(password);
+    return { success: true, errors: {} };
+  } catch (error) {
+    const formattedErrors: Record<string, string> = {};
+    if (error instanceof z.ZodError) {
+      for (const error_ of error.errors) {
+        formattedErrors['password'] = error_.message;
+        break; // Only show first error
+      }
+    }
+    return { success: false, errors: formattedErrors };
+  }
+}
 
 function createFormField(
   labelText: string,
@@ -55,8 +166,11 @@ function createFormField(
 
 type AddressContext = 'shipping' | 'billing';
 
-export default function createProfilePage(container: HTMLElement): void {
+export default async function createProfilePage(
+  container: HTMLElement
+): Promise<void> {
   container.innerHTML = '';
+  await AuthService.loadSession();
 
   const profileContainer = createElement({
     tag: 'div',
@@ -139,6 +253,19 @@ export default function createProfilePage(container: HTMLElement): void {
     customer.lastName || '',
     formGrid
   );
+  // Date of Birth
+  const rawDateOfBirth = customer.dateOfBirth || '';
+  const formattedDOB = rawDateOfBirth.includes('.')
+    ? rawDateOfBirth.split('.').reverse().join('-')
+    : rawDateOfBirth;
+
+  const dateOfBirthInput = createFormField(
+    'Date of Birth',
+    'date',
+    'dateOfBirth',
+    formattedDOB,
+    formGrid
+  );
   const emailInput = createFormField(
     'Email',
     'email',
@@ -171,8 +298,83 @@ export default function createProfilePage(container: HTMLElement): void {
     parent: personalInfoForm,
   });
 
+  /* ───────────── Personal information form Password (unchanged logic) ───────────── */
+
+  const personalInfoFormPassword = createElement({
+    tag: 'form',
+    parent: profileContainer,
+  });
+  createElement({
+    tag: 'h2',
+    text: 'Password change field',
+    classes: ['text-2xl', 'font-nexa-bold', 'mt-10', 'text-gray-700'],
+    parent: personalInfoFormPassword,
+  });
+  const formGridPassword = createElement({
+    tag: 'div',
+    classes: ['grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-x-6', 'gap-y-4'],
+    parent: personalInfoFormPassword,
+  });
+  const { input: actualPassInput } = createPasswordField({
+    container: formGridPassword,
+    id: 'actualPass',
+    placeholder: 'Current password',
+    label: 'Current Password',
+  });
+  const { input: newPassInput } = createPasswordField({
+    container: formGridPassword,
+    id: 'newPass',
+    placeholder: 'New password',
+    label: 'New Password',
+  });
+  const { input: replayNewPassInput } = createPasswordField({
+    container: formGridPassword,
+    id: 'replayNewPass',
+    placeholder: 'Repeat new password',
+    label: 'Repeat New Password',
+  });
+
+  const savePersonalButtonPassword = createElement({
+    tag: 'button',
+    text: 'Save Password',
+    attributes: { type: 'submit' },
+    classes: [
+      'mt-6',
+      'px-6',
+      'py-2.5',
+      'bg-gray-900',
+      'text-white',
+      'font-nexa-bold',
+      'hover:bg-gray-700',
+      'focus:outline-none',
+      'focus:ring-2',
+      'focus:ring-gray-800',
+      'focus:ring-offset-2',
+      'transition-colors',
+      'w-full',
+      'md:w-auto',
+    ],
+    parent: personalInfoFormPassword,
+  });
+
   personalInfoForm.addEventListener('submit', async (event_) => {
     event_.preventDefault();
+
+    // Validate form using Zod
+    const validation = validatePersonalInfo({
+      firstName: firstNameInput.value,
+      lastName: lastNameInput.value,
+      dateOfBirth: dateOfBirthInput.value,
+      email: emailInput.value,
+    });
+
+    if (!validation.success) {
+      // Show first error notification
+      const firstError = Object.values(validation.errors)[0];
+      addNotification('error', firstError);
+      return;
+    }
+
     savePersonalButton.textContent = 'Saving…';
     savePersonalButton.setAttribute('disabled', 'true');
     try {
@@ -186,6 +388,12 @@ export default function createProfilePage(container: HTMLElement): void {
         });
       if (lastNameInput.value !== (currentCustomer.lastName || ''))
         actions.push({ action: 'setLastName', lastName: lastNameInput.value });
+      // Date of Birth
+      if (dateOfBirthInput.value !== currentCustomer.dateOfBirth)
+        actions.push({
+          action: 'setDateOfBirth',
+          dateOfBirth: dateOfBirthInput.value,
+        });
       if (emailInput.value !== currentCustomer.email)
         actions.push({ action: 'changeEmail', email: emailInput.value });
 
@@ -206,6 +414,64 @@ export default function createProfilePage(container: HTMLElement): void {
     } finally {
       savePersonalButton.textContent = 'Save Personal Info';
       savePersonalButton.removeAttribute('disabled');
+    }
+  });
+
+  /* ───────────── Password form submission ───────────── */
+  personalInfoFormPassword.addEventListener('submit', async (event_) => {
+    event_.preventDefault();
+
+    const currentCustomer = useCustomerStore.getState().customer;
+    if (!currentCustomer) {
+      addNotification('error', 'You must be logged in to change your password');
+      return;
+    }
+
+    const currentPassword = actualPassInput.value;
+    const newPassword = newPassInput.value;
+    const replayPassword = replayNewPassInput.value;
+
+    // Validate new password using Zod
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.success) {
+      addNotification('error', passwordValidation.errors['password']);
+      return;
+    }
+
+    // Check password match
+    if (newPassword !== replayPassword) {
+      addNotification('error', 'New password and confirmation do not match');
+      return;
+    }
+
+    savePersonalButtonPassword.textContent = 'Saving…';
+    savePersonalButtonPassword.setAttribute('disabled', 'true');
+    try {
+      await AuthService.changePassword(
+        currentCustomer.version,
+        currentPassword,
+        newPassword
+      );
+
+      addNotification('success', 'Password updated successfully');
+
+      // Logout and redirect after password change
+      await AuthService.logout();
+      getRouter().navigateTo('/login'); // Single-page transition
+      triggerHeaderUpdate(); // Update header navigation
+      return;
+    } catch (error) {
+      if ((error as Error).message.includes('InvalidCredentials')) {
+        addNotification('error', 'Current password is incorrect');
+      } else {
+        addNotification(
+          'error',
+          (error as Error).message ?? 'Failed to update password'
+        );
+      }
+    } finally {
+      savePersonalButtonPassword.textContent = 'Save Password';
+      savePersonalButtonPassword.removeAttribute('disabled');
     }
   });
 
