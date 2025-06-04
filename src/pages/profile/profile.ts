@@ -75,7 +75,7 @@ const dateOfBirthSchema = z
 const personalInfoSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
-  age: dateOfBirthSchema,
+  dateOfBirth: dateOfBirthSchema,
   email: emailSchema,
 });
 
@@ -87,7 +87,7 @@ type ValidationResult = {
 function validatePersonalInfo(data: {
   firstName: string;
   lastName: string;
-  age: string;
+  dateOfBirth: string;
   email: string;
 }): ValidationResult {
   try {
@@ -253,15 +253,19 @@ export default async function createProfilePage(
     customer.lastName || '',
     formGrid
   );
-  // Age
-  const ageInput = createFormField(
-    `Age`,
+  // Date of Birth
+  const rawDateOfBirth = customer.dateOfBirth || '';
+  const formattedDOB = rawDateOfBirth.includes('.')
+    ? rawDateOfBirth.split('.').reverse().join('-')
+    : rawDateOfBirth;
+
+  const dateOfBirthInput = createFormField(
+    'Date of Birth',
     'date',
-    'ageInput',
-    customer.age || '',
+    'dateOfBirth',
+    formattedDOB,
     formGrid
   );
-  // Age
   const emailInput = createFormField(
     'Email',
     'email',
@@ -360,7 +364,7 @@ export default async function createProfilePage(
     const validation = validatePersonalInfo({
       firstName: firstNameInput.value,
       lastName: lastNameInput.value,
-      age: ageInput.value,
+      dateOfBirth: dateOfBirthInput.value,
       email: emailInput.value,
     });
 
@@ -384,10 +388,12 @@ export default async function createProfilePage(
         });
       if (lastNameInput.value !== (currentCustomer.lastName || ''))
         actions.push({ action: 'setLastName', lastName: lastNameInput.value });
-      // Age
-      if (ageInput.value !== currentCustomer.age)
-        actions.push({ action: 'changeAge', age: ageInput.value });
-      // Age
+      // Date of Birth
+      if (dateOfBirthInput.value !== currentCustomer.dateOfBirth)
+        actions.push({
+          action: 'setDateOfBirth',
+          dateOfBirth: dateOfBirthInput.value,
+        });
       if (emailInput.value !== currentCustomer.email)
         actions.push({ action: 'changeEmail', email: emailInput.value });
 
