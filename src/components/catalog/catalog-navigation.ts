@@ -8,7 +8,7 @@ export function createCatalogNavigationElement(): HTMLElement {
     tag: 'div',
     attributes: {
       class:
-        'flex space-x-3 items-center justify-center p-4 bg-white shadow-md',
+        'flex space-x-3 items-center justify-center p-4 bg-white shadow-md flex-col gap-2 min-[500px]:flex-row min-[500px]:gap-0',
     },
   });
 

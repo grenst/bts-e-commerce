@@ -145,6 +145,9 @@
   transition:
     transform .4s cubic-bezier(.22,1,.36,1),
     opacity .25s ease-out;
+  
+  /* Add animation delay for modal content */
+  transition-delay: 0.1s;
 
   &.open {
     opacity: 1;
@@ -183,7 +186,7 @@
 .headline-fx {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   width: 110%;
-  padding-top: clamp(3vw, 33vw, 210px);
+  padding-top: clamp(3vw, 33vw, 510px);
   padding-left: clamp(1vw,3.5vw, 9.9vw);
   font-size: clamp(2.7rem, 12vw, 6.5rem);
   line-height: 0.85;
@@ -288,4 +291,62 @@
   color: #fff;
   cursor: pointer;
   text-align: end;
+}
+
+/* Hero slider styles */
+.hero-slider {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  height: min(80vw, 40rem);
+  max-width: 100%;
+  margin: 0 auto;
+  object-fit: contain;
+
+  .slide {
+    transition: opacity 0.3s ease;
+  }
+
+  .slider-nav {
+    transform: translateY(230%);
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition:
+      opacity 0.3s ease,
+      background 0.3s ease,
+      transform 0.3s ease;
+
+    &:hover {
+      background: rgba(0,0,0,0.8);
+    }
+
+    img {
+      width: 24px;
+      height: 24px;
+      filter: invert(1);
+    }
+  }
+
+  .nav-left {
+    left: 10px;
+  }
+
+  .nav-right {
+    right: 10px;
+  }
+  &:hover {
+    .nav-left  { transform: translateY(180%) translateX(-5px); }
+    .nav-right { transform: translateY(180%) translateX(5px);  }
+  }
+}
+
+/* Ensure hero-left has relative positioning for slider */
+.hero-left {
+  position: relative;
 }
