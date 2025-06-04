@@ -3,7 +3,11 @@ import { createCatalogNavigationElement } from '../../components/catalog/catalog
 import { createCatalogSubNavElement } from '../../components/catalog/catalog-sub-nav';
 import { createProductListElement } from '../../components/catalog/product-list';
 import { applyFilters } from '../../logic/product-filter';
-import { sortProducts } from '../../logic/product-sort';
+import {
+  sortProducts,
+  sortProductsWithinCategories,
+  sortCategories,
+} from '../../logic/product-sort';
 import { getAllProducts } from '../../api/products/product-service';
 import { getAllCategories } from '../../api/products/product-service';
 import { Product, Category, ActiveSortMode } from '../../types/catalog-types';
@@ -13,6 +17,7 @@ import {
 } from '../../components/layout/modal/product-modal';
 
 let productModal: ProductModal;
+let categoryOrder: string[] = [];
 
 export function createCatalogPage(container: HTMLElement): void {
   container.innerHTML = '';
@@ -71,6 +76,7 @@ export function createCatalogPage(container: HTMLElement): void {
       for (const category of categories) {
         allCategoriesMap.set(category.id, category);
       }
+      categoryOrder = [...allCategoriesMap.keys()];
 
       // DEFAULT with all categories active
       activeCategoryIds = new Set(allCategoriesMap.keys());
@@ -83,15 +89,36 @@ export function createCatalogPage(container: HTMLElement): void {
   }
 
   function renderOrUpdateProductList() {
-    // Apply filters and sorting
+    console.log('--- RENDER ---');
+    console.log('Sort mode:', currentSortMode);
+    console.log('Category order:', categoryOrder);
+
     const filteredProducts = applyFilters(
       allProducts,
       activeCategoryIds,
       currentSearchTerm
     );
-    displayedProducts = sortProducts(filteredProducts, currentSortMode);
 
-    // Clear and update product list container
+    if (currentSortMode.key === 'category') {
+      const sortedCategories = sortCategories(
+        [...allCategoriesMap.values()],
+        currentSortMode.asc
+      );
+      displayedProducts = [];
+      for (const category of sortedCategories) {
+        const categoryProducts = filteredProducts.filter((product) =>
+          product.categories?.some((c) => c.id === category.id)
+        );
+        displayedProducts.push(...categoryProducts);
+      }
+    } else {
+      displayedProducts = sortProductsWithinCategories(
+        filteredProducts,
+        currentSortMode,
+        categoryOrder
+      );
+    }
+
     productListContainer.innerHTML = '';
     const productListElement = createProductListElement(
       displayedProducts,
@@ -129,6 +156,15 @@ export function createCatalogPage(container: HTMLElement): void {
   subNavControl.element.addEventListener('sort-changed', (event: Event) => {
     const customEvent = event as CustomEvent<ActiveSortMode>;
     currentSortMode = customEvent.detail;
+
+    if (currentSortMode.key === 'category') {
+      const sorted = sortCategories(
+        [...allCategoriesMap.values()],
+        currentSortMode.asc
+      );
+      categoryOrder = sorted.map((c) => c.id);
+    }
+
     renderOrUpdateProductList();
   });
 
