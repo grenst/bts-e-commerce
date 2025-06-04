@@ -58,6 +58,15 @@ export function createCatalogPage(container: HTMLElement): void {
     document.body.append(productModal.modalElement);
   }
 
+  // Check if we need to open a product modal from history state
+  const state = window.history.state;
+  if (state && state.openProductModal) {
+    productModal.showModal(state.openProductModal);
+    
+    // Clear the state to prevent reopening on refresh
+    window.history.replaceState({ ...state, openProductModal: undefined }, '');
+  }
+
   // State management variables
   let allProducts: Product[] = [];
   let displayedProducts: Product[] = [];

@@ -7,14 +7,16 @@ import { createCatalogPage } from '../pages/catalog/catalog';
 export interface Route {
   path: string;
   component: (container: HTMLElement, router: Router) => void;
-  preserveState?: boolean; // Флаг, нужно ли сохранять состояние для этого маршрута
+  preserveState?: boolean;
 }
+
+type RouteState = Record<string, unknown>;
 
 export class Router {
   private routes: Route[] = [];
-  private mainContainer: HTMLElement; // Основной контейнер приложения
-  private pageContainers: Map<string, HTMLElement> = new Map(); // Хранилище контейнеров страниц
-  private currentPath: string = '';
+  private mainContainer: HTMLElement;
+  private pageContainers: Map<string, HTMLElement> = new Map();
+  private currentPath = '';
   private scrollPositions: Map<string, number> = new Map();
 
   constructor(container: HTMLElement) {
@@ -25,7 +27,7 @@ export class Router {
   private setupEventListeners(): void {
     globalThis.addEventListener('popstate', () => this.handleRouteChange());
     globalThis.addEventListener('beforeunload', () =>
-      this.saveCurrentScrollPosition()
+      this.saveCurrentScrollPosition(),
     );
   }
 
@@ -33,32 +35,58 @@ export class Router {
     this.routes.push(route);
   }
 
-  navigateTo(path: string): void {
-    if (this.currentPath === path) return;
-
-    globalThis.history.pushState({}, '', path);
+  navigateTo(path: string, state: RouteState = {}): void {
+    if (this.currentPath === path && Object.keys(state).length === 0) return;
+    globalThis.history.pushState(state, '', path);
     this.handleRouteChange();
   }
 
-  private handleRouteChange(): void {
+  private async handleRouteChange(): Promise<void> {
     const path = globalThis.location.pathname;
     if (this.currentPath === path) return;
 
-    // Сохраняем текущую позицию скролла
     this.saveCurrentScrollPosition();
     this.currentPath = path;
 
     if (path === '/') {
-      this.navigateTo('/main'); // редирект
+      this.navigateTo('/main');
       return;
     }
 
-    const route = this.findRoute(path);
-    // if (!route) return;
+    const productDetailMatch = path.match(
+      /^\/(catalog|main)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i,
+    );
+    if (productDetailMatch) {
+      const basePath = `/${productDetailMatch[1]}`;
+      const productId = productDetailMatch[2];
 
-    if (route) {
-      this.processRoute(route, path);
+      const validBasePaths = ['/catalog', '/main'];
+      if (!validBasePaths.includes(basePath)) {
+        this.navigateTo('/error');
+        return;
+      }
+
+      try {
+        const { getProductById } = await import(
+          '../api/products/product-service'
+        );
+        const product = await getProductById(productId);
+        if (!product) {
+          this.navigateTo('/error');
+          return;
+        }
+
+        this.navigateTo(basePath, { openProductModal: productId });
+        return;
+      } catch (error) {
+        console.error('Error checking product existence:', error);
+        this.navigateTo('/error');
+        return;
+      }
     }
+
+    const route = this.findRoute(path);
+    if (route) this.processRoute(route, path);
   }
 
   private findRoute(path: string): Route | undefined {
@@ -69,30 +97,24 @@ export class Router {
   }
 
   private processRoute(route: Route, path: string): void {
-    // Проверяем, есть ли сохраненный контейнер и разрешено ли сохранение состояния
     const hasSavedContainer =
       this.pageContainers.has(path) && route.preserveState;
 
     let pageContainer = this.pageContainers.get(path);
 
-    // Если контейнера нет или маршрут не сохраняет состояние
     if (!pageContainer) {
       pageContainer = this.createPageContainer(route);
       this.pageContainers.set(path, pageContainer);
       console.log(`Создали новый контейнер для ${path}`);
     }
 
-    // Очищаем основной контейнер
     removeAllChild(this.mainContainer);
 
     if (hasSavedContainer) {
-      // Случай 1: Восстановление сохраненного состояния
       this.mainContainer.append(pageContainer);
       this.restoreScrollPosition(path);
-      console.log(`Восстановили сохраненное состояние для ${path}`);
+      console.log(`Восстановили сохранённое состояние для ${path}`);
     } else {
-      // Случай 2: Первая отрисовка или страница без сохранения состояния
-      // if (route.preserveState) {
       route.component(this.mainContainer, this);
       window.scrollTo(0, 0);
       console.log(`Первая отрисовка ${path}`);
@@ -100,37 +122,30 @@ export class Router {
   }
 
   private createPageContainer(route: Route): HTMLElement {
-    const pageContainer = createElement({
-      tag: 'div',
-      classes: ['page-container'],
-    });
+    const pageContainer = createElement({ tag: 'div', classes: ['page-container'] });
     route.component(pageContainer, this);
-
     return pageContainer;
   }
 
   private saveCurrentScrollPosition(): void {
-    if (this.currentPath) {
-      this.scrollPositions.set(this.currentPath, window.scrollY);
-    }
+    if (this.currentPath) this.scrollPositions.set(this.currentPath, window.scrollY);
   }
 
   private restoreScrollPosition(path: string): void {
     requestAnimationFrame(() => {
-      const savedPosition = this.scrollPositions.get(path) || 0;
+      const savedPosition = this.scrollPositions.get(path) ?? 0;
       window.scrollTo(0, savedPosition);
     });
   }
 
   init(): void {
     if (globalThis.location.pathname === '/') {
-      this.navigateTo('/main'); // Редирект на /main при загрузке
+      this.navigateTo('/main');
     } else {
-      this.handleRouteChange(); // Обычная обработка
+      this.handleRouteChange();
     }
   }
 
-  // методы очистки состояний (на всякий случай)
   clearCache(): void {
     this.pageContainers.clear();
     this.scrollPositions.clear();
@@ -147,7 +162,7 @@ export function createRouterLink(
   path: string,
   parent: HTMLElement,
   router: Router,
-  addClasses: string[] = []
+  addClasses: string[] = [],
 ): HTMLAnchorElement {
   const link = createElement({
     tag: 'a',
@@ -157,8 +172,8 @@ export function createRouterLink(
     attributes: { href: path },
   }) as HTMLAnchorElement;
 
-  link.addEventListener('click', (event_) => {
-    event_.preventDefault();
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
     router.navigateTo(path);
   });
 
@@ -170,7 +185,6 @@ let routerInstance: Router | undefined;
 export function createRouter(container: HTMLElement): Router {
   if (!routerInstance) {
     routerInstance = new Router(container);
-    // Add catalog route
     routerInstance.addRoute({
       path: '/catalog',
       component: createCatalogPage,
@@ -182,9 +196,7 @@ export function createRouter(container: HTMLElement): Router {
 
 export function getRouter(): Router {
   if (!routerInstance) {
-    throw new Error(
-      'Router has not been initialized. Call createRouter first.'
-    );
+    throw new Error('Router has not been initialized. Call createRouter first.');
   }
   return routerInstance;
 }
