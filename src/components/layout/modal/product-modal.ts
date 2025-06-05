@@ -102,7 +102,7 @@ export function createProductModal(): ProductModal {
       'flex',
       'flex-wrap',
       'gap-2',
-      'justify-start',
+      'justify-end',
     ],
   });
 
@@ -582,7 +582,7 @@ export function createProductModal(): ProductModal {
     const price = createElement({
       tag: 'span',
       parent: submitOrder,
-      classes: ['order-price', 'w-30'],
+      classes: ['order-price', 'w-40'],
     });
 
     const updatePrice = () => {

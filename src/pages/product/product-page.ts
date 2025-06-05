@@ -274,7 +274,7 @@ export function createProductModal(): ProductModal {
     const price = h({
       tag: 'span',
       parent: submitOrder,
-      classes: ['order-price', 'w-30'],
+      classes: ['order-price', 'w-40'],
     });
 
     const update = () => {

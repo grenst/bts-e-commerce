@@ -240,14 +240,14 @@
 }
 
 .hero-right {
-  height: 70%;
+  // height: 70%;
   display: flex;
   flex-direction: row;
-  font-size: clamp(0.7rem, 1.4vw, 0.85rem);
+  // font-size: clamp(0.7rem, 1.4vw, 0.85rem);
   padding: 0 0 0 1.5rem;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  font: 700 1.125rem/1;
+  // font: 700 1.125rem/1;
   font-weight: 900;
   z-index: 1;
   p {
@@ -255,7 +255,7 @@
   }
   .padder {
     width: 20px;
-    height: 26.8vh;
+    height: 26.8vw;
     z-index: 1;
   }
   @media (width <= 510px) {

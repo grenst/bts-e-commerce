@@ -8,7 +8,8 @@ export function createCatalogNavigationElement(): HTMLElement {
     tag: 'div',
     attributes: {
       class:
-        'flex space-x-3 items-center justify-center p-4 bg-white shadow-md flex-col gap-2 min-[500px]:flex-row min-[500px]:gap-0',
+        'space-x-3 filter_atributes',
+        // 'flex space-x-3 w-auto max-[680px]:w-full justify-items-center items-center justify-center p-4 max-[680px]:p-0 max-[680px]:pb-2 bg-white shadow-md flex-col gap-2 min-[680px]:flex-row min-[680px]:gap-0',
     },
   });
 
@@ -148,7 +149,7 @@ export function createCatalogNavigationElement(): HTMLElement {
     tag: 'button',
     attributes: {
       class:
-        'px-4 py-2 bg-gray-800 text-white rounded-3xl hover:bg-gray-900 cursor-pointer',
+        'px-4 py-2 max-[400px]:w-full text-gray-700 hover:text-gray-900 cursor-pointer',
     },
     text: 'Filters',
   });
@@ -162,7 +163,7 @@ export function createCatalogNavigationElement(): HTMLElement {
     tag: 'button',
     attributes: {
       class:
-        'px-4 py-2 bg-gray-800 text-white rounded-3xl hover:bg-gray-900 cursor-pointer',
+        'px-4 py-2 max-[400px]:w-full text-gray-700 hover:text-gray-900 cursor-pointer',
     },
     text: 'Sort',
   });
@@ -173,7 +174,7 @@ export function createCatalogNavigationElement(): HTMLElement {
 
   const buttonsContainer = createElement({
     tag: 'div',
-    attributes: { class: 'flex space-x-3' },
+    attributes: { class: 'flex space-x-3 max-[400px]:w-full flex-col flex-1 gap-2 min-[400px]:flex-row min-[400px]:gap-0' },
   });
   buttonsContainer.append(filtersButton);
   buttonsContainer.append(sortButton);
@@ -183,7 +184,7 @@ export function createCatalogNavigationElement(): HTMLElement {
     tag: 'button',
     attributes: {
       class:
-        'px-4 py-2 bg-gray-800 text-white rounded-3xl hover:bg-gray-900 cursor-pointer',
+        'px-4 py-2 max-[400px]:w-full text-gray-700 hover:text-gray-900 cursor-pointer',
     },
     text: 'Actions',
   });
@@ -199,7 +200,7 @@ export function createCatalogNavigationElement(): HTMLElement {
     tag: 'button',
     attributes: {
       class:
-        'px-4 py-2 bg-gray-800 text-white rounded-3xl hover:bg-gray-900 cursor-pointer',
+        'px-4 py-2 max-[400px]:w-full text-gray-700 hover:text-gray-900 cursor-pointer',
     },
     text: 'Reset',
   });
