@@ -27,7 +27,7 @@ export class Router {
   private setupEventListeners(): void {
     globalThis.addEventListener('popstate', () => this.handleRouteChange());
     globalThis.addEventListener('beforeunload', () =>
-      this.saveCurrentScrollPosition(),
+      this.saveCurrentScrollPosition()
     );
   }
 
@@ -54,7 +54,7 @@ export class Router {
     }
 
     const productDetailMatch = path.match(
-      /^\/(catalog|main)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i,
+      /^\/(catalog|main)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
     );
     if (productDetailMatch) {
       const basePath = `/${productDetailMatch[1]}`;
@@ -122,13 +122,17 @@ export class Router {
   }
 
   private createPageContainer(route: Route): HTMLElement {
-    const pageContainer = createElement({ tag: 'div', classes: ['page-container'] });
+    const pageContainer = createElement({
+      tag: 'div',
+      classes: ['page-container'],
+    });
     route.component(pageContainer, this);
     return pageContainer;
   }
 
   private saveCurrentScrollPosition(): void {
-    if (this.currentPath) this.scrollPositions.set(this.currentPath, window.scrollY);
+    if (this.currentPath)
+      this.scrollPositions.set(this.currentPath, window.scrollY);
   }
 
   private restoreScrollPosition(path: string): void {
@@ -162,7 +166,7 @@ export function createRouterLink(
   path: string,
   parent: HTMLElement,
   router: Router,
-  addClasses: string[] = [],
+  addClasses: string[] = []
 ): HTMLAnchorElement {
   const link = createElement({
     tag: 'a',
@@ -196,7 +200,9 @@ export function createRouter(container: HTMLElement): Router {
 
 export function getRouter(): Router {
   if (!routerInstance) {
-    throw new Error('Router has not been initialized. Call createRouter first.');
+    throw new Error(
+      'Router has not been initialized. Call createRouter first.'
+    );
   }
   return routerInstance;
 }

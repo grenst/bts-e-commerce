@@ -64,7 +64,7 @@ export function createProductModal(): ProductModal {
       'absolute',
       'h-full',
       'w-full',
-      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_25%,rgba(255,255,255,1)_75%,rgba(255,255,255,1)_100%)]',
+      // 'bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_25%,rgba(255,255,255,1)_75%,rgba(255,255,255,1)_100%)]',
       '-z-1',
     ],
   });
@@ -368,13 +368,13 @@ export function createProductModal(): ProductModal {
     let currentSlideIndex = 0;
     const slideElements: HTMLElement[] = [];
 
-    for (const img of images) {
+    images.forEach((img, index) => {
       const slide = createElement({
         tag: 'div',
         parent: heroSlider,
         classes: ['slide', 'absolute', 'inset-0', 'w-full', 'h-full'],
       });
-      if (img !== images[0]) slide.style.display = 'none';
+      if (index !== 0) slide.style.display = 'none';
 
       const imgUrl = img.url
         ? `${img.url}?format=webp`
@@ -390,7 +390,7 @@ export function createProductModal(): ProductModal {
         },
       });
       slideElements.push(slide);
-    }
+    });
 
     // Create navigation buttons
     const createNavButton = (icon: string, direction: 'left' | 'right') => {
@@ -441,9 +441,9 @@ export function createProductModal(): ProductModal {
 
     // Navigation functions
     const showSlide = (index: number) => {
-      for (const slide of slideElements) {
-        slide.style.display = slide === slideElements[index] ? 'block' : 'none';
-      }
+      slideElements.forEach((slide, i) => {
+        slide.style.display = i === index ? 'block' : 'none';
+      });
       currentSlideIndex = index;
     };
 

@@ -6,7 +6,7 @@
   justify-content: center;
   align-items: center;
   padding-top: 6vh;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(255, 255, 255, 0.91);
   z-index: 3;
 }
 
@@ -33,7 +33,7 @@
   right: 0.8rem;
   background: none;
   border: none;
-  font: 700 1.25rem/1 'inherit';
+  font: 700 1.25rem/1 'alumni';
   cursor: pointer;
 }
 
@@ -82,7 +82,7 @@
 .headline-fx {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   width: 110%;
-  padding-top: clamp(3vw, 33vw, 240px);
+  padding-top: clamp(3vw, 33vw, 210px);
   padding-left: clamp(1vw,3.5vw, 9.9vw);
   font-size: clamp(2.7rem, 12vw, 6.5rem);
   line-height: 0.85;
@@ -97,7 +97,7 @@
   }
 }
 .headline-bg {
-  color: #000;
+  // color: #000;
   z-index: -1;
 }
 .headline-fx {
@@ -119,10 +119,11 @@
   width: min(50vw, 20rem);
   max-width: 90%;
   margin: 0 auto;
-  object-fit: contain;
+  // object-fit: contain;
 }
 
 .hero-right {
+  height: 80%;
   display: flex;
   flex-direction: row;
   font-size: clamp(0.7rem, 1.4vw, 0.85rem);

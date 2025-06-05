@@ -126,7 +126,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const state = window.history.state;
   if (state && state.openProductModal) {
     productModal.showModal(state.openProductModal);
-    
+
     // Clear the state to prevent reopening on refresh
     window.history.replaceState({ ...state, openProductModal: undefined }, '');
   }
