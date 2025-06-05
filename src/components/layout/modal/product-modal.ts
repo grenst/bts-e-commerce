@@ -289,7 +289,7 @@ export function createProductModal(): ProductModal {
                 'to-90%',
               ],
               attributes: {
-                src: p.masterVariant.images?.[1]?.url ?? '',
+                src: p.masterVariant.images?.[0]?.url ?? '',
                 alt: p.name.en ?? 'product image',
                 loading: 'lazy',
               },
