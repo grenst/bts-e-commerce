@@ -122,6 +122,18 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   const productModal: ProductModal = createProductModal();
   container.append(productModal.modalElement);
 
+  // Check if we need to open a product modal from history state
+  const state = globalThis.history.state;
+  if (state && state.openProductModal) {
+    productModal.showModal(state.openProductModal);
+
+    // Clear the state to prevent reopening on refresh
+    globalThis.history.replaceState(
+      { ...state, openProductModal: undefined },
+      ''
+    );
+  }
+
   const homeContainer = createElement({
     tag: 'div',
     parent: container,

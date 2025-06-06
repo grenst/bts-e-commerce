@@ -64,7 +64,7 @@ export function createProductModal(): ProductModal {
       'absolute',
       'h-full',
       'w-full',
-      'bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_25%,rgba(255,255,255,1)_75%,rgba(255,255,255,1)_100%)]',
+      // 'bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_25%,rgba(255,255,255,1)_75%,rgba(255,255,255,1)_100%)]',
       '-z-1',
     ],
   });
@@ -102,7 +102,7 @@ export function createProductModal(): ProductModal {
       'flex',
       'flex-wrap',
       'gap-2',
-      'justify-start',
+      'justify-end',
     ],
   });
 
@@ -289,7 +289,7 @@ export function createProductModal(): ProductModal {
                 'to-90%',
               ],
               attributes: {
-                src: p.masterVariant.images?.[1]?.url ?? '',
+                src: p.masterVariant.images?.[0]?.url ?? '',
                 alt: p.name.en ?? 'product image',
                 loading: 'lazy',
               },
@@ -368,7 +368,7 @@ export function createProductModal(): ProductModal {
     let currentSlideIndex = 0;
     const slideElements: HTMLElement[] = [];
 
-    images.forEach((img, index) => {
+    for (const [index, img] of images.entries()) {
       const slide = createElement({
         tag: 'div',
         parent: heroSlider,
@@ -376,7 +376,9 @@ export function createProductModal(): ProductModal {
       });
       if (index !== 0) slide.style.display = 'none';
 
-      const imgUrl = img.url ? `${img.url}?format=webp` : '../../assets/images/placeholder.webp';
+      const imgUrl = img.url
+        ? `${img.url}?format=webp`
+        : '../../assets/images/placeholder.webp';
       createElement({
         tag: 'img',
         parent: slide,
@@ -388,10 +390,10 @@ export function createProductModal(): ProductModal {
         },
       });
       slideElements.push(slide);
-    });
+    }
 
     // Create navigation buttons
-    const createNavButton = (icon: string, direction: 'left'|'right') => {
+    const createNavButton = (icon: string, direction: 'left' | 'right') => {
       const button = createElement({
         tag: 'button',
         parent: heroSlider,
@@ -439,9 +441,9 @@ export function createProductModal(): ProductModal {
 
     // Navigation functions
     const showSlide = (index: number) => {
-      slideElements.forEach((slide, i) => {
-        slide.style.display = i === index ? 'block' : 'none';
-      });
+      for (const [index_, slide] of slideElements.entries()) {
+        slide.style.display = index_ === index ? 'block' : 'none';
+      }
       currentSlideIndex = index;
     };
 
@@ -580,7 +582,7 @@ export function createProductModal(): ProductModal {
     const price = createElement({
       tag: 'span',
       parent: submitOrder,
-      classes: ['order-price', 'w-30'],
+      classes: ['order-price', 'w-40'],
     });
 
     const updatePrice = () => {

@@ -165,6 +165,7 @@ export function initializeAuthForm(
     container: formContainer,
     id: 'password',
     placeholder: 'Use A-Z a-z 0-9',
+    label: 'Password',
   });
 
   const errorContainer = createElement({

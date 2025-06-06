@@ -2,9 +2,7 @@ import { createEl as createElement } from '../../utils/element-utilities';
 import { createCatalogNavigationElement } from '../../components/catalog/catalog-navigation';
 import { createCatalogSubNavElement } from '../../components/catalog/catalog-sub-nav';
 import { createProductListElement } from '../../components/catalog/product-list';
-import { applyFilters } from '../../logic/product-filter';
-import { sortProducts } from '../../logic/product-sort';
-import { getAllProducts } from '../../api/products/product-service';
+import { getAllPublishedProducts as getAllProducts } from '../../api/products/product-service';
 import { getAllCategories } from '../../api/products/product-service';
 import { Product, Category, ActiveSortMode } from '../../types/catalog-types';
 import {
@@ -24,13 +22,14 @@ export function createCatalogPage(container: HTMLElement): void {
 
   const title = createElement({
     tag: 'h1',
-    attributes: { class: 'text-4xl font-impact text-center my-1 pt-8 min-[500px]:my-6' }, // TODO @451-490 wide is header UI-bug
+    attributes: {
+      class: 'text-4xl font-impact text-center my-1 pt-8 min-[680px]:my-6',
+    },
     text: 'Grab your drink',
   });
 
   const navigation = createCatalogNavigationElement();
   const subNavControl = createCatalogSubNavElement();
-
   const productListContainer = createElement({
     tag: 'div',
     classes: ['product-list-container', 'mt-8', 'xl:px-[10%]'],
@@ -42,63 +41,90 @@ export function createCatalogPage(container: HTMLElement): void {
     subNavControl.element,
     productListContainer
   );
-
   container.append(section);
 
-  // Initialize product modal
   if (!productModal) {
     productModal = createProductModal();
     document.body.append(productModal.modalElement);
   }
 
-  // State management variables
+  const state = globalThis.history.state;
+  if (state?.openProductModal) {
+    productModal.showModal(state.openProductModal);
+    globalThis.history.replaceState(
+      { ...state, openProductModal: undefined },
+      ''
+    );
+  }
+
   let allProducts: Product[] = [];
   let displayedProducts: Product[] = [];
   const allCategoriesMap: Map<string, Category> = new Map();
-  let activeCategoryIds: Set<string> = new Set();
-  let currentSearchTerm: string = '';
+  let selectedCategoryId: string | undefined;
+  const selectedSizes = new Set<string>();
+  let currentSearchTerm = '';
+  let discountOnly = false;
   let currentSortMode: ActiveSortMode = { key: 'name', asc: true };
 
   async function initializePage() {
     try {
-      // Fetch all products and categories
-      allProducts = await getAllProducts();
       const categories = await getAllCategories();
-
-      // categories map
       for (const category of categories) {
         allCategoriesMap.set(category.id, category);
       }
-
-      // DEFAULT with all categories active
-      activeCategoryIds = new Set(allCategoriesMap.keys());
-
-      // Render initial product list
-      renderOrUpdateProductList();
+      await fetchProducts();
     } catch (error) {
-      console.error('Error initializing catalog page:', error);
+      console.error(
+        'Error initializing catalog page:',
+        (error as Error).message
+      );
     }
   }
 
-  function renderOrUpdateProductList() {
-    // Apply filters and sorting
-    const filteredProducts = applyFilters(
-      allProducts,
-      activeCategoryIds,
-      currentSearchTerm
-    );
-    displayedProducts = sortProducts(filteredProducts, currentSortMode);
+  async function fetchProducts() {
+    try {
+      const filterClauses: string[] = [];
 
-    // Clear and update product list container
-    productListContainer.innerHTML = '';
-    const productListElement = createProductListElement(
-      displayedProducts,
-      allCategoriesMap
-    );
-    productListContainer.append(productListElement);
+      if (selectedCategoryId) {
+        filterClauses.push(`categories.id:"${selectedCategoryId}"`);
+      }
+
+      if (selectedSizes.size > 0) {
+        const values = [...selectedSizes].map((s) => `"${s}"`).join(',');
+        filterClauses.push(`variants.attributes.size:${values}`);
+      }
+
+      if (discountOnly) {
+        filterClauses.push('variants.prices.discounted:exists');
+      }
+
+      const filterParameter =
+        filterClauses.length > 0 ? filterClauses : undefined;
+
+      const sortParameter =
+        currentSortMode.key === 'name'
+          ? `name.en-US ${currentSortMode.asc ? 'asc' : 'desc'}`
+          : `price ${currentSortMode.asc ? 'asc' : 'desc'}`;
+
+      allProducts = await getAllProducts(
+        filterParameter,
+        sortParameter,
+        currentSearchTerm
+      );
+      renderProductList();
+    } catch (error) {
+      console.error('Error fetching products:', (error as Error).message);
+    }
   }
 
-  // Event listeners for navigation toggle events!!!
+  function renderProductList() {
+    displayedProducts = allProducts;
+    productListContainer.innerHTML = '';
+    productListContainer.append(
+      createProductListElement(displayedProducts, allCategoriesMap)
+    );
+  }
+
   navigation.addEventListener('filter-toggle', () => {
     subNavControl.toggle('filters');
   });
@@ -107,61 +133,48 @@ export function createCatalogPage(container: HTMLElement): void {
     subNavControl.toggle('sort');
   });
 
-  // Handle search changes
   navigation.addEventListener('search-change', (event: Event) => {
-    const customEvent = event as CustomEvent<{ searchTerm: string }>;
-    currentSearchTerm = customEvent.detail.searchTerm;
-    renderOrUpdateProductList();
+    currentSearchTerm = (event as CustomEvent<{ searchTerm: string }>).detail
+      .searchTerm;
+    fetchProducts();
   });
 
-  // Handle filter changes
   subNavControl.element.addEventListener('filters-changed', (event: Event) => {
-    const customEvent = event as CustomEvent<{
-      activeCategoryIds: Set<string>;
-    }>;
-    activeCategoryIds = customEvent.detail.activeCategoryIds;
-    renderOrUpdateProductList();
+    const detail = (
+      event as CustomEvent<{
+        selectedCategoryId: string | undefined;
+        selectedSizes: Set<string>;
+      }>
+    ).detail;
+    selectedCategoryId = detail.selectedCategoryId;
+    selectedSizes.clear();
+    for (const size of detail.selectedSizes) {
+      selectedSizes.add(size);
+    }
+    fetchProducts();
   });
 
-  // Handle sort changes
   subNavControl.element.addEventListener('sort-changed', (event: Event) => {
-    const customEvent = event as CustomEvent<ActiveSortMode>;
-    currentSortMode = customEvent.detail;
-    renderOrUpdateProductList();
+    currentSortMode = (event as CustomEvent<ActiveSortMode>).detail;
+    fetchProducts();
   });
 
-  // Handle apply-discount-filter event
   navigation.addEventListener('apply-discount-filter', () => {
-    // Logic to filter products with discounts
-    const discountedProducts = allProducts.filter(
-      (product) => product.masterVariant.prices?.[0]?.discounted?.value
-    );
-    displayedProducts = sortProducts(discountedProducts, currentSortMode);
-
-    // Update product list
-    productListContainer.innerHTML = '';
-    const productListElement = createProductListElement(
-      displayedProducts,
-      allCategoriesMap
-    );
-    productListContainer.append(productListElement);
+    discountOnly = true;
+    fetchProducts();
   });
 
-  // Handle reset-filters event
   navigation.addEventListener('reset-filters', () => {
-    // Reset all filters
-    activeCategoryIds = new Set(allCategoriesMap.keys());
+    selectedCategoryId = undefined;
+    selectedSizes.clear();
     currentSearchTerm = '';
+    discountOnly = false;
     currentSortMode = { key: 'name', asc: true };
-
-    // Reset search input
     const searchInput = navigation.querySelector('input[type="text"]');
     if (searchInput) {
       (searchInput as HTMLInputElement).value = '';
     }
-
-    // Re-render with all products
-    renderOrUpdateProductList();
+    fetchProducts();
   });
 
   initializePage();

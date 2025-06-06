@@ -34,6 +34,6 @@ export interface Category {
 }
 
 export type ActiveSortMode = {
-  key: 'name' | 'price';
+  key: 'name' | 'price' | 'category';
   asc: boolean;
 };

@@ -6,7 +6,7 @@
   justify-content: center;
   align-items: center;
   padding-top: 6vh;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(255, 255, 255, 0.91);
   z-index: 3;
 }
 
@@ -22,18 +22,19 @@
   position: absolute;
   background: transparent;
   width: 100%;
-  height: clamp(2vw, 33vw, 210px);
+  height: clamp(2vw, 28vw, 150px);
   z-index: 100;
+  overflow: hidden;
 }
 
 .product-modal-close {
   position: absolute;
   z-index: 10;
-  top: clamp(2vw, 33vw, 210px);
+  top: clamp(2vw, 28vw, 150px);
   right: 0.8rem;
   background: none;
   border: none;
-  font: 700 1.25rem/1 'inherit';
+  font: 700 1.25rem/1 'alumni';
   cursor: pointer;
 }
 
@@ -97,7 +98,7 @@
   }
 }
 .headline-bg {
-  color: #000;
+  // color: #000;
   z-index: -1;
 }
 .headline-fx {
@@ -119,29 +120,32 @@
   width: min(50vw, 20rem);
   max-width: 90%;
   margin: 0 auto;
-  object-fit: contain;
+  // object-fit: contain;
 }
 
 .hero-right {
+  // height: 80%;
   display: flex;
   flex-direction: row;
-  font-size: clamp(0.7rem, 1.4vw, 0.85rem);
-  padding: 0 0 0 1.5rem;
+  // font-size: clamp(0.7rem, 1.4vw, 0.85rem);
+  padding: 0;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  font: 700 1.125rem/1;
+  // font: 700 1.125rem/1;
   font-weight: 900;
   z-index: 1;
   p {
+    border: 1px solid gray;
     text-wrap: inherit;
+    // height: 60%;
   }
   .padder {
     width: 20px;
-    height: 26.8vh;
+    height: 26.8vw;
     z-index: 1;
   }
   @media (width <= 510px) {
-    font-size: clamp(0.6rem, 2vw, 1rem);
+    font-size: clamp(0.8rem, 2vw, 1rem);
   }
 }
 

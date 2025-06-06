@@ -125,3 +125,23 @@ $textColor: #000;
         }
     }
 }
+.serach {
+
+}
+
+.filter_atributes {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+    background: white;
+    width: fit-content;
+
+
+  @media (width <= 420px) {
+    width: 100%;
+    flex-direction: column;
+    gap: 4px;
+  }
+}

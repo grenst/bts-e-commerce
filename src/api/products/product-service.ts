@@ -2,7 +2,6 @@ import { apiInstance } from '../axios-instances';
 import { AxiosError } from 'axios';
 import { useTokenStore } from '../../store/token-store';
 import { getAnonymousToken } from '../../components/auth-services/token.service';
-
 import { Product, Category } from '../../types/catalog-types';
 
 export const getAllProducts = getAllPublishedProducts;
@@ -23,10 +22,13 @@ interface ProductProjectionPagedQueryResponse {
   results: Product[];
 }
 
-export async function getAllPublishedProducts(): Promise<Product[]> {
+export async function getAllPublishedProducts(
+  filter?: string | string[],
+  sort?: string | string[],
+  text?: string
+): Promise<Product[]> {
   try {
     let { accessToken } = useTokenStore.getState();
-
     if (!accessToken) {
       const anon = await getAnonymousToken();
       useTokenStore
@@ -39,10 +41,42 @@ export async function getAllPublishedProducts(): Promise<Product[]> {
       accessToken = anon.access_token;
     }
 
+    const parameters: Record<string, string | string[]> = {
+      staged: 'false',
+      limit: '200',
+    };
+
+    if (filter) {
+      parameters['filter.query'] = filter;
+    }
+
+    if (sort) {
+      parameters.sort = sort;
+
+      const needsPriceCurrency = (Array.isArray(sort) ? sort : [sort]).some(
+        (s) => s.startsWith('price ')
+      );
+      if (needsPriceCurrency) {
+        parameters.priceCurrency = 'EUR';
+      }
+
+      const nameSort = (Array.isArray(sort) ? sort : [sort]).find((s) =>
+        /^name\.([a-z]{2}(?:-[A-Z]{2})?)\s/.test(s)
+      );
+      if (nameSort) {
+        const locale = nameSort.split('.')[1].split(' ')[0];
+        parameters.localeProjection = locale;
+      }
+    }
+
+    if (text) {
+      parameters['text.en'] = text;
+    }
+
     const response = await apiInstance.get<ProductProjectionPagedQueryResponse>(
-      '/product-projections',
+      '/product-projections/search',
       {
-        params: { staged: 'false' },
+        params: parameters,
         headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
@@ -50,6 +84,9 @@ export async function getAllPublishedProducts(): Promise<Product[]> {
     return response.data.results;
   } catch (error_) {
     const error = error_ as AxiosError | Error;
+    if ('isAxiosError' in error && (error as AxiosError).response?.data) {
+      console.dir((error as AxiosError).response!.data, { depth: undefined });
+    }
     console.error('Error fetching published products:', error.message);
     if ('isAxiosError' in error && (error as AxiosError).isAxiosError) {
       const axiosError = error as AxiosError;
@@ -66,7 +103,6 @@ export async function getAllPublishedProducts(): Promise<Product[]> {
 export async function getAllCategories(): Promise<Category[]> {
   try {
     let { accessToken } = useTokenStore.getState();
-
     if (!accessToken) {
       const anon = await getAnonymousToken();
       useTokenStore
@@ -85,6 +121,7 @@ export async function getAllCategories(): Promise<Category[]> {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
+
     return response.data.results;
   } catch (error_) {
     const error = error_ as AxiosError | Error;
@@ -104,7 +141,6 @@ export async function getProductById(
 ): Promise<Product | undefined> {
   try {
     let { accessToken } = useTokenStore.getState();
-
     if (!accessToken) {
       const anon = await getAnonymousToken();
       useTokenStore
@@ -126,13 +162,11 @@ export async function getProductById(
     );
 
     const product = response.data;
-    // Add slug from master variant if available
     if (product.masterVariant.sku) {
       product.slug = product.masterVariant.sku
         .toLowerCase()
         .replaceAll(/[^a-z0-9]+/g, '-');
     }
-
     return product;
   } catch (error_) {
     const error = error_ as AxiosError | Error;
@@ -143,8 +177,7 @@ export async function getProductById(
     if ('isAxiosError' in error && (error as AxiosError).isAxiosError) {
       const axiosError = error as AxiosError;
       if (axiosError.response?.status === 404) {
-        console.warn(`Product with ID ${productId} not found.`);
-        return undefined; // for not found
+        return undefined;
       }
       if (axiosError.response?.status === 403) {
         console.error(
@@ -166,45 +199,31 @@ export interface DrinkProduct {
 }
 
 export async function getDrinkProducts(): Promise<DrinkProduct[]> {
-  try {
-    const products = await getAllPublishedProducts();
-    return products.map(
-      (product): DrinkProduct => ({
-        id: product.id,
-        name: product.name.en || Object.values(product.name)[0] || 'N/A',
-        description:
-          product.description?.en ||
-          Object.values(product.description ?? {})[0] ||
-          'No description available.',
-        price: product.masterVariant.prices?.[0]?.value.centAmount,
-        currency: product.masterVariant.prices?.[0]?.value.currencyCode,
-        imageUrl: product.masterVariant.images?.[0]?.url,
-      })
-    );
-  } catch (error_) {
-    const error = error_ as AxiosError | Error;
-    console.error(
-      'Error transforming products to DrinkProduct format:',
-      error.message
-    );
-    throw error;
-  }
+  const products = await getAllPublishedProducts();
+  return products.map(
+    (product): DrinkProduct => ({
+      id: product.id,
+      name: product.name.en || Object.values(product.name)[0] || 'N/A',
+      description:
+        product.description?.en ||
+        Object.values(product.description ?? {})[0] ||
+        'No description available.',
+      price: product.masterVariant.prices?.[0]?.value.centAmount,
+      currency: product.masterVariant.prices?.[0]?.value.currencyCode,
+      imageUrl: product.masterVariant.images?.[0]?.url,
+    })
+  );
 }
 
 export async function getProductsByCategory(
-  categoryId: string
+  categoryIds: string | string[]
 ): Promise<Product[]> {
-  try {
-    const allProducts = await getAllPublishedProducts();
-    return allProducts.filter((product) =>
-      product.categories.some((category) => category.id === categoryId)
-    );
-  } catch (error_) {
-    const error = error_ as AxiosError | Error;
-    console.error(
-      `Error fetching products for category ${categoryId}:`,
-      error.message
-    );
-    throw error;
-  }
+  const ids = Array.isArray(categoryIds) ? categoryIds : [categoryIds];
+
+  // categories.id:"id1"  OR  categories.id:"id1","id2",…
+  const filters = ids.map((id) => `categories.id:"${id}"`);
+
+  // getAllPublishedProducts already accepts string | string[],
+  // so we can forward the array to create multiple filter.query params
+  return getAllPublishedProducts(filters);
 }
