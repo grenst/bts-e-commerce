@@ -3,7 +3,8 @@ import { createEl as createElement } from '../../utils/element-utilities';
 import './about-style.scss';
 import aboutImg1 from '@assets/images/about-1.webp';
 import aboutImg2 from '@assets/images/about-2.webp';
-import aboutImg3 from '@assets/images/about-3.webp';
+// import aboutImg3 from '@assets/images/about-3.webp';
+import aboutImg3 from '@assets/images/honey-vulkan.png';
 
 export default function createAboutPage(container: HTMLElement): void {
   container.innerHTML = '';
