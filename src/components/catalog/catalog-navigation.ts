@@ -7,9 +7,8 @@ export function createCatalogNavigationElement(): HTMLElement {
   const nav = createElement({
     tag: 'div',
     attributes: {
-      class:
-        'space-x-3 filter_atributes',
-        // 'flex space-x-3 w-auto max-[680px]:w-full justify-items-center items-center justify-center p-4 max-[680px]:p-0 max-[680px]:pb-2 bg-white shadow-md flex-col gap-2 min-[680px]:flex-row min-[680px]:gap-0',
+      class: 'space-x-3 filter_atributes',
+      // 'flex space-x-3 w-auto max-[680px]:w-full justify-items-center items-center justify-center p-4 max-[680px]:p-0 max-[680px]:pb-2 bg-white shadow-md flex-col gap-2 min-[680px]:flex-row min-[680px]:gap-0',
     },
   });
 
@@ -174,7 +173,10 @@ export function createCatalogNavigationElement(): HTMLElement {
 
   const buttonsContainer = createElement({
     tag: 'div',
-    attributes: { class: 'flex space-x-3 max-[400px]:w-full flex-col flex-1 gap-2 min-[400px]:flex-row min-[400px]:gap-0' },
+    attributes: {
+      class:
+        'flex space-x-3 max-[400px]:w-full flex-col flex-1 gap-2 min-[400px]:flex-row min-[400px]:gap-0',
+    },
   });
   buttonsContainer.append(filtersButton);
   buttonsContainer.append(sortButton);

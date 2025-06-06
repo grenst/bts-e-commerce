@@ -368,7 +368,7 @@ export function createProductModal(): ProductModal {
     let currentSlideIndex = 0;
     const slideElements: HTMLElement[] = [];
 
-    images.forEach((img, index) => {
+    for (const [index, img] of images.entries()) {
       const slide = createElement({
         tag: 'div',
         parent: heroSlider,
@@ -390,7 +390,7 @@ export function createProductModal(): ProductModal {
         },
       });
       slideElements.push(slide);
-    });
+    }
 
     // Create navigation buttons
     const createNavButton = (icon: string, direction: 'left' | 'right') => {
@@ -441,9 +441,9 @@ export function createProductModal(): ProductModal {
 
     // Navigation functions
     const showSlide = (index: number) => {
-      slideElements.forEach((slide, i) => {
-        slide.style.display = i === index ? 'block' : 'none';
-      });
+      for (const [index_, slide] of slideElements.entries()) {
+        slide.style.display = index_ === index ? 'block' : 'none';
+      }
       currentSlideIndex = index;
     };
 

@@ -176,8 +176,8 @@ export function createRouterLink(
     attributes: { href: path },
   }) as HTMLAnchorElement;
 
-  link.addEventListener('click', (e) => {
-    e.preventDefault();
+  link.addEventListener('click', (event_) => {
+    event_.preventDefault();
     router.navigateTo(path);
   });
 
