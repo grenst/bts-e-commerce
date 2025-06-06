@@ -38,6 +38,12 @@ export interface ProductModal {
 }
 
 export function createProductModal(): ProductModal {
+  // Remove existing modals to prevent duplicates
+  const existingModals = document.querySelectorAll('.product-modal-overlay');
+  for (const modal of existingModals) {
+    modal.remove();
+  }
+
   const overlay = createElement({
     tag: 'div',
     classes: ['product-modal-overlay'],
