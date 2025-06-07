@@ -25,7 +25,7 @@ export function createProductCardElement(product: Product): HTMLElement {
       'bg-white',
       'cursor-pointer',
       'overflow-hidden',
-      'border',
+      // 'border',
       'flex',
       'flex-col',
     ],
