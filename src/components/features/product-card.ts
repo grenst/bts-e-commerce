@@ -39,6 +39,12 @@ export function createProductCardElement(product: Product): HTMLElement {
   });
 
   createElement({
+    tag: 'div',
+    parent: imageContainer,
+    classes: ['h-full', 'w-full', 'img_bgrnd', 'absolute'],
+  });
+
+  createElement({
     tag: 'img',
     parent: imageContainer,
     attributes: {
@@ -65,7 +71,7 @@ export function createProductCardElement(product: Product): HTMLElement {
     tag: 'div',
     parent: card,
     classes: [
-      'p-5',
+      'p-2',
       'pt-8',
       'flex',
       'flex-col',
