@@ -1,17 +1,18 @@
 .product-card {
   background-color: #fff;
   cursor: pointer;
-  overflow: hidden;
+  // overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  transition: transform 0.3s cubic-bezier(0.95, 0.05, 0.795, 0.035), box-shadow 0.3s ease-in-out;
 
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    z-index: 5;
 
     .product_preview {
-      transform: scale(1.15);
+      transform: translateY(30px) scale(1.55) rotate(20deg);
     }
 
     .pricee {

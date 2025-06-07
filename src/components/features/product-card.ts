@@ -24,7 +24,7 @@ export function createProductCardElement(product: Product): HTMLElement {
       'product-card',
       'bg-white',
       'cursor-pointer',
-      'overflow-hidden',
+      // 'overflow-hidden',
       // 'border',
       'flex',
       'flex-col',
@@ -42,7 +42,7 @@ export function createProductCardElement(product: Product): HTMLElement {
     tag: 'img',
     parent: imageContainer,
     attributes: {
-      src: product.masterVariant.images?.[0]?.url ?? '',
+      src: product.masterVariant.images?.[1]?.url ?? '',
       alt: product.name['en-US'] || 'Product Image',
     },
     classes: ['object-cover', 'object-top', 'h-[140%]', 'product_preview'],
@@ -77,7 +77,7 @@ export function createProductCardElement(product: Product): HTMLElement {
       'via-35%',
       'to-white/100',
       'to-90%',
-      'z-1',
+      'z-10',
     ],
     // classes: ['p-5', 'flex', 'flex-col', 'flex-grow', 'bg-gray-200', 'bg-opacity-50'],
   });

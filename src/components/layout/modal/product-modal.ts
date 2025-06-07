@@ -89,7 +89,7 @@ export function createProductModal(): ProductModal {
       'product-modal-category',
       'absolute',
       'top-0',
-      'left-0',
+      'right-0',
       'ml-4',
       'text-lg',
       'font-bold',
@@ -97,6 +97,18 @@ export function createProductModal(): ProductModal {
       'cursor-pointer',
     ],
     text: '',
+  });
+
+  const lockerContainer = createElement({
+    tag: 'div',
+    parent: quitModalHelp,
+    classes: [
+      'locker',
+      'absolute',
+      'w-full',
+      'h-full',
+      // 'z-1' // That will be help
+    ],
   });
 
   const categoryProductsContainer = createElement({
@@ -190,6 +202,8 @@ export function createProductModal(): ProductModal {
 
   async function showModal(productId: string, origin?: Point): Promise<void> {
     const firstOpen = overlay.style.display !== 'flex';
+    lockerContainer.classList.remove('z-0');
+    lockerContainer.classList.add('z-1');
 
     if (firstOpen) {
       originalURL = globalThis.location.href;
@@ -312,6 +326,8 @@ export function createProductModal(): ProductModal {
     }
 
     hideLoader();
+    lockerContainer.classList.remove('z-1');
+    lockerContainer.classList.add('z-0');
 
     const hero = createElement({
       tag: 'section',

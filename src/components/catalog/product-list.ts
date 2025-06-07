@@ -12,7 +12,10 @@ export function createProductListElement(
   products: Product[],
   allCategories: Map<string, Category>
 ): HTMLElement {
-  const container = createElement({ tag: 'div', classes: ['product-list'] });
+  const container = createElement({
+    tag: 'div',
+    classes: ['product-list', 'overflow-hidden'],
+  });
 
   // Initialize product modal if not already initialized
   if (!productModal) {
@@ -104,7 +107,7 @@ export function createProductListElement(
         'min-[440px]:grid-cols-2',
         'min-[610px]:grid-cols-3',
         'min-[830px]:grid-cols-4',
-        'gap-1',
+        // 'gap-1',
       ],
     });
     container.append(grid);
