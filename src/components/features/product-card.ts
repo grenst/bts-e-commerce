@@ -84,6 +84,7 @@ export function createProductCardElement(product: Product): HTMLElement {
       'to-white/100',
       'to-90%',
       'z-10',
+      'card_description',
     ],
     // classes: ['p-5', 'flex', 'flex-col', 'flex-grow', 'bg-gray-200', 'bg-opacity-50'],
   });
