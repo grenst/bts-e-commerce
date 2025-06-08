@@ -61,7 +61,7 @@ export function createCatalogPage(container: HTMLElement): void {
   let displayedProducts: Product[] = [];
   const allCategoriesMap: Map<string, Category> = new Map();
   let selectedCategoryId: string | undefined;
-  const selectedSizes = new Set<string>();
+  const selectedVolumes = new Set<string>();
   let currentSearchTerm = '';
   let discountOnly = false;
   let currentSortMode: ActiveSortMode = { key: 'name', asc: true };
@@ -89,9 +89,9 @@ export function createCatalogPage(container: HTMLElement): void {
         filterClauses.push(`categories.id:"${selectedCategoryId}"`);
       }
 
-      if (selectedSizes.size > 0) {
-        const values = [...selectedSizes].map((s) => `"${s}"`).join(',');
-        filterClauses.push(`variants.attributes.size:${values}`);
+      if (selectedVolumes.size > 0) {
+        const values = [...selectedVolumes].map((v) => `"${v}"`).join(',');
+        filterClauses.push(`variants.attributes.volume.key:${values}`);
       }
 
       if (discountOnly) {
@@ -143,14 +143,16 @@ export function createCatalogPage(container: HTMLElement): void {
     const detail = (
       event as CustomEvent<{
         selectedCategoryId: string | undefined;
-        selectedSizes: Set<string>;
+        selectedVolumes: Set<string>;
       }>
     ).detail;
+
     selectedCategoryId = detail.selectedCategoryId;
-    selectedSizes.clear();
-    for (const size of detail.selectedSizes) {
-      selectedSizes.add(size);
+    selectedVolumes.clear();
+    for (const volume of detail.selectedVolumes) {
+      selectedVolumes.add(volume);
     }
+
     fetchProducts();
   });
 
@@ -166,7 +168,7 @@ export function createCatalogPage(container: HTMLElement): void {
 
   navigation.addEventListener('reset-filters', () => {
     selectedCategoryId = undefined;
-    selectedSizes.clear();
+    selectedVolumes.clear();
     currentSearchTerm = '';
     discountOnly = false;
     currentSortMode = { key: 'name', asc: true };
