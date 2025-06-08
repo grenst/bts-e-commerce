@@ -7,10 +7,13 @@ import {
   getAllCategories,
   getProductsByCategory,
 } from '../../../api/products/product-service';
-import { Product } from '../../../types/catalog-types';
+import { Product, ProductVariant } from '../../../types/catalog-types';
 import './product-modal.scss';
 import leftSvg from '@assets/images/left.svg';
 import rightSvg from '@assets/images/right.svg';
+import { addToCart } from '../../../api/cart/cart-service';
+import { useCustomerStore } from '../../../store/customer-store';
+import { addNotification } from '../../../store/store';
 
 const categoryCache = new Map<string, Product[]>();
 
@@ -31,11 +34,56 @@ function releaseBodyLock(): void {
   body.style.removeProperty('--scrollbar-width');
 }
 
+function createQtyButton(
+  label: string,
+  parent: HTMLElement
+): HTMLButtonElement {
+  return createElement({
+    tag: 'button',
+    parent,
+    text: label,
+    classes: ['order-btn', 'm-[1px]', 'text-xl', 'px-2', 'm-2', 'bg-gray-200'],
+  }) as HTMLButtonElement;
+}
+
 export interface ProductModal {
   modalElement: HTMLElement;
   showModal: (productId: string, origin?: Point) => Promise<void>;
   hideModal: () => void;
 }
+
+// const variants: ProductVariant[] = [
+//   product.masterVariant,
+//   ...(product.variants ?? []),
+// ];
+
+const getVolumeLabel = (variant: ProductVariant, locale = 'en'): string => {
+  const volumeAttribute = variant.attributes?.find(
+    (attribute) => attribute.name === 'volume'
+  );
+  if (
+    volumeAttribute &&
+    typeof volumeAttribute.value === 'object' &&
+    volumeAttribute.value !== null
+  ) {
+    const { key, label } = volumeAttribute.value as {
+      key?: string;
+      label?: Record<string, string>;
+    };
+    // trying to get a label
+    if (label && typeof label[locale] === 'string') return label[locale];
+    // then a key
+    if (typeof key === 'string') return key;
+  }
+  return ''; // nothing got
+};
+
+const getUnitPrice = (variant: ProductVariant): number => {
+  const priceInfo = variant.prices?.[0];
+  const cents =
+    priceInfo?.discounted?.value.centAmount ?? priceInfo?.value.centAmount ?? 0;
+  return cents / 100;
+};
 
 export function createProductModal(): ProductModal {
   // Remove existing modals to prevent duplicates
@@ -65,14 +113,7 @@ export function createProductModal(): ProductModal {
   createElement({
     tag: 'div',
     parent: card,
-    classes: [
-      'product-modal-bg',
-      'absolute',
-      'h-full',
-      'w-full',
-      // 'bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,0)_25%,rgba(255,255,255,1)_75%,rgba(255,255,255,1)_100%)]',
-      '-z-1',
-    ],
+    classes: ['product-modal-bg', 'absolute', 'h-full', 'w-full', '-z-1'],
   });
 
   const buttonClose = createElement({
@@ -385,7 +426,7 @@ export function createProductModal(): ProductModal {
       classes: ['hero-slider', 'w-full', 'h-full', 'relative'],
     });
 
-    // Add all product images except index 0
+    // Add all product images except index 0 (BC [0] it's JPEG)
     const images = product.masterVariant.images?.slice(1) || [];
     let currentSlideIndex = 0;
     const slideElements: HTMLElement[] = [];
@@ -450,7 +491,6 @@ export function createProductModal(): ProductModal {
     const leftButton = createNavButton(leftSvg, 'left');
     const rightButton = createNavButton(rightSvg, 'right');
 
-    // Show buttons on hover
     heroSlider.addEventListener('mouseenter', () => {
       leftButton.style.opacity = '1';
       rightButton.style.opacity = '1';
@@ -526,17 +566,102 @@ export function createProductModal(): ProductModal {
       ],
     });
 
-    const quantity = createElement({
+    const orderParameters = createElement({
       tag: 'div',
       parent: order,
       classes: [
-        'order-quantity',
+        'order-params',
         'flex',
         'items-stretch',
-        'justify-between',
+        // 'justify-between',
         'h-[28px]',
+        'w-full',
       ],
     });
+
+    const quantity = createElement({
+      tag: 'div',
+      parent: orderParameters,
+      classes: [
+        'order-quantity',
+        'flex',
+        'items-center',
+        'justify-between',
+        // 'm-2',
+      ],
+    });
+
+    createElement({
+      tag: 'qty',
+      parent: orderParameters,
+      text: '',
+      classes: ['separator_container'],
+    });
+
+    const allVariants: ProductVariant[] = [
+      product.masterVariant,
+      ...(product.variants ?? []),
+    ];
+
+    // By default (if there are two variants — 350 ml, or else masterVariant)
+    let selectedVariant: ProductVariant =
+      allVariants.find((v) => getVolumeLabel(v) === '350 ml') ??
+      product.masterVariant;
+
+    const volumeSelector = createElement({
+      tag: 'div',
+      parent: orderParameters,
+      classes: ['order-variants', 'h-[28px]', 'flex', 'items-center', 'gap-2'],
+    });
+
+    if (allVariants.length === 1) {
+      createElement({
+        tag: 'span',
+        parent: volumeSelector,
+        text: 'no variants',
+        classes: ['text-gray-500'],
+      });
+    } else {
+      createElement({
+        tag: 'label',
+        parent: volumeSelector,
+        text: 'Volume:',
+        classes: ['font-medium'],
+      });
+
+      const select = createElement({
+        tag: 'div',
+        parent: volumeSelector,
+        classes: ['select', 'flex', 'gap-2', 'justify-evenly'],
+      });
+
+      for (const variant of allVariants) {
+        const button = createElement({
+          tag: 'button',
+          parent: select,
+          text: getVolumeLabel(variant) || `ID ${variant.id ?? ''}`,
+          classes: [
+            'variant-btn',
+            'px-2',
+            'py-1',
+            ...(variant.id === selectedVariant.id
+              ? ['bg-gray-900', 'text-white', 'border']
+              : []),
+          ],
+        });
+
+        button.addEventListener('click', () => {
+          selectedVariant = variant;
+          unitPrice = getUnitPrice(selectedVariant);
+          updatePrice();
+
+          for (const button_ of select.querySelectorAll('.variant-btn')) {
+            button_.classList.remove('bg-gray-900', 'border', 'text-white');
+          }
+          button.classList.add('bg-gray-900', 'border', 'text-white');
+        });
+      }
+    }
 
     const submitOrder = createElement({
       tag: 'div',
@@ -553,53 +678,23 @@ export function createProductModal(): ProductModal {
     });
 
     let qty = 1;
-    // const unitPrice =
-    //   (product.masterVariant.prices?.[0]?.value.centAmount ?? 0) / 100;
-    const first = product.masterVariant.prices?.[0];
-    const centAmount =
-      first?.discounted?.value.centAmount ?? first?.value.centAmount ?? 0;
-    const unitPrice = centAmount / 100;
+    let unitPrice = getUnitPrice(selectedVariant);
 
-    const nooom =
-      product.name.en?.toUpperCase() ??
-      (product.name ? Object.values(product.name)[0]?.toUpperCase() : '') ??
-      '';
-
-    const pricelog = product.masterVariant.prices?.[0];
-
-    if (pricelog) {
-      if (pricelog.discounted) {
-        console.log(
-          `${nooom} ==> Зі знижкою: ${pricelog.discounted.value.centAmount}, Звичайна ціна: ${pricelog.value.centAmount}`
-        );
-      } else {
-        console.log(`${nooom} ==> Без знижки: ${pricelog.value.centAmount}`);
-      }
-    }
-
-    const createQtyButton = (label: string) =>
-      createElement({
-        tag: 'button',
-        parent: quantity,
-        text: label,
-        classes: ['order-btn', 'm-[1px]'],
-      }) as HTMLButtonElement;
-
-    const minus = createQtyButton('−');
+    const minus = createQtyButton('−', quantity);
     const qtyElement = createElement({
       tag: 'span',
       parent: quantity,
       text: String(qty),
       classes: ['order-qty'],
     });
-    const plus = createQtyButton('+');
+    const plus = createQtyButton('+', quantity);
 
-    createElement({
+    const addToCartButton = createElement({
       tag: 'button',
       parent: submitOrder,
       text: 'ADD TO CART',
-      classes: ['order-cart', 'w-60'],
-    });
+      classes: ['order-cart', 'w-20'],
+    }) as HTMLButtonElement;
 
     const price = createElement({
       tag: 'span',
@@ -617,15 +712,36 @@ export function createProductModal(): ProductModal {
       qty += 1;
       updatePrice();
     });
-
     minus.addEventListener('click', () => {
       if (qty > 1) {
         qty -= 1;
         updatePrice();
       }
     });
-
     updatePrice();
+
+    addToCartButton.addEventListener('click', async () => {
+      const isLoggedIn = Boolean(useCustomerStore.getState().customer);
+      if (!isLoggedIn) {
+        addNotification(
+          'warning',
+          'Please log in or register to add items to the cart.'
+        );
+        return;
+      }
+
+      if (selectedVariant.id === undefined) {
+        addNotification('error', 'Cannot add to cart: variant has no ID.');
+        return;
+      }
+
+      try {
+        await addToCart(product.id, selectedVariant.id, qty);
+        addNotification('success', 'Product added to cart!');
+      } catch {
+        addNotification('error', 'Failed to add product to cart.');
+      }
+    });
 
     overlay.style.display = 'flex';
     applyBodyLock();

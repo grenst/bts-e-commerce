@@ -223,9 +223,9 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   if (animatedLineElements.length > 0) {
     gsap.fromTo(
       animatedLineElements,
-      { yPercent: 120 },
+      { yPercent: 150 },
       {
-        yPercent: 0,
+        yPercent: 25,
         stagger: 0.25,
         duration: 0.8,
         ease: 'power2.out',

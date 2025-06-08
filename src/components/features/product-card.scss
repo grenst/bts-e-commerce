@@ -1,10 +1,17 @@
+.back_frame {
+  border: 1px solid gray;
+  border-style: dashed;
+  height: 100%;
+  z-index: 5;
+}
 .product-card {
   background-color: #fff;
     .img_bgrnd {
-      background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(22, 35, 48, 0.2) 45%, rgba(255,255,255,1) 75%, rgba(255,255,255,1) 100%);
-      opacity: 0;
+      // background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(22, 35, 48, 0.2) 45%, rgba(255,255,255,1) 75%, rgba(255,255,255,1) 100%);
+      opacity: 0.3;
+      // margin: -15px;
       top: 100px;
-      transform: translateY(-1px);
+      transform: translateY(60px) scale(0.5);
       transition: transform 0.3s ease-in, box-shadow 0.3s ease-in-out, opacity 0.6s ease-in;
     } 
     .card_description {
@@ -16,17 +23,31 @@
   flex-direction: column;
   transition: transform 0.3s cubic-bezier(0.95, 0.05, 0.795, 0.035), box-shadow 0.3s ease-in-out, opacity 0.3s ease-in-out;
 
+  .image_limiter {
+    top: -10px;
+  }
+  .product_preview {
+    padding-top: 40px;;
+  }
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     z-index: 10;
+    // .image_limiter {
+    //   top: -40px;
+    // }
+
+    .back_frame {
+      border: 5px solid gray;
+      border-style: dashed;
+    }
 
     .product_preview {
-      transform: translateY(3px) translateX(8px) scale(1.55) rotate(10deg);
+      transform: translateY(-3px) translateX(-5px) scale(1.2) rotate(10deg);
     }
     .img_bgrnd {
       opacity: 1;
-      transform: translateY(-30px) scale(0.95);
+      transform: translateY(60px) scale(0.85);
     } 
 
     .pricee {

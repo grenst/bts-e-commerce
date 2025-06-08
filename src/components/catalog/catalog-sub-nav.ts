@@ -40,7 +40,7 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
 
   let categories: Category[] | undefined;
   let selectedCategoryId: string | undefined;
-  const selectedSizes = new Set<string>();
+  const selectedVolumeKeys = new Set<string>();
 
   const SORT_OPTIONS: SortOption[] = [
     { key: 'name', label: 'by name' },
@@ -49,7 +49,10 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
   ];
   let activeSortMode: ActiveSortMode = { key: 'name', asc: true };
 
-  const SIZE_VALUES = ['350 ml', '500 ml'];
+  const VOLUME_OPTIONS: { key: string; label: string }[] = [
+    { key: '350-ml', label: '350 ml' },
+    { key: '500-ml', label: '500 ml' },
+  ];
 
   const buildPill = (
     label: string,
@@ -74,16 +77,28 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
     return pill;
   };
 
-  const renderFilterPills = () => {
+  const dispatchFiltersChanged = (): void => {
+    element.dispatchEvent(
+      new CustomEvent('filters-changed', {
+        detail: {
+          selectedCategoryId,
+          selectedVolumes: new Set(selectedVolumeKeys),
+        },
+      })
+    );
+  };
+
+  const renderFilterPills = (): void => {
     contentElement.innerHTML = '';
 
     if (!categories || categories.length === 0) {
-      const noCat = createElement({
-        tag: 'p',
-        classes: ['text-gray-600', 'text-center', 'w-full'],
-        text: 'No categories available',
-      });
-      contentElement.append(noCat);
+      contentElement.append(
+        createElement({
+          tag: 'p',
+          classes: ['text-gray-600', 'text-center', 'w-full'],
+          text: 'No categories available',
+        })
+      );
       return;
     }
 
@@ -107,20 +122,21 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
       );
     }
 
-    const divider = createElement({
-      tag: 'div',
-      attributes: { class: 'basis-full h-0' },
-    });
-    contentElement.append(divider);
+    contentElement.append(
+      createElement({
+        tag: 'div',
+        attributes: { class: 'basis-full h-0' },
+      })
+    );
 
-    for (const size of SIZE_VALUES) {
-      const active = selectedSizes.has(size);
+    for (const option of VOLUME_OPTIONS) {
+      const active = selectedVolumeKeys.has(option.key);
       contentElement.append(
-        buildPill(size, active, () => {
+        buildPill(option.label, active, () => {
           if (active) {
-            selectedSizes.delete(size);
+            selectedVolumeKeys.delete(option.key);
           } else {
-            selectedSizes.add(size);
+            selectedVolumeKeys.add(option.key);
           }
           renderFilterPills();
           dispatchFiltersChanged();
@@ -129,17 +145,7 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
     }
   };
 
-  const dispatchFiltersChanged = () => {
-    const event = new CustomEvent('filters-changed', {
-      detail: {
-        selectedCategoryId,
-        selectedSizes: new Set(selectedSizes),
-      },
-    });
-    element.dispatchEvent(event);
-  };
-
-  const renderSortOptions = () => {
+  const renderSortOptions = (): void => {
     contentElement.innerHTML = '';
     for (const option of SORT_OPTIONS) {
       const isActive = activeSortMode.key === option.key;
@@ -162,24 +168,25 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
       });
 
       if (isActive) {
-        const arrowImg = createElement({
-          tag: 'img',
-          attributes: {
-            src: arrowsIconPath,
-            alt: 'sort arrow',
-            class: [
-              'w-3',
-              'h-3',
-              'filter',
-              'invert',
-              'brightness-0',
-              'shrink-0',
-              'transition-transform',
-              activeSortMode.asc ? '' : 'rotate-180',
-            ].join(' '),
-          },
-        });
-        sortButton.append(arrowImg);
+        sortButton.append(
+          createElement({
+            tag: 'img',
+            attributes: {
+              src: arrowsIconPath,
+              alt: 'sort arrow',
+              class: [
+                'w-3',
+                'h-3',
+                'filter',
+                'invert',
+                'brightness-0',
+                'shrink-0',
+                'transition-transform',
+                activeSortMode.asc ? '' : 'rotate-180',
+              ].join(' '),
+            },
+          })
+        );
       }
 
       sortButton.addEventListener('click', () => {
@@ -188,16 +195,17 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
             ? { ...activeSortMode, asc: !activeSortMode.asc }
             : { key: option.key, asc: true };
         renderSortOptions();
-        const event_ = new CustomEvent('sort-changed', {
-          detail: { ...activeSortMode },
-        });
-        element.dispatchEvent(event_);
+        element.dispatchEvent(
+          new CustomEvent('sort-changed', {
+            detail: { ...activeSortMode },
+          })
+        );
       });
       contentElement.append(sortButton);
     }
   };
 
-  const show = (mode: 'filters' | 'sort') => {
+  const show = (mode: 'filters' | 'sort'): void => {
     if (currentMode === mode) return;
     currentMode = mode;
     element.classList.add('open');
@@ -206,12 +214,13 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
       if (categories) {
         renderFilterPills();
       } else {
-        const loading = createElement({
-          tag: 'p',
-          classes: ['text-gray-600', 'text-center'],
-          text: 'Loading filters...',
-        });
-        contentElement.append(loading);
+        contentElement.append(
+          createElement({
+            tag: 'p',
+            classes: ['text-gray-600', 'text-center'],
+            text: 'Loading filters...',
+          })
+        );
         getAllCategories()
           .then((cats) => {
             categories = cats;
@@ -219,12 +228,13 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
           })
           .catch(() => {
             contentElement.innerHTML = '';
-            const error = createElement({
-              tag: 'p',
-              classes: ['text-red-500', 'text-center'],
-              text: 'Failed to load filters',
-            });
-            contentElement.append(error);
+            contentElement.append(
+              createElement({
+                tag: 'p',
+                classes: ['text-red-500', 'text-center'],
+                text: 'Failed to load filters',
+              })
+            );
           });
       }
     } else {
@@ -232,12 +242,12 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
     }
   };
 
-  const hide = () => {
+  const hide = (): void => {
     currentMode = undefined;
     element.classList.remove('open');
   };
 
-  const toggle = (mode: 'filters' | 'sort') => {
+  const toggle = (mode: 'filters' | 'sort'): void => {
     if (currentMode === mode) {
       hide();
     } else {
@@ -245,7 +255,7 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
     }
   };
 
-  const getCurrentMode = () => currentMode;
+  const getCurrentMode = (): 'filters' | 'sort' | undefined => currentMode;
 
   return { element, show, hide, toggle, getCurrentMode };
 }
