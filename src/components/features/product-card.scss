@@ -1,5 +1,6 @@
 .back_frame {
   border: 1px solid gray;
+  border-style: dashed;
   height: 100%;
   z-index: 5;
 }
@@ -10,7 +11,7 @@
       opacity: 0.3;
       // margin: -15px;
       top: 100px;
-      transform: translateY(60px) scale(0.9);
+      transform: translateY(60px) scale(0.5);
       transition: transform 0.3s ease-in, box-shadow 0.3s ease-in-out, opacity 0.6s ease-in;
     } 
     .card_description {
@@ -36,12 +37,17 @@
     //   top: -40px;
     // }
 
+    .back_frame {
+      border: 5px solid gray;
+      border-style: dashed;
+    }
+
     .product_preview {
       transform: translateY(-3px) translateX(-5px) scale(1.2) rotate(10deg);
     }
     .img_bgrnd {
       opacity: 1;
-      // transform: translateY(-30px) scale(0.99);
+      transform: translateY(60px) scale(0.85);
     } 
 
     .pricee {
