@@ -22,8 +22,9 @@ export function createProductListElement(
   //   productModal.modalElement.classList.add('third');
   // }
 
-  const productModal = ModalManager.getModal();
-  productModal.modalElement.classList.add('third');
+  ModalManager.getModal();
+  // const productModal = ModalManager.getModal();
+  // productModal.modalElement.classList.add('third');
 
   // Handle empty product list
   if (products.length === 0) {

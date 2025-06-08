@@ -19,7 +19,7 @@ export function createProductCardElement(product: Product): HTMLElement {
   // }
 
   const productModal = ModalManager.getModal();
-  productModal.modalElement.classList.add('four');
+  // productModal.modalElement.classList.add('four');
 
   // Get price information early to use in multiple places
   const price = product.masterVariant.prices?.[0];

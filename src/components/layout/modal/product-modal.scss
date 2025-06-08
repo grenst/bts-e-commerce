@@ -172,6 +172,7 @@
   opacity: 0;
   transition: opacity .25s ease-out;
   &.open {
+    display: flex;
     opacity: 1;
   }
 }

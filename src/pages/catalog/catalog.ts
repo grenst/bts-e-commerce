@@ -70,7 +70,7 @@ export function createCatalogPage(container: HTMLElement): void {
   // }
 
   const productModal = ModalManager.getModal();
-  productModal.modalElement.classList.add('second');
+  // productModal.modalElement.classList.add('second');
 
   const state = globalThis.history.state;
   if (state?.openProductModal) {
