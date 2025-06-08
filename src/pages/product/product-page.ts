@@ -1,7 +1,7 @@
 import { createEl as h, body } from '../../utils/element-utilities';
 import { getProductById } from '../../api/products/product-service';
 import { Product } from '../../types/catalog-types';
-import './product-page.scss';
+// import './product-page.scss';
 
 type Point = { x: number; y: number };
 

@@ -6,15 +6,23 @@
   justify-content: center;
   align-items: center;
   padding-top: 6vh;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(255, 255, 255, 0.91);;
   backdrop-filter: blur(5px);
   z-index: 3;
+}
+
+.product-modal-overlay {
+  opacity: 0;
+  transition: opacity .25s ease-out;
+  &.open {
+    opacity: 1;
+  }
 }
 
 .product-modal-category {
   position: absolute;
   z-index: 10;
-  top: clamp(2vw, 28vw, 150px);
+  top: clamp(2vw, 22vw, 150px);
   right: 36px;
   text-align: end;
   // right: 0.8rem;
@@ -48,7 +56,7 @@
   pointer-events: auto;
   
   &.show {
-    transform: translateY(0);
+    transform: translateY(-24px);
     opacity: 1;
   }
 }
@@ -123,44 +131,25 @@
                        21.3px 21.3px 0 5.6px, 42.6px 21.3px 0 0, 63.8px 21.3px 0 0; }
 }
 
+// .product-modal-content {
+//   position: relative;
+//   width: clamp(320px, 90vw, 820px);
+//   max-height: 95vh;
+//   overflow-y: auto;
+//   background: transparent;
+// }
 .product-modal-content {
   position: relative;
   width: clamp(320px, 90vw, 820px);
-  max-height: 95vh;
+  max-height: 90vh;
   overflow-y: auto;
   background: transparent;
-}
-
-// .quit-modal-helper {
-//   position: absolute;
-//   background: transparent;
-//   width: 100%;
-//   height: clamp(2vw, 33vw, 210px);
-//   z-index: 100;
-//   overflow: hidden;
-// }
-
-// .product-modal-close {
-//   position: absolute;
-//   z-index: 10;
-//   top: clamp(2vw, 33vw, 210px);
-//   right: 0.8rem;
-//   background: none;
-//   border: none;
-//   font: 700 1.25rem/1 'alumni';
-//   cursor: pointer;
-// }
-
-.product-modal-content {
   opacity: 0;
   transform: scale(.35);
   transform-origin: var(--ox,50%) var(--oy,50%);
   transition:
     transform .4s cubic-bezier(.22,1,.36,1),
     opacity .25s ease-out;
-  
-  /* Add animation delay for modal content */
-  transition-delay: 0.1s;
 
   &.open {
     opacity: 1;
@@ -168,13 +157,43 @@
   }
 }
 
-.product-modal-overlay {
-  opacity: 0;
-  transition: opacity .25s ease-out;
-  &.open {
-    opacity: 1;
-  }
+.quit-modal-helper {
+  position: absolute;
+  background: transparent;
+  width: 100%;
+  height: clamp(2vw, 22vw, 150px);
+  z-index: 100;
+  overflow: hidden;
 }
+
+.product-modal-close {
+  position: absolute;
+  z-index: 10;
+  top: clamp(2vw, 22vw, 150px);
+  right: 0.8rem;
+  background: none;
+  border: none;
+  font: 700 1.25rem/1 'alumni';
+  cursor: pointer;
+}
+
+// .product-modal-content {
+//   opacity: 0;
+//   transform: scale(.35);
+//   transform-origin: var(--ox,50%) var(--oy,50%);
+//   transition:
+//     transform .4s cubic-bezier(.22,1,.36,1),
+//     opacity .25s ease-out;
+  
+//   /* Add animation delay for modal content */
+//   transition-delay: 0.1s;
+
+//   &.open {
+//     opacity: 1;
+//     transform: scale(1);
+//   }
+// }
+
 
 .hero {
   display: flex;
@@ -199,9 +218,9 @@
 .headline-fx {
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   width: 110%;
-  padding-top: clamp(3vw, 33vw, 510px);
+  padding-top: clamp(3vw, 33vw, 210px);
   padding-left: clamp(1vw,3.5vw, 9.9vw);
-  // font-size: clamp(2.7rem, 10vw, 6.0rem);
+  font-size: clamp(2.7rem, 12vw, 6.5rem);
   line-height: 0.85;
   text-transform: uppercase;
   font-weight: 700;
@@ -210,7 +229,7 @@
   pointer-events: none;
   user-select: none;
   @media (width <= 750px) {
-    // font-size: clamp(2.7rem, 10vw, 7rem);
+    font-size: clamp(2.7rem, 12vw, 8rem);
   }
 }
 .headline-bg {
@@ -240,14 +259,12 @@
 }
 
 .hero-right {
-  // height: 70%;
+  height: clamp(3vw, 82vw, 450px);
   display: flex;
   flex-direction: row;
-  // font-size: clamp(0.7rem, 1.4vw, 0.85rem);
-  padding: 0 0 0 1.5rem;
+  padding: 0;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  // font: 700 1.125rem/1;
   font-weight: 900;
   z-index: 1;
   p {
@@ -257,9 +274,10 @@
     width: 20px;
     height: 26.8vw;
     z-index: 1;
+    text-wrap: inherit;
   }
   @media (width <= 510px) {
-    font-size: clamp(0.6rem, 2vw, 2rem);
+    font-size: clamp(0.8rem, 2vw, 1rem);
   }
 }
 

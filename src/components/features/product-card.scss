@@ -1,40 +1,49 @@
 .product-card {
   background-color: #fff;
+    .img_bgrnd {
+      background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(22, 35, 48, 0.2) 45%, rgba(255,255,255,1) 75%, rgba(255,255,255,1) 100%);
+      opacity: 0;
+      top: 100px;
+      transform: translateY(-1px);
+      transition: transform 0.3s ease-in, box-shadow 0.3s ease-in-out, opacity 0.6s ease-in;
+    } 
+    .card_description {
+      z-index: 5;
+    }
   cursor: pointer;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
+  // overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  transition: transform 0.3s cubic-bezier(0.95, 0.05, 0.795, 0.035), box-shadow 0.3s ease-in-out, opacity 0.3s ease-in-out;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+
+    .product_preview {
+      transform: translateY(3px) translateX(8px) scale(1.55) rotate(10deg);
+    }
+    .img_bgrnd {
+      opacity: 1;
+      transform: translateY(-30px) scale(0.95);
+    } 
+
+    .pricee {
+      background-color: #000000;
+      color: #f8fafc;
+
+      &::before {
+        color: #f8fafc;
+      }
+    }
   }
 
   .product_preview {
     object-fit: cover;
     object-position: top;
     height: 140%;
-  }
-
-  h3 {
-    font-size: 1.25rem;
-    font-family: 'nexa-bold';
-    margin-bottom: 0.5rem;
-    color: #061328;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  p {
-    font-size: 0.875rem;
-    color: #718096;
-    margin-bottom: 0.75rem;
-    // display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    transition: transform 0.3s ease-in-out;
   }
 
   .pricee {
@@ -44,6 +53,7 @@
     border: 1px solid #e2e8f0;
     padding: 0.5rem;
     position: relative;
+    transition: background-color 0.3s, color 0.3s;
 
     &::before {
       content: 'ADD';
@@ -56,19 +66,6 @@
       transition: color 0.3s, background-color 0.3s;
     }
 
-    &:hover {
-      background-color: #2d3748;
-      color: #f8fafc;
-
-      &::before {
-        color: #f8fafc;
-      }
-    }
-  }
-}
-
-.disc_price{
-  &:hover {
-    color: #f8fafc;
+    // Удаляем прямой hover для .pricee — он теперь срабатывает через карточку
   }
 }
