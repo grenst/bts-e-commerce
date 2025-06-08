@@ -37,12 +37,32 @@ export interface ProductModal {
   hideModal: () => void;
 }
 
+export class ModalManager {
+  private static instance: ProductModal | undefined = undefined;
+
+  static getModal(): ProductModal {
+    if (!this.instance) {
+      this.instance = createProductModal();
+      document.body.append(this.instance.modalElement);
+      this.instance.modalElement.classList.add('first');
+    }
+    return this.instance;
+  }
+
+  static clearModal(): void {
+    if (this.instance) {
+      this.instance.modalElement.remove();
+      this.instance = undefined;
+    }
+  }
+}
+
 export function createProductModal(): ProductModal {
   // Remove existing modals to prevent duplicates
-  const existingModals = document.querySelectorAll('.product-modal-overlay');
-  for (const modal of existingModals) {
-    modal.remove();
-  }
+  // const existingModals = document.querySelectorAll('.product-modal-overlay');
+  // for (const modal of existingModals) {
+  //   modal.remove();
+  // }
 
   const overlay = createElement({
     tag: 'div',
@@ -200,7 +220,8 @@ export function createProductModal(): ProductModal {
       x: globalThis.innerWidth / 2,
       y: globalThis.innerHeight / 2,
     };
-
+    /********************************************************* */
+    /********************************************************* */
     // Show background immediately
     overlay.style.display = 'flex';
     // Add open class to trigger background fade-in
@@ -211,6 +232,8 @@ export function createProductModal(): ProductModal {
     card.style.setProperty('--oy', `${currentOrigin.y}px`);
     // Add open class to trigger modal animation
     card.classList.add('open');
+
+    /********************************************************* */
 
     const wasCategoryOpen = isCategoryModalOpen;
 

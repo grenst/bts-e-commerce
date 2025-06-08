@@ -2,7 +2,10 @@ import {
   createEl as createElement,
   removeAllChild,
 } from '../utils/element-utilities';
-import { createCatalogPage } from '../pages/catalog/catalog';
+// import { createCatalogPage } from '../pages/catalog/catalog';
+// import { ModalManager } from '../pages/catalog/catalog';
+// import { productModal } from '../pages/catalog/catalog';
+import { ModalManager } from '../components/layout/modal/product-modal';
 
 export interface Route {
   path: string;
@@ -37,6 +40,20 @@ export class Router {
 
   navigateTo(path: string, state: RouteState = {}): void {
     if (this.currentPath === path && Object.keys(state).length === 0) return;
+
+    // Проверяем, является ли текущий переход открытием модалки
+    const isOpeningModal = state?.openProductModal !== undefined;
+    // Закрываем модалку только если:
+    // 1. Это не переход открытия модалки
+    // 2. Путь не содержит ID продукта
+    const isProductPath = path.match(
+      /^\/(catalog|main)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+    );
+    const modal = ModalManager.getModal();
+    if (modal && !isOpeningModal && !isProductPath) {
+      modal.hideModal();
+    }
+
     globalThis.history.pushState(state, '', path);
     this.handleRouteChange();
   }
@@ -47,6 +64,35 @@ export class Router {
 
     this.saveCurrentScrollPosition();
     this.currentPath = path;
+
+    /************************************************* */
+    const state = history.state;
+
+    const isOpeningModal = state?.openProductModal !== undefined;
+    const isProductPath = path.match(
+      /^\/(catalog|main)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+    );
+    const isComingFromProduct = this.currentPath.match(
+      /^\/(catalog|main)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+    );
+
+    const modal = ModalManager.getModal();
+    console.log(modal);
+
+    // Закрываем модалку если:
+    // 1. Это не открытие модалки
+    // 2. Это не страница продукта
+    // 3. ИЛИ это переход назад с продукта на /main
+    if (
+      (modal && !isOpeningModal && !isProductPath) ||
+      (isComingFromProduct && path === '/main')
+    ) {
+      modal.hideModal();
+
+      // console.log(`Попытка закрыть ${modal}`);
+    }
+
+    /************************************************* */
 
     if (path === '/') {
       this.navigateTo('/main');
@@ -189,11 +235,11 @@ let routerInstance: Router | undefined;
 export function createRouter(container: HTMLElement): Router {
   if (!routerInstance) {
     routerInstance = new Router(container);
-    routerInstance.addRoute({
-      path: '/catalog',
-      component: createCatalogPage,
-      preserveState: true,
-    });
+    // routerInstance.addRoute({
+    //   path: '/catalog',
+    //   component: createCatalogPage,
+    //   preserveState: true,
+    // });
   }
   return routerInstance;
 }
