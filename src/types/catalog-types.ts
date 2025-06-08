@@ -13,10 +13,22 @@ export interface Price {
   discounted?: DiscountedPrice;
 }
 
+export interface AttributeLocalizedEnum {
+  key: string;
+  label: Record<string, string>;
+}
+
+export interface Attribute {
+  name: string;
+  value: AttributeLocalizedEnum | string;
+}
+
 export interface ProductVariant {
+  id?: number;
   sku?: string;
   images?: { url: string }[];
   prices?: Price[];
+  attributes?: Attribute[];
 }
 
 export interface Product {
@@ -25,6 +37,7 @@ export interface Product {
   name: { [key: string]: string };
   description?: { [key: string]: string };
   masterVariant: ProductVariant;
+  variants?: ProductVariant[];
   categories: Array<{ id: string }>;
 }
 

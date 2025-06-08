@@ -12,6 +12,7 @@ import {
 } from '../components/auth-services/customer.service';
 import type { Address } from '../types/commercetools'; // Added import for Address
 import { apiInstance } from '../api/axios-instances';
+import { isAxiosError } from 'axios';
 import { useTokenStore } from '../store/token-store';
 import { useCustomerStore } from '../store/customer-store';
 import { uiStore as useUIStore } from '../store/store';
@@ -23,6 +24,8 @@ function persistTokens(token: OAuthTokenResponse) {
     .getState()
     .setTokens(access_token, refresh_token ?? undefined, expires_in);
 }
+
+type CustomerAction = { action: string; [k: string]: unknown };
 
 export const AuthService = {
   async register(
@@ -131,32 +134,34 @@ export const AuthService = {
 
   async updateCurrentCustomer(
     version: number,
-    actions: { action: string; [key: string]: unknown }[]
-  ): Promise<CommercetoolsCustomer> {
-    const { accessToken } = useTokenStore.getState();
-    if (!accessToken) {
-      throw new Error('No access token available for updating customer.');
-    }
+    actions: readonly CustomerAction[]
+  ): Promise<void> {
+    const token = useTokenStore.getState().accessToken;
 
-    debug('POST /me (update customer)', { version, actions });
-    try {
-      const { data } = await apiInstance.post<CommercetoolsCustomer>(
+    const send = async (v: number) =>
+      apiInstance.post(
         '/me',
-        { version, actions },
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        { version: v, actions },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
-      debug('Customer update successful', data.email);
-      // Update customer in store after successful API call
+
+    try {
+      const { data } = await send(version);
       useCustomerStore.getState().setCustomer(data);
-      return data;
     } catch (error) {
-      debug('Customer update error', error);
-      useUIStore
-        .getState()
-        .addNotification(
-          'error',
-          `Customer update failed: ${(error as Error).message}`
-        );
+      if (isAxiosError(error) && error.response?.status === 409) {
+        const errorData = error.response.data;
+        const fresh: number | undefined =
+          errorData?.errors?.[0]?.currentVersion;
+
+        if (typeof fresh === 'number') {
+          const { data } = await send(fresh);
+          useCustomerStore.getState().setCustomer(data);
+          return;
+        }
+      }
       throw error;
     }
   },
