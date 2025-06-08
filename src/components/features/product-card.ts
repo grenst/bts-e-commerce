@@ -41,12 +41,24 @@ export function createProductCardElement(product: Product): HTMLElement {
   createElement({
     tag: 'div',
     parent: imageContainer,
-    classes: ['h-full', 'w-full', 'img_bgrnd', 'absolute'],
+    classes: ['w-full', 'img_bgrnd', 'back_frame'],
+  });
+
+  const imageLimiter = createElement({
+    tag: 'div',
+    parent: imageContainer,
+    classes: [
+      'w-full',
+      'absolute',
+      'h-[140%]',
+      'overflow-hidden',
+      'image_limiter',
+    ],
   });
 
   createElement({
     tag: 'img',
-    parent: imageContainer,
+    parent: imageLimiter,
     attributes: {
       src: product.masterVariant.images?.[1]?.url ?? '',
       alt: product.name['en-US'] || 'Product Image',
