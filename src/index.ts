@@ -27,6 +27,7 @@ import {
   addNotification,
 } from './store/store';
 import createErrorPage from './pages/error/error-page';
+import { createCatalogPage } from './pages/catalog/catalog';
 
 // --- sprite
 svgSpriteElement();
@@ -94,6 +95,11 @@ const routes: Route[] = [
     path: '*',
     component: createErrorPage,
     preserveState: false, // можно и не ставить будет работать
+  },
+  {
+    path: '/catalog',
+    component: createCatalogPage,
+    preserveState: true,
   },
 ];
 

@@ -2,11 +2,12 @@ import { Product, Category } from '../../types/catalog-types';
 import { createProductCardElement } from '../features/product-card';
 import { createEl as createElement } from '../../utils/element-utilities';
 import {
-  createProductModal,
-  ProductModal,
+  // createProductModal,
+  // ProductModal,
+  ModalManager,
 } from '../../components/layout/modal/product-modal';
 
-let productModal: ProductModal;
+// let productModal: ProductModal;
 
 export function createProductListElement(
   products: Product[],
@@ -18,10 +19,15 @@ export function createProductListElement(
   });
 
   // Initialize product modal if not already initialized
-  if (!productModal) {
-    productModal = createProductModal();
-    document.body.append(productModal.modalElement);
-  }
+  // if (!productModal) {
+  //   productModal = createProductModal();
+  //   document.body.append(productModal.modalElement);
+  //   productModal.modalElement.classList.add('third');
+  // }
+
+  ModalManager.getModal();
+  // const productModal = ModalManager.getModal();
+  // productModal.modalElement.classList.add('third');
 
   // Handle empty product list
   if (products.length === 0) {

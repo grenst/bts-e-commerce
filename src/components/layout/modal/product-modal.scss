@@ -166,6 +166,15 @@
   overflow: hidden;
 }
 
+.product-modal-overlay {
+  opacity: 0;
+  transition: opacity .25s ease-out;
+  &.open {
+    display: flex;
+    opacity: 1;
+  }
+}
+
 .product-modal-close {
   position: absolute;
   z-index: 10;
