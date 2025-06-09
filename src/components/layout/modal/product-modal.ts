@@ -52,51 +52,38 @@ export interface ProductModal {
   hideModal: () => void;
 }
 
-// const variants: ProductVariant[] = [
-//   product.masterVariant,
-//   ...(product.variants ?? []),
-// ];
+export class ModalManager {
+  private static instance: ProductModal | undefined = undefined;
 
-const getVolumeLabel = (variant: ProductVariant, locale = 'en'): string => {
-  const volumeAttribute = variant.attributes?.find(
-    (attribute) => attribute.name === 'volume'
-  );
-  if (
-    volumeAttribute &&
-    typeof volumeAttribute.value === 'object' &&
-    volumeAttribute.value !== null
-  ) {
-    const { key, label } = volumeAttribute.value as {
-      key?: string;
-      label?: Record<string, string>;
-    };
-    // trying to get a label
-    if (label && typeof label[locale] === 'string') return label[locale];
-    // then a key
-    if (typeof key === 'string') return key;
+  static getModal(): ProductModal {
+    if (!this.instance) {
+      this.instance = createProductModal();
+      document.body.append(this.instance.modalElement);
+      // this.instance.modalElement.classList.add('first');
+    }
+    return this.instance;
   }
-  return ''; // nothing got
-};
 
-const getUnitPrice = (variant: ProductVariant): number => {
-  const priceInfo = variant.prices?.[0];
-  const cents =
-    priceInfo?.discounted?.value.centAmount ?? priceInfo?.value.centAmount ?? 0;
-  return cents / 100;
-};
+  static clearModal(): void {
+    if (this.instance) {
+      this.instance.modalElement.remove();
+      this.instance = undefined;
+    }
+  }
+}
 
 export function createProductModal(): ProductModal {
   // Remove existing modals to prevent duplicates
-  const existingModals = document.querySelectorAll('.product-modal-overlay');
-  for (const modal of existingModals) {
-    modal.remove();
-  }
+  // const existingModals = document.querySelectorAll('.product-modal-overlay');
+  // for (const modal of existingModals) {
+  //   modal.remove();
+  // }
 
   const overlay = createElement({
     tag: 'div',
     classes: ['product-modal-overlay'],
   });
-  overlay.style.display = 'none';
+  // overlay.style.display = 'none';
 
   const card = createElement({
     tag: 'div',
@@ -199,11 +186,13 @@ export function createProductModal(): ProductModal {
   let loader: HTMLElement | undefined;
 
   function showLoader(): void {
+    // console.log('1. showLoader() начал выполнение');
     lockCardHeight();
     details.innerHTML = '';
     details.classList.add('loading');
 
     loader = createElement({ tag: 'span', parent: details, classes: ['dots'] });
+    // console.log('2. showLoader() создал спиннер', loader);
   }
 
   function hideLoader(): void {
@@ -213,6 +202,7 @@ export function createProductModal(): ProductModal {
       loader = undefined;
       unlockCardHeight();
     }
+    // console.log('удалился hideLoader()');
   }
 
   let originalURL: string | undefined = undefined;
@@ -255,17 +245,26 @@ export function createProductModal(): ProductModal {
       x: globalThis.innerWidth / 2,
       y: globalThis.innerHeight / 2,
     };
-
+    /********************************************************* */
+    /********************************************************* */
     // Show background immediately
     overlay.style.display = 'flex';
     // Add open class to trigger background fade-in
+
+    // showLoader();
+    // await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    console.log('A. Перед добавлением open класса');
+
     overlay.classList.add('open');
+    card.classList.add('open');
 
     // Set transform origin to click position
     card.style.setProperty('--ox', `${currentOrigin.x}px`);
     card.style.setProperty('--oy', `${currentOrigin.y}px`);
     // Add open class to trigger modal animation
-    card.classList.add('open');
+
+    /********************************************************* */
 
     const wasCategoryOpen = isCategoryModalOpen;
 
@@ -750,9 +749,17 @@ export function createProductModal(): ProductModal {
     card.style.setProperty('--ox', `${currentOrigin.x - rect.left}px`);
     card.style.setProperty('--oy', `${currentOrigin.y - rect.top}px`);
 
-    card.classList.remove('open');
-    overlay.classList.remove('open');
-    void card.offsetWidth;
+    // card.classList.remove('open');
+    // overlay.classList.remove('open');
+    // void card.offsetWidth;
+
+    // Перед удалением классов проверяем, были ли они добавлены
+    if (overlay.classList.contains('open')) {
+      card.classList.remove('open');
+      overlay.classList.remove('open');
+      void card.offsetWidth;
+    }
+
     requestAnimationFrame(() => {
       card.classList.add('open');
       overlay.classList.add('open');
@@ -761,6 +768,7 @@ export function createProductModal(): ProductModal {
   }
 
   function hideModal(): void {
+    console.trace('hideModal called');
     if (popStateHandler) {
       globalThis.removeEventListener('popstate', popStateHandler);
       popStateHandler = undefined;
@@ -778,13 +786,21 @@ export function createProductModal(): ProductModal {
     overlay.classList.remove('open');
 
     const onEnd = () => {
-      overlay.style.display = 'none';
-      overlay.removeEventListener('transitionend', onEnd);
-      body.classList.remove('lock');
-      originalURL = undefined;
-      basePath = undefined;
+      if (!overlay.classList.contains('open')) {
+        overlay.style.display = 'none';
+        // overlay.removeEventListener('transitionend', onEnd);
+        body.classList.remove('lock');
+        originalURL = undefined;
+        basePath = undefined;
+      }
+      // overlay.style.display = 'none';
+      // overlay.removeEventListener('transitionend', onEnd);
+      // body.classList.remove('lock');
+      // originalURL = undefined;
+      // basePath = undefined;
+      // console.log('B. transitionend сработал');
     };
-    overlay.addEventListener('transitionend', onEnd);
+    overlay.addEventListener('transitionend', onEnd, { once: true });
     releaseBodyLock();
   }
 

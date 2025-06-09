@@ -157,6 +157,7 @@
   }
 }
 
+<<<<<<< HEAD
 .quit-modal-helper {
   position: absolute;
   background: transparent;
@@ -164,6 +165,15 @@
   height: clamp(2vw, 22vw, 150px);
   z-index: 100;
   overflow: hidden;
+=======
+.product-modal-overlay {
+  opacity: 0;
+  transition: opacity .25s ease-out;
+  &.open {
+    display: flex;
+    opacity: 1;
+  }
+>>>>>>> commercetools-may
 }
 
 .product-modal-close {
