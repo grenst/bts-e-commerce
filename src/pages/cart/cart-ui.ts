@@ -1,0 +1,279 @@
+import { createEl as createElement } from '../../utils/element-utilities';
+import { getOrCreateCart } from '../../api/cart/cart-service';
+import { apiInstance } from '../../api/axios-instances';
+import { useTokenStore } from '../../store/token-store';
+import { getAnonymousToken } from '../../components/auth-services/token.service';
+import { isAxiosError } from 'axios';
+import { LineItem, createCartItem } from './cart-item';
+
+/* ────────── TYPES Commercetools ───── TO DO ───── */
+interface CtMoney {
+  centAmount: number;
+}
+
+interface CtImage {
+  url: string;
+}
+
+interface CtAttribute {
+  name: string;
+  value: unknown;
+}
+
+interface CtVariant {
+  id: number;
+  images?: CtImage[];
+  attributes?: CtAttribute[];
+}
+
+interface CtLineItem {
+  id: string;
+  productId: string;
+  name: Record<string, string>;
+  variant: CtVariant;
+  price: { value: CtMoney };
+  quantity: number;
+}
+
+interface CtCart {
+  id: string;
+  version: number;
+  lineItems: CtLineItem[];
+  totalPrice: CtMoney;
+}
+
+/* ────────── helpers ────────── */
+function formatPrice(c: number): string {
+  return new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(c / 100);
+}
+
+async function getAccessToken(): Promise<string> {
+  const { accessToken } = useTokenStore.getState();
+  if (accessToken) return accessToken;
+  const anon = await getAnonymousToken();
+  useTokenStore
+    .getState()
+    .setTokens(
+      anon.access_token,
+      anon.refresh_token ?? undefined,
+      anon.expires_in
+    );
+  return anon.access_token;
+}
+
+function showToast(m: string, error = false): void {
+  console[error ? 'error' : 'log'](m);
+}
+
+/* ────────── type-guard for volume ────────── */
+interface Labeled {
+  label: Record<string, string>;
+}
+const isLabeled = (v: unknown): v is Labeled =>
+  typeof v === 'object' && v !== null && 'label' in v;
+
+/* ────────── CartUI ────────── */
+type CartAction =
+  | { action: 'changeLineItemQuantity'; lineItemId: string; quantity: number }
+  | { action: 'removeLineItem'; lineItemId: string };
+
+export default class CartUI {
+  private readonly container: HTMLElement;
+
+  private cart: CtCart | undefined = undefined;
+
+  private itemsWrapper: HTMLElement | undefined = undefined;
+
+  /** query of PATCH-reqsts */
+  private updateQueue: Promise<void> = Promise.resolve();
+
+  constructor(container: HTMLElement) {
+    this.container = container;
+  }
+
+  async init(): Promise<void> {
+    await this.fetchCart();
+    this.render();
+  }
+
+  private async fetchCart(): Promise<void> {
+    const c = await getOrCreateCart();
+    this.cart = c as unknown as CtCart;
+  }
+
+  private mapLineItem(li: CtLineItem): LineItem {
+    const volAttribute = li.variant.attributes?.find(
+      (a) => a.name === 'volume'
+    );
+    let volume = '';
+    if (volAttribute && isLabeled(volAttribute.value)) {
+      volume =
+        volAttribute.value.label['en-US'] ?? volAttribute.value.label.en ?? '';
+    }
+
+    return {
+      id: li.id,
+      productId: li.productId,
+      name: li.name['en-US'] ?? li.name.en ?? 'Unnamed',
+      variantId: li.variant.id,
+      volume,
+      price: li.price.value.centAmount,
+      quantity: li.quantity,
+      imageUrl: li.variant.images?.[0]?.url ?? '',
+    };
+  }
+
+  private render(): void {
+    if (!this.cart) return;
+    this.container.innerHTML = '';
+
+    if (this.cart.lineItems.length === 0) return this.renderEmpty();
+
+    this.container.append(
+      createElement({ tag: 'h1', classes: ['cart-title'], text: 'Your Cart' })
+    );
+
+    this.itemsWrapper = createElement({
+      tag: 'div',
+      classes: ['cart-items-grid'],
+    });
+    this.container.append(this.itemsWrapper);
+
+    for (const li of this.cart.lineItems) {
+      this.renderItem(li);
+    }
+
+    this.renderSummary();
+  }
+
+  private renderEmpty(): void {
+    this.container.append(
+      createElement({
+        tag: 'p',
+        classes: ['empty-cart'],
+        text: 'Your cart is empty 🤷‍♂️',
+      })
+    );
+
+    const button = createElement({
+      tag: 'button',
+      classes: ['go-shopping'],
+      text: 'Go shopping',
+    });
+    button.addEventListener(
+      'click',
+      () => (globalThis.location.hash = '/catalog')
+    );
+    this.container.append(button);
+  }
+
+  private renderItem(ct: CtLineItem): void {
+    if (!this.itemsWrapper) return;
+    const item = this.mapLineItem(ct);
+    const element = createCartItem(item, {
+      onQuantityChange: (q) =>
+        this.enqueueUpdate([
+          {
+            action: 'changeLineItemQuantity',
+            lineItemId: item.id,
+            quantity: q,
+          },
+        ]),
+      onRemove: () =>
+        this.enqueueUpdate([{ action: 'removeLineItem', lineItemId: item.id }]),
+    });
+    element.dataset.lineItemId = item.id;
+    this.itemsWrapper.append(element);
+  }
+
+  private renderSummary(): void {
+    if (!this.cart) return;
+
+    this.container.querySelector('.cart-summary')?.remove();
+
+    const subtotal = this.cart.lineItems.reduce(
+      (s, li) => s + li.price.value.centAmount * li.quantity,
+      0
+    );
+    const tax = this.cart.totalPrice.centAmount - subtotal;
+
+    const summary = createElement({ tag: 'div', classes: ['cart-summary'] });
+    summary.append(
+      createElement({ tag: 'div', text: `Subtotal: ${formatPrice(subtotal)}` })
+    );
+    summary.append(
+      createElement({ tag: 'div', text: `Tax (19 %): ${formatPrice(tax)}` })
+    );
+    summary.append(
+      createElement({
+        tag: 'div',
+        classes: ['total'],
+        text: `Total: ${formatPrice(this.cart.totalPrice.centAmount)}`,
+      })
+    );
+
+    const checkout = createElement({
+      tag: 'button',
+      classes: [
+        'mt-4',
+        'w-full',
+        'py-2',
+        'rounded-md',
+        'text-white',
+        this.cart.lineItems.length > 0
+          ? 'bg-black'
+          : 'bg-gray-400 cursor-not-allowed',
+      ],
+      text: 'Proceed to checkout',
+    });
+    if (this.cart.lineItems.length > 0)
+      checkout.addEventListener('click', () => alert('Not implemented'));
+    summary.append(checkout);
+
+    this.container.append(summary);
+  }
+
+  private enqueueUpdate(actions: CartAction[]): void {
+    this.updateQueue = this.updateQueue.then(() => this.applyUpdate(actions));
+  }
+
+  private async applyUpdate(actions: CartAction[]): Promise<void> {
+    if (!this.cart) return;
+
+    const token = await getAccessToken();
+
+    const patch = async (version: number) => {
+      const { data } = await apiInstance.post<CtCart>(
+        `/me/carts/${this.cart!.id}`,
+        { version, actions },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return data;
+    };
+
+    try {
+      this.cart = await patch(this.cart.version);
+      this.render();
+      showToast('Cart updated');
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 409) {
+        try {
+          const fresh = await getOrCreateCart();
+          this.cart = fresh as unknown as CtCart;
+          this.cart = await patch(this.cart.version); // patching with actual version!!!!
+          this.render();
+          showToast('Cart updated');
+        } catch (retryError) {
+          showToast('Failed to update cart', true);
+          console.error(retryError);
+        }
+      } else {
+        showToast('Failed to update cart', true);
+        console.error(error);
+      }
+    }
+  }
+}

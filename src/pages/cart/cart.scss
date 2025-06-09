@@ -1,0 +1,57 @@
+.site-header {
+  margin-bottom: 2rem;
+}
+
+.cart-items-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cart-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cart-summary {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  max-width: 320px;
+  margin-left: auto;
+}
+
+.cart-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.empty-cart {
+  font-size: 1.25rem;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.go-shopping {
+  display: block;
+  margin: 1.5rem auto 0;
+  background-color: #1f2937;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.go-shopping:hover {
+  background-color: #111827;
+}
+
+.total {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1rem;
+}

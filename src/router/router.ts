@@ -3,6 +3,7 @@ import {
   removeAllChild,
 } from '../utils/element-utilities';
 import { createCatalogPage } from '../pages/catalog/catalog';
+import { createCartPage } from '../pages/cart/cart';
 
 export interface Route {
   path: string;
@@ -192,6 +193,11 @@ export function createRouter(container: HTMLElement): Router {
     routerInstance.addRoute({
       path: '/catalog',
       component: createCatalogPage,
+      preserveState: true,
+    });
+    routerInstance.addRoute({
+      path: '/cart',
+      component: createCartPage,
       preserveState: true,
     });
   }
