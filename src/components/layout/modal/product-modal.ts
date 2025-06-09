@@ -72,6 +72,34 @@ export class ModalManager {
   }
 }
 
+const getVolumeLabel = (variant: ProductVariant, locale = 'en'): string => {
+  const volumeAttribute = variant.attributes?.find(
+    (attribute) => attribute.name === 'volume'
+  );
+  if (
+    volumeAttribute &&
+    typeof volumeAttribute.value === 'object' &&
+    volumeAttribute.value !== null
+  ) {
+    const { key, label } = volumeAttribute.value as {
+      key?: string;
+      label?: Record<string, string>;
+    };
+    // trying to get a label
+    if (label && typeof label[locale] === 'string') return label[locale];
+    // then a key
+    if (typeof key === 'string') return key;
+  }
+  return ''; // nothing got
+};
+
+const getUnitPrice = (variant: ProductVariant): number => {
+  const priceInfo = variant.prices?.[0];
+  const cents =
+    priceInfo?.discounted?.value.centAmount ?? priceInfo?.value.centAmount ?? 0;
+  return cents / 100;
+};
+
 export function createProductModal(): ProductModal {
   // Remove existing modals to prevent duplicates
   // const existingModals = document.querySelectorAll('.product-modal-overlay');
