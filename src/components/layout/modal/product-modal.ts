@@ -202,6 +202,9 @@ export function createProductModal(): ProductModal {
 
   function lockCardHeight(): void {
     const { height } = card.getBoundingClientRect();
+    // const minHeight = 250; // Минимальная высота, если измерение дало 0
+    // const finalHeight = height > 0 ? height : minHeight;
+    // card.style.setProperty('--locked-height', `${finalHeight}px`);
     card.style.setProperty('--locked-height', `${height}px`);
     card.classList.add('height-locked');
   }
@@ -219,7 +222,11 @@ export function createProductModal(): ProductModal {
     details.innerHTML = '';
     details.classList.add('loading');
 
-    loader = createElement({ tag: 'span', parent: details, classes: ['dots'] });
+    loader = createElement({
+      tag: 'span',
+      parent: details,
+      classes: ['dots'],
+    });
     // console.log('2. showLoader() создал спиннер', loader);
   }
 

@@ -91,6 +91,7 @@
 }
 .product-modal-content.height-locked {
   height: var(--locked-height);
+  min-height: 250px; /* Чтобы спинер гарантированно был виден*/
 }
 .dots {
   width: 4.5px;
@@ -142,6 +143,8 @@
   position: relative;
   width: clamp(320px, 90vw, 820px);
   max-height: 90vh;
+  // --locked-height: 250px; /* Минимальная высота, если JS не сработал */
+  // min-height: 250px; /* Чтобы спинер гарантированно был виден*/
   overflow-y: auto;
   background: transparent;
   opacity: 0;
