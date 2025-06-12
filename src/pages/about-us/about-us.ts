@@ -10,8 +10,37 @@ import { gsap } from 'gsap';
 // import aboutImg3 from '@assets/images/about-3.webp';
 // import aboutImg3 from '@assets/images/honey-vulkan.png';
 
+type TextVal = { key: string; val: string };
+
 export default function createAboutUsPage(container: HTMLElement): void {
   container.innerHTML = '';
+  const big_text_container: TextVal[] = [
+    {
+      key: 'answer',
+      val: 'Our team works on equal terms, without strict hierarchy, We appreciate the contribution of each participant, We are building effective cooperation, Based on mutual respect and support!',
+    },
+    {
+      key: 'Andreii',
+      val: 'Andreii is a Team Leader The role in the project: Organizing the work of the team, working with the commercetools API, making key technical decisions, coordinating development and timing control. Contribution: Andrey implemented the SPA architecture, organized the project assembly process using Vite, provided integration with commercetools, and tirelessly motivated the team to create the Bubble Tea Shop.Collaboration methods: Regular meetings, code review, and setting up CI/CD processes.Brief biography: An experienced developer specializing in TypeScript, js, a variety of libraries and a modern interface. You can also check out his GitHub page:',
+    },
+    {
+      key: 'Vitali',
+      val: 'Vitali is the senior developer of the project Vitali is responsible for the development of key modules, actively works with the commercetools API, writes tests and ensures high-quality code. His contributions include setting up linters (ESLint, Prettier), implementing Tailwind for styling, as well as writing and maintaining tests for Jest and TypeScript. Collaboration methods: Vitali actively participates in discussions, helps colleagues solve complex problems, maintains a unified code style and is the soul of the team. Brief biography: Specialist in layout and testing and working with commercetools. You can also check out his GitHub page:',
+    },
+    {
+      key: 'Sergey',
+      val: 'Sergey is a user interface developer Sergey is responsible for the implementation of functionality, support and improvement of the user interface. His contributions include writing interface components, implementing a SPA, and participating in performance optimization. Collaboration methods: Sergey is actively involved in joint task planning, uses TypeScript and SCSS for development, and regularly participates in code review. Brief biography: Frontend is a developer who is passionate about modern technology and creating high-quality code. You can also check out his GitHub page:',
+    },
+    {
+      key: 'Rss',
+      val: "This project was created specifically for the R.S.School as part of one of the school's unique assignments, of which there are a lot. To whom are we grateful? Our team would like to thank all the mentors and mentors of the R.S.School for their efforts and support. What do we value at R.S.School? We would like to thank R.S.School for the excellent educational program, the tremendous amount of knowledge, the wonderful mentors and the unforgettable experience that we received. Where can I find out more? You can also view the courses offered by clicking on the link — just click on the name of the school",
+    },
+  ];
+
+  function getTextByKey(key: string): string | undefined {
+    const item = big_text_container.find((el) => el.key === key);
+    return item?.val;
+  }
 
   const profileContainer = createElement({
     tag: 'div',
@@ -106,12 +135,18 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const descriptionUl = createElement({
     tag: 'ul',
     classes: ['description-ul-us'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerTextPreface.append(descriptionUl);
 
   const containerMesegUser1 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-1', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   descriptionUl.append(containerMesegUser1);
 
@@ -124,7 +159,6 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const titleDescription = createElement({
     tag: 'li',
-    text: '',
     classes: ['title-description-about'],
   });
   containerMesegUser1.append(titleDescription);
@@ -138,6 +172,9 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const containerMesegUser2 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   descriptionUl.append(containerMesegUser2);
 
@@ -156,7 +193,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const titleDescriptionPUser2 = createElement({
     tag: 'p',
-    text: 'Our team works on equal terms, without strict hierarchy, We appreciate the contribution of each participant, We are building effective cooperation, Based on mutual respect and support!',
+    text: getTextByKey('answer'),
   });
   pointOne.append(titleDescriptionPUser2);
 
@@ -175,12 +212,18 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const containerInfoUsAndreiUl = createElement({
     tag: 'ul',
     classes: ['description-ul-us'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerTechnologiesText.append(containerInfoUsAndreiUl);
 
   const containerInfoUsAndreiUser1 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-1', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerInfoUsAndreiUl.append(containerInfoUsAndreiUser1);
 
@@ -206,6 +249,9 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const containerInfoUsAndreiUser2 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerInfoUsAndreiUl.append(containerInfoUsAndreiUser2);
 
@@ -231,6 +277,9 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const containerInfoUsAndreiUser22 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerInfoUsAndreiUl.append(containerInfoUsAndreiUser22);
 
@@ -242,13 +291,16 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const technologiesTitleP3 = createElement({
     tag: 'p',
-    text: 'Andrey is a Team Leader The role in the project: Organizing the work of the team, working with the commercetools API, making key technical decisions, coordinating development and timing control. Contribution: Andrey implemented the SPA architecture, organized the project assembly process using Vite, provided integration with commercetools, and tirelessly motivated the team to create the Bubble Tea Shop.Collaboration methods: Regular meetings, code review, and setting up CI/CD processes.Brief biography: An experienced developer specializing in TypeScript, js, a variety of libraries and a modern interface. You can also check out his GitHub page:',
+    text: getTextByKey('Andreii'),
   });
   titleMasegeAndreiUser3.append(technologiesTitleP3);
 
   const containerInfoUsAndreiUser222 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerInfoUsAndreiUl.append(containerInfoUsAndreiUser222);
 
@@ -296,12 +348,18 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const containerUlVitali = createElement({
     tag: 'ul',
     classes: ['container-ul-vitali'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerVitaliTitle.append(containerUlVitali);
 
   const containerTechnologiesTextVit = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerUlVitali.append(containerTechnologiesTextVit);
 
@@ -327,6 +385,9 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const containerTechnologiesTextVit1 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerUlVitali.append(containerTechnologiesTextVit1);
 
@@ -338,13 +399,16 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const technologiesTitleVit = createElement({
     tag: 'p',
-    text: 'Vitali is the senior developer of the project Vitali is responsible for the development of key modules, actively works with the commercetools API, writes tests and ensures high-quality code. His contributions include setting up linters (ESLint, Prettier), implementing Tailwind for styling, as well as writing and maintaining tests for Jest and TypeScript. Collaboration methods: Vitali actively participates in discussions, helps colleagues solve complex problems, maintains a unified code style and is the soul of the team. Brief biography: Specialist in layout and testing and working with commercetools. You can also check out his GitHub page:',
+    text: getTextByKey('Vitali'),
   });
   technologiesTitleP3Vit.append(technologiesTitleVit);
 
   const containerTechnologiesTextVit11 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerUlVitali.append(containerTechnologiesTextVit11);
 
@@ -385,12 +449,18 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const containerUlser = createElement({
     tag: 'ul',
     classes: ['container-ul-ser'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerAboutSer.append(containerUlser);
 
   const containerTechnologiesTextSer = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerUlser.prepend(containerTechnologiesTextSer);
 
@@ -416,6 +486,9 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const containerTechnologiesTextSer1 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerUlser.append(containerTechnologiesTextSer1);
 
@@ -427,13 +500,16 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const technologiesTitleP4Ser = createElement({
     tag: 'p',
-    text: 'Sergey is a user interface developer Sergey is responsible for the implementation of functionality, support and improvement of the user interface. His contributions include writing interface components, implementing a SPA, and participating in performance optimization. Collaboration methods: Sergey is actively involved in joint task planning, uses TypeScript and SCSS for development, and regularly participates in code review. Brief biography: Frontend is a developer who is passionate about modern technology and creating high-quality code. You can also check out his GitHub page:',
+    text: getTextByKey('Sergey'),
   });
   technologiesTitleP3Ser.append(technologiesTitleP4Ser);
 
   const containerTechnologiesTextSer11 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerUlser.append(containerTechnologiesTextSer11);
 
@@ -474,12 +550,18 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const containerULRss = createElement({
     tag: 'ul',
     classes: ['container-ul-rss'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerRSSAbout.append(containerULRss);
 
   const containeriRss = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-1', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerULRss.append(containeriRss);
 
@@ -505,6 +587,9 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const userRssUl = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerRSSAbout.append(userRssUl);
 
@@ -523,13 +608,16 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const textPRss2 = createElement({
     tag: 'p',
-    text: "This project was created specifically for the R.S.School as part of one of the school's unique assignments, of which there are a lot. To whom are we grateful? Our team would like to thank all the mentors and mentors of the R.S.School for their efforts and support. What do we value at R.S.School? We would like to thank R.S.School for the excellent educational program, the tremendous amount of knowledge, the wonderful mentors and the unforgettable experience that we received. Where can I find out more? You can also view the courses offered by clicking on the link — just click on the name of the school.",
+    text: getTextByKey('Rss'),
   });
   userRssli.append(textPRss2);
 
   const userRssUl1 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
+    attributes: {
+      style: 'will-change: transform, opacity;',
+    },
   });
   containerRSSAbout.append(userRssUl1);
 
