@@ -6,13 +6,12 @@ interface WindowWithBuffer extends Window {
 (globalThis as unknown as WindowWithBuffer).Buffer = Buffer;
 import '@styles/global.scss';
 import '@styles/tailwind.css';
-import './animations/gsap-init'; // Initialize GSAP and plugins
-import { createAnimatedBackground } from './components/layout/animated-background'; // Import createAnimatedBackground
+import './animations/gsap-init';
+import { createAnimatedBackground } from './components/layout/animated-background';
 import {
   createHeaderElements,
   updateUserNavOnHeader,
-} from './components/layout/header/header'; // Import header functions
-
+} from './components/layout/header/header';
 import svgSpriteElement from './sources/svg-sprite';
 import createFooter from './components/layout/footer/footer';
 import { body, createEl as createElement } from './utils/element-utilities';
@@ -115,7 +114,7 @@ createLoadingIndicator(body);
 addNotification('info', 'Welcome to the E-commerce App!');
 
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 618) {
+  if (window.scrollY > 118) {
     header.classList.add('bg-white/50');
     header.classList.remove('bg-transparent');
     mainTitle.classList.add('text-xl');

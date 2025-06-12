@@ -22,6 +22,6 @@
     "noUncheckedSideEffectImports": true,
     "types": ["jest", "node"]
   },
-  "include": ["src"],
+  "include": ["src", "src/types/three-examples.d.ts"],
   "exclude": ["node_modules", "dist", ".eslintrc.cjs", "jest.config.cjs", "prettier.config.cjs", "vite.config.ts"] // Exclude build output, node_modules and config files
 }

@@ -174,13 +174,75 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     ],
     parent: heroSection,
   });
+  // const preGlass = createElement({
+  //   tag: 'div',
+  //   classes: [
+  //     'pre_glass',
+  //     'relative',
+  //     'inset-0',
+  //     'overflow-hidden',
+  //     'flex',
+  //     // 'px-6',
+  //     // 'py-3',
+  //     'justify-center',
+  //     'items-center',
+  //     'flex-col',
+  //   ],
+  //   parent: heroContainer,
+  // });
 
-  // --- ANIMATED BACKGROUND ---
+  // // --- ANIMATED BACKGROUND ---
+  // const slogan = createElement({
+  //   tag: 'div',
+  //   parent: preGlass,
+  //   classes: [
+  //     'slogan-glass',
+  //     'absolute',
+  //     'text-white',
+  //     'text-2xl',
+  //     'font-bold',
+  //     'px-6',
+  //     'py-3',
+  //     // 'rounded-2xl',
+  //     'backdrop-blur-md',
+  //     'bg-black/50',
+  //     'border',
+  //     'border-white/20',
+  //     // 'shadow-lg',
+  //     'z-10',
+  //     'top-[42%]'
+  //   ],
+  // });
+  // slogan.style.filter = 'url(#frosted)';
+
+  // // slogan.style.top = '42%';
+  // // slogan.style.opacity = '1';
+  // ScrollTrigger.refresh();
+
+  // const header = document.querySelector('header') as HTMLElement;
+  // const headerHeight = header?.offsetHeight ?? 0;
+
+  // gsap.fromTo(
+  //   slogan,
+  //   { top: '42%', opacity: 1 },
+  //   {
+  //     top: '0%',
+  //     opacity: 0,
+  //     ease: 'none',
+  //     scrollTrigger: {
+  //       trigger: heroContainer,
+  //       start: `top top+=${headerHeight}`,
+  //       end: `+=300`,
+  //       scrub: true,
+  //     },
+  //   }
+  // );
+
   const bgLosung = createElement({
     tag: 'div',
     attributes: { id: 'bg-losung' },
     classes: [
-      'font-nexa-bold',
+      // 'font-nexa-bold',
       'px-4',
       'pb-16',
       'bg-transparent',
@@ -188,6 +250,8 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       'text-center',
       'max-w-md',
       'z-30',
+      // 'text-white',
+      // 'mix-blend-difference',
     ],
     parent: heroContainer,
   });
@@ -225,7 +289,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       animatedLineElements,
       { yPercent: 150 },
       {
-        yPercent: 25,
+        yPercent: 18,
         stagger: 0.25,
         duration: 0.8,
         ease: 'power2.out',
@@ -234,11 +298,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     );
   }
 
-  createElement({
-    tag: 'a', // ← был button
+  const catalogButton = createElement({
+    tag: 'a',
     attributes: { id: 'hero-button', href: '/catalog' },
-    text: 'Our drinks',
+    text: 'Catalog',
     classes: [
+      'absolute',
+      'top-[70%]',
       'hero_btn',
       'inline-block',
       'text-xl',
@@ -261,13 +327,29 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: heroContainer,
   });
 
-  // gsap.from(heroTitle, {
-  //   duration: 1.2,
-  //   opacity: 0,
-  //   scale: 0.5,
-  //   ease: 'back.out(1.7)',
-  //   delay: 0.3,
-  // });
+  gsap.to(catalogButton, {
+    top: '70%',
+    ease: 'none',
+    scrollTrigger: {
+      trigger: homeContainer,
+      start: 'top top',
+      end: '+=1000',
+      scrub: true,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        const currentTop = 50 - progress * 50;
+
+        if (currentTop >= 40) {
+          catalogButton.style.opacity = '1';
+        } else if (currentTop <= 30) {
+          catalogButton.style.opacity = '0';
+        } else {
+          const fadeProgress = (30 - currentTop) / 10;
+          catalogButton.style.opacity = `${1 - fadeProgress}`;
+        }
+      },
+    },
+  });
 
   // Fetch all products and categories once for the page
   let allProducts: Product[] = [];
