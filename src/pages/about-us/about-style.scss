@@ -64,6 +64,7 @@
   font-size: 1rem;
   margin: 0 0.2rem;
   color: #718096;
+  text-align: end;
 }
 
 .title-user-h3 {
@@ -78,7 +79,7 @@
   border: solid 0.1rem black;
   border-radius: 1.3rem 1.3rem 1.3rem 0.0rem;
   padding: 0.4rem;
-  width: 80%;
+  width: fit-content;
   margin-bottom: 0.5rem;
   margin-right: auto;
   text-align: center;
@@ -90,7 +91,7 @@
   padding: 0.4rem;
   border: solid 0.1rem black;
   border-radius: 1.3rem 1.3rem 0rem 1.3rem;
-  width: 80%;
+  width: 70%;
   margin-left: auto;
   margin-bottom: 0.5rem;
   text-align: center;
@@ -105,6 +106,7 @@
   margin-left: auto;
   margin-bottom: 0.5rem;
   text-align: center;
+  width: 15rem;
 }
 
 .point-us {
@@ -113,7 +115,7 @@
   padding: 0.4rem;
   border: solid 0.1rem black;
   border-radius: 1.3rem 1.3rem 0rem 1.3rem;
-  width: auto;
+  width: fit-content;
   margin-left: auto;
   margin-bottom: 0.5rem;
   text-align: center;
@@ -410,52 +412,4 @@
 .container-ul-rss {
   display: flex;
   flex-direction: column;
-}
- 
-// animation
-.hidden1 {
-  display: none;
-  opacity: 0;
-  transform: translateX(0);
-  transition: transform 0.5s ease, opacity 0.5s ease;
-}
- 
-.container-meseg-user-1.show {
-  display: flex;
-  flex-direction: column;
-  align-self: start;
-  opacity: 1;
-  transition: translateX(0);
-  animation: slideInFromLeft 8.5s forwards;
-}
-
-.container-meseg-user-2.show {
-  display: flex;
-  flex-direction: column;
-  align-items: end;
-  opacity: 1;
-  transition: translateX(0);
-  animation: slideInFromRight 8.5s forwards;
-}
-
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInFromRight {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }

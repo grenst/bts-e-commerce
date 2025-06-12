@@ -4,6 +4,7 @@ import {
 } from '../../utils/element-utilities';
 // import { useCustomerStore } from '../../store/customer-store';
 import './about-style.scss';
+import { gsap } from 'gsap';
 // import aboutImg1 from '@assets/images/about-1.webp';
 // import aboutImg2 from '@assets/images/about-2.webp';
 // import aboutImg3 from '@assets/images/about-3.webp';
@@ -550,69 +551,50 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const svgRSS = createSvgUse('#rss', 'about-svg_rss');
   linkRss.append(svgRSS);
 
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      containerMesegUser1?.classList.add('show');
-    }, 1000);
+  const revealOrder: { el: HTMLElement, time: number }[] = [
+    { el: containerMesegUser1!, time: 1 },
+    { el: containerMesegUser2!, time: 3 },
+    { el: containerInfoUsAndreiUser1!, time: 6 },
+    { el: containerInfoUsAndreiUser2!, time: 9 },
+    { el: containerInfoUsAndreiUser22!, time: 12 },
+    { el: containerInfoUsAndreiUser222!, time: 15 },
+    { el: containerTechnologiesTextVit!, time: 18 },
+    { el: containerTechnologiesTextVit1!, time: 21 },
+    { el: containerTechnologiesTextVit11!, time: 24 },
+    { el: containerTechnologiesTextSer!, time: 27 },
+    { el: containerTechnologiesTextSer1!, time: 30 },
+    { el: containerTechnologiesTextSer11!, time: 33 },
+    { el: containeriRss!, time: 36 },
+    { el: userRssUl!, time: 39 },
+    { el: userRssUl1!, time: 42 },
+  ];
 
-    setTimeout(() => {
-      containerMesegUser2?.classList.add('show');
-    }, 5000);
+  gsap.set(
+    revealOrder.map((item) => item.el),
+    {
+      autoAlpha: 0,
+      x: (_index, el: HTMLElement) =>
+        el.classList.contains('container-meseg-user-1') ? -100 : 100,
+    }
+  );
 
-    // 1
-    setTimeout(() => {
-      containerInfoUsAndreiUser1?.classList.add('show');
-    }, 9000);
+  const tl = gsap.timeline({
+    defaults: {
+      duration: 0.8,
+      ease: 'power1.out',
+    },
+  });
 
-    setTimeout(() => {
-      containerInfoUsAndreiUser2?.classList.add('show');
-    }, 13000);
-
-    setTimeout(() => {
-      containerInfoUsAndreiUser22?.classList.add('show');
-    }, 21000);
-
-    setTimeout(() => {
-      containerInfoUsAndreiUser222?.classList.add('show');
-    }, 26000);
-
-    // 2
-    setTimeout(() => {
-      containerTechnologiesTextVit?.classList.add('show');
-    }, 30000);
-
-    setTimeout(() => {
-      containerTechnologiesTextVit1?.classList.add('show');
-    }, 36000);
-
-    setTimeout(() => {
-      containerTechnologiesTextVit11?.classList.add('show');
-    }, 40000);
-
-    // 3
-    setTimeout(() => {
-      containerTechnologiesTextSer?.classList.add('show');
-    }, 44000);
-
-    setTimeout(() => {
-      containerTechnologiesTextSer1?.classList.add('show');
-    }, 48000);
-
-    setTimeout(() => {
-      containerTechnologiesTextSer11?.classList.add('show');
-    }, 50000);
-
-    // 4
-    setTimeout(() => {
-      containeriRss?.classList.add('show');
-    }, 56000);
-
-    setTimeout(() => {
-      userRssUl?.classList.add('show');
-    }, 60000);
-
-     setTimeout(() => {
-      userRssUl1?.classList.add('show');
-    }, 64000);
+  revealOrder.forEach(({ el, time }) => {
+    tl.to(
+      el,
+      {
+        duration: 2.5,
+        autoAlpha: 1,
+        x: 0,
+        ease: 'power1.out',
+      },
+      time
+    );
   });
 }
