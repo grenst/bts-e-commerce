@@ -145,7 +145,7 @@ export function createUserDropdown(
     hideMenuAndRemoveListener();
   });
   const aboutMenuItem = createAnimatedMenuItem('About us', () => {
-    router.navigateTo('/about');
+    router.navigateTo('/aboutUs');
     hideMenuAndRemoveListener();
   });
 

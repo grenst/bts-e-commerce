@@ -20,7 +20,8 @@ import { createRouter, Route } from './router/router';
 import createHomePage from './pages/home/home';
 import { createLoginPage } from './pages/auth/auth-page';
 import createProfilePage from './pages/profile/profile';
-import createAboutPage from './pages/about/about-page';
+import createAboutInfoPage from './pages/about-the-product/about-page';
+import createAboutUsPage from './pages/about-us/about-us';
 import {
   createNotificationsContainer,
   createLoadingIndicator,
@@ -69,8 +70,13 @@ const routes: Route[] = [
     preserveState: false, // можно и не ставить
   },
   {
-    path: '/about',
-    component: createAboutPage,
+    path: '/aboutInfo',
+    component: createAboutInfoPage,
+    preserveState: false,
+  },
+  {
+    path: '/aboutUs',
+    component: createAboutUsPage,
     preserveState: false,
   },
   {

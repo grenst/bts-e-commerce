@@ -6,7 +6,7 @@ import aboutImg2 from '@assets/images/about-2.webp';
 // import aboutImg3 from '@assets/images/about-3.webp';
 import aboutImg3 from '@assets/images/honey-vulkan.png';
 
-export default function createAboutPage(container: HTMLElement): void {
+export default function createAboutInfoPage(container: HTMLElement): void {
   container.innerHTML = '';
 
   const profileContainer = createElement({
@@ -27,7 +27,7 @@ export default function createAboutPage(container: HTMLElement): void {
 
   createElement({
     tag: 'h1',
-    text: 'About Us',
+    text: 'About the Company',
     classes: [
       'text-3xl',
       'font-bold',
@@ -38,7 +38,7 @@ export default function createAboutPage(container: HTMLElement): void {
       "before:content-['']",
       'before:absolute',
       'before:h-6',
-      'before:w-36',
+      'before:w-75',
       'before:bg-yellow-400',
       'before:-z-1',
       'login-name',
