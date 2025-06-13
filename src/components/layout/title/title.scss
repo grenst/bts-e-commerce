@@ -1,0 +1,17 @@
+.login-name::before {
+  transform: rotate(-5deg) translateX(-5px) scaleX(0);
+  animation: scaleElement 0.5s ease-in-out forwards;
+}
+
+.reset-animation::before { // Reset-class for animation
+  animation: none;
+}
+
+@keyframes scaleElement {
+  0% {
+    transform: rotate(-5deg) translateX(-70px) scaleX(0);
+  }
+  100% {
+    transform: rotate(-5deg) translateX(-8px) scaleX(1);
+  }
+}

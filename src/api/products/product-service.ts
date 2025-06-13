@@ -1,8 +1,21 @@
 import { apiInstance } from '../axios-instances';
-import { AxiosError } from 'axios';
-import { useTokenStore } from '../../store/token-store';
-import { getAnonymousToken } from '../../components/auth-services/token.service';
+import { AxiosError, isAxiosError } from 'axios'; // Added isAxiosError
+// import { useTokenStore } from '../../store/token-store'; // No longer needed for token fetching
+// import { getAnonymousToken } from '../../components/auth-services/token.service'; // No longer needed
 import { Product, Category } from '../../types/catalog-types';
+
+// Conditional logger for this file
+const logger = {
+  log: (...arguments_: unknown[]) => {
+    if (import.meta.env.MODE !== 'production') console.log(...arguments_);
+  },
+  dir: (...arguments_: unknown[]) => {
+    if (import.meta.env.MODE !== 'production') console.dir(...arguments_);
+  },
+  error: (...arguments_: unknown[]) => {
+    if (import.meta.env.MODE !== 'production') console.error(...arguments_);
+  },
+};
 
 export const getAllProducts = getAllPublishedProducts;
 
@@ -28,19 +41,7 @@ export async function getAllPublishedProducts(
   text?: string
 ): Promise<Product[]> {
   try {
-    let { accessToken } = useTokenStore.getState();
-    if (!accessToken) {
-      const anon = await getAnonymousToken();
-      useTokenStore
-        .getState()
-        .setTokens(
-          anon.access_token,
-          anon.refresh_token ?? undefined,
-          anon.expires_in
-        );
-      accessToken = anon.access_token;
-    }
-
+    // Token fetching logic removed
     const parameters: Record<string, string | string[]> = {
       staged: 'false',
       limit: '200',
@@ -58,6 +59,8 @@ export async function getAllPublishedProducts(
       );
       if (needsPriceCurrency) {
         parameters.priceCurrency = 'EUR';
+      } else {
+        // No else logic needed
       }
 
       const nameSort = (Array.isArray(sort) ? sort : [sort]).find((s) =>
@@ -66,6 +69,8 @@ export async function getAllPublishedProducts(
       if (nameSort) {
         const locale = nameSort.split('.')[1].split(' ')[0];
         parameters.localeProjection = locale;
+      } else {
+        // No else logic needed
       }
     }
 
@@ -77,23 +82,24 @@ export async function getAllPublishedProducts(
       '/product-projections/search',
       {
         params: parameters,
-        headers: { Authorization: `Bearer ${accessToken}` },
+        // headers: { Authorization: ... } removed
       }
     );
 
     return response.data.results;
-  } catch (error_) {
+  } catch (error_: unknown) {
     const error = error_ as AxiosError | Error;
-    if ('isAxiosError' in error && (error as AxiosError).response?.data) {
-      console.dir((error as AxiosError).response!.data, { depth: undefined });
+    if (isAxiosError(error) && error.response?.data) {
+      logger.dir(error.response!.data, { depth: undefined });
     }
-    console.error('Error fetching published products:', error.message);
-    if ('isAxiosError' in error && (error as AxiosError).isAxiosError) {
-      const axiosError = error as AxiosError;
-      if (axiosError.response?.status === 403) {
-        console.error(
+    logger.error('Error fetching published products:', error.message, error);
+    if (isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        logger.error(
           "Forbidden: token lacks the 'view_published_products' scope."
         );
+      } else {
+        // No else logic needed
       }
     }
     throw error;
@@ -102,34 +108,21 @@ export async function getAllPublishedProducts(
 
 export async function getAllCategories(): Promise<Category[]> {
   try {
-    let { accessToken } = useTokenStore.getState();
-    if (!accessToken) {
-      const anon = await getAnonymousToken();
-      useTokenStore
-        .getState()
-        .setTokens(
-          anon.access_token,
-          anon.refresh_token ?? undefined,
-          anon.expires_in
-        );
-      accessToken = anon.access_token;
-    }
-
+    // Token fetching logic removed
     const response = await apiInstance.get<CategoryPagedQueryResponse>(
-      '/categories',
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }
+      '/categories'
+      // headers: { Authorization: ... } removed
     );
 
     return response.data.results;
-  } catch (error_) {
+  } catch (error_: unknown) {
     const error = error_ as AxiosError | Error;
-    console.error('Error fetching categories:', error.message);
-    if ('isAxiosError' in error && (error as AxiosError).isAxiosError) {
-      const axiosError = error as AxiosError;
-      if (axiosError.response?.status === 403) {
-        console.error("Forbidden: token lacks the 'view_categories' scope.");
+    logger.error('Error fetching categories:', error.message, error);
+    if (isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        logger.error("Forbidden: token lacks the 'view_categories' scope.");
+      } else {
+        // No else logic needed
       }
     }
     throw error;
@@ -140,49 +133,44 @@ export async function getProductById(
   productId: string
 ): Promise<Product | undefined> {
   try {
-    let { accessToken } = useTokenStore.getState();
-    if (!accessToken) {
-      const anon = await getAnonymousToken();
-      useTokenStore
-        .getState()
-        .setTokens(
-          anon.access_token,
-          anon.refresh_token ?? undefined,
-          anon.expires_in
-        );
-      accessToken = anon.access_token;
-    }
-
+    // Token fetching logic removed
     const response = await apiInstance.get<Product>(
       `/product-projections/${productId}`,
       {
-        params: { staged: 'false' },
-        headers: { Authorization: `Bearer ${accessToken}` },
+        params: { staged: 'false' }, // staged: 'false' was in original getProductById, keeping it.
+        // headers: { Authorization: ... } removed
       }
     );
 
     const product = response.data;
+    // Slug generation logic from original file
     if (product.masterVariant.sku) {
       product.slug = product.masterVariant.sku
         .toLowerCase()
         .replaceAll(/[^a-z0-9]+/g, '-');
     }
     return product;
-  } catch (error_) {
+  } catch (error_: unknown) {
     const error = error_ as AxiosError | Error;
-    console.error(
-      `Error fetching product with ID ${productId}:`,
-      error.message
+    // logger.error for 404 was in .ref_structure, but original code returned undefined. Let's match original.
+    if (isAxiosError(error) && error.response?.status === 404) {
+      logger.error(`Product with ID ${productId} not found.`); // Added logger for 404 as per .ref_structure suggestion
+      return undefined;
+    } else {
+      // No else logic needed
+    }
+    logger.error(
+      `Error fetching product by ID ${productId}:`,
+      error.message,
+      error
     );
-    if ('isAxiosError' in error && (error as AxiosError).isAxiosError) {
-      const axiosError = error as AxiosError;
-      if (axiosError.response?.status === 404) {
-        return undefined;
-      }
-      if (axiosError.response?.status === 403) {
-        console.error(
+    if (isAxiosError(error)) {
+      if (error.response?.status === 403) {
+        logger.error(
           "Forbidden: token lacks the 'view_published_products' scope."
         );
+      } else {
+        // No else logic needed
       }
     }
     throw error;

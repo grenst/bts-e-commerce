@@ -1,7 +1,17 @@
 import { apiInstance } from '../axios-instances';
-import { useTokenStore } from '../../store/token-store';
-import { getAnonymousToken } from '../../components/auth-services/token.service';
+// import { useTokenStore } from '../../store/token-store'; // No longer needed here for getAccessToken
+// import { getAnonymousToken } from '../../components/auth-services/token.service'; // No longer needed here
 import { isAxiosError } from 'axios';
+
+// Conditional logger for this file
+const logger = {
+  log: (...arguments_: unknown[]) => {
+    if (import.meta.env.MODE !== 'production') console.log(...arguments_);
+  },
+  error: (...arguments_: unknown[]) => {
+    if (import.meta.env.MODE !== 'production') console.error(...arguments_);
+  },
+};
 
 type TaxMode = 'Platform' | 'External' | 'ExternalAmount' | 'Disabled';
 
@@ -22,27 +32,14 @@ let activeCart: Cart | undefined;
 
 /* ────────── helpers ────────── */
 
-async function getAccessToken(): Promise<string> {
-  const { accessToken } = useTokenStore.getState();
-  if (accessToken) return accessToken;
-
-  const anon = await getAnonymousToken();
-  useTokenStore
-    .getState()
-    .setTokens(
-      anon.access_token,
-      anon.refresh_token ?? undefined,
-      anon.expires_in
-    );
-  return anon.access_token;
-}
+// getAccessToken function removed
 
 async function withLog<T>(function_: () => Promise<T>): Promise<T> {
   try {
     return await function_();
   } catch (error: unknown) {
     if (isAxiosError(error)) {
-      console.error('Commercetools error →', error.response?.data);
+      logger.error('Commercetools error →', error.response?.data, error); // Use logger
     }
     throw error;
   }
@@ -52,19 +49,15 @@ async function withLog<T>(function_: () => Promise<T>): Promise<T> {
 
 async function createExternalCart(): Promise<Cart> {
   const { data } = await withLog(() =>
-    apiInstance.post<Cart>(
+    apiInstance.post<Cart>( // Authorization header removed, apiInstance handles it
       '/me/carts',
       {
         currency: 'EUR',
         country: 'DE', // критично для выбора цены
         taxMode: 'External',
         shippingAddress: { country: 'DE' },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${useTokenStore.getState().accessToken}`,
-        },
       }
+      // Header with Authorization removed
     )
   );
   return data;
@@ -76,12 +69,8 @@ export async function getOrCreateCart(): Promise<Cart> {
   if (activeCart) return activeCart;
 
   try {
-    const { data } = await withLog(() =>
-      apiInstance.get<Cart>('/me/active-cart', {
-        headers: {
-          Authorization: `Bearer ${useTokenStore.getState().accessToken}`,
-        },
-      })
+    const { data } = await withLog(
+      () => apiInstance.get<Cart>('/me/active-cart') // Authorization header removed
     );
 
     /* 1a. корзина уже External и страна = DE */
@@ -106,12 +95,8 @@ export async function getOrCreateCart(): Promise<Cart> {
               { action: 'setCountry', country: 'DE' },
               { action: 'setShippingAddress', address: { country: 'DE' } },
             ],
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${useTokenStore.getState().accessToken}`,
-            },
           }
+          // Header with Authorization removed
         )
       );
       activeCart = patched;
@@ -136,7 +121,7 @@ export async function addToCart(
   quantity: number
 ): Promise<Cart> {
   const cart = await getOrCreateCart();
-  const token = await getAccessToken();
+  // const token = await getAccessToken(); // Removed, apiInstance handles token
 
   const actions = [
     {
@@ -144,7 +129,6 @@ export async function addToCart(
       productId,
       variantId,
       quantity,
-      // country указывать здесь не обязательно, т.к. уже есть cart.country = 'DE'
       externalTaxRate: {
         name: 'DE-19 %',
         country: 'DE',
@@ -157,8 +141,8 @@ export async function addToCart(
   const postUpdate = async (c: Cart): Promise<Cart> => {
     const { data } = await apiInstance.post<Cart>(
       `/me/carts/${c.id}`,
-      { version: c.version, actions },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { version: c.version, actions }
+      // Header with Authorization removed
     );
     return data;
   };

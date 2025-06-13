@@ -2,10 +2,11 @@ import { createEl as createElement } from '../../utils/element-utilities';
 import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown';
 import {
   createPageContainer,
-  createTitleLogin,
+  // createTitleLogin, // Removed
   createInputField,
   createPasswordField,
 } from './auth-form-elements';
+import createTitle from '../../components/layout/title/title'; // Import new createTitle
 
 export interface AuthFormState {
   isLoginForm: boolean;
@@ -140,7 +141,14 @@ export function initializeAuthForm(
   parentContainer: HTMLElement
 ): AuthFormState {
   const pageContainer = createPageContainer(parentContainer);
-  const titleElement = createTitleLogin(pageContainer);
+  // const titleElement = createTitleLogin(pageContainer); // Old call
+  const titleElement = createTitle('Login', pageContainer, [], {
+    textSize: 'text-2xl',
+    marginBottom: 'mb-6',
+    beforeWidth: 'before:w-20',
+    isAbsolutePositioned: false,
+    zIndex: 'z-30',
+  });
 
   const formContainer = createElement({
     tag: 'form',

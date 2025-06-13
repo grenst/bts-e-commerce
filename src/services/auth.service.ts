@@ -116,6 +116,17 @@ export const AuthService = {
     }
   },
 
+  async getAnonymousToken(): Promise<string | undefined> {
+    try {
+      const token = await getAnonymousToken();
+      persistTokens(token);
+      return token.access_token;
+    } catch (error) {
+      debug('Get anonymous token error', error);
+      return undefined;
+    }
+  },
+
   async loadSession(): Promise<void> {
     const { customer } = useCustomerStore.getState();
     if (customer) return;
