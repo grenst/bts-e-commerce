@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import './auth-page.scss';
 import {
   createEl as createElement,
@@ -7,7 +6,6 @@ import {
 import createButton from '../../components/layout/button/button';
 import { getRouter } from '../../router/router';
 import { uiStore } from '../../store/store';
-// import { addNotification } from '../../store/store'; // Changed uiStore to addNotification
 import { AuthService } from '../../services/auth.service';
 import { useCustomerStore } from '../../store/customer-store';
 import { triggerHeaderUpdate } from '../../index';
@@ -26,240 +24,9 @@ import {
   BILLING_FIELDS,
   BASIC_FIELDS,
 } from './auth-form-config';
-
-// import {
-//   createInputField,
-//   createPageContainer,
-//   createPasswordField,
-// } from './auth-form-elements';
 import { AuthFormState, initializeAuthForm, dirty } from './auth-form-state';
-// import { initializeAuthForm, dirty } from './auth-form-state';
-
-const NAME_CITY_REGEX = /^[A-Za-zÀ-ÿ]+(?: [A-Za-zÀ-ÿ]+)*$/u;
-
-const POSTAL_CODE_PATTERNS: Record<string, RegExp> = {
-  // Северная Америка
-  US: /^\d{5}(?:-\d{4})?$/,
-  CA: /^[A-Za-z]\d[A-Za-z][ ]?\d[A-Za-z]\d$/,
-
-  // Европа (топ-10 e-commerce)
-  GB: /^[A-Za-z]{1,2}\d[A-Za-z\d]?\s?\d[A-Za-z]{2}$/,
-  DE: /^\d{5}$/,
-  FR: /^\d{5}$/,
-  IT: /^\d{5}$/,
-  ES: /^\d{5}$/,
-  NL: /^\d{4}\s?[A-Za-z]{2}$/,
-  BE: /^\d{4}$/,
-  CH: /^\d{4}$/,
-  AT: /^\d{4}$/,
-  AU: /^\d{4}$/,
-  RU: /^\d{6}$/,
-  UA: /^\d{5}$/,
-  PL: /^\d{2}-\d{3}$/,
-  BY: /^\d{6}$/,
-};
-
-function isPostalCodeValid(code: string, country: string): boolean {
-  const cc = country.toUpperCase();
-  const pattern = POSTAL_CODE_PATTERNS[cc];
-
-  if (!pattern) {
-    // Фолбэк для «экзотических» стран: 3-10 символов, ≤1 пробела
-    return /^[A-Za-z0-9-]+(?: [A-Za-z0-9-]+)?$/.test(code);
-  }
-
-  return pattern.test(code);
-}
-
-const emailSchema = z
-  .string()
-  .min(1, { message: 'Please enter your email' })
-  .email({ message: 'Please enter a valid email (e.g., user@example.com)' })
-  // запрещаем пробелы в начале/конце
-  .refine((v: string) => v === v.trim(), {
-    message: 'Email must not start or end with spaces',
-  })
-  // запрещаем пробелы внутри
-  .refine((v: string) => !/\s/.test(v), {
-    message: 'Email must not contain spaces',
-  });
-
-const passwordSchema = z
-  .string()
-  .min(8, { message: 'Use at least 8 characters' })
-  .regex(/[A-Z]/, {
-    message: 'Add at least one uppercase letter (A-Z)',
-  })
-  .regex(/[a-z]/, {
-    message: 'Add at least one lowercase letter (a-z)',
-  })
-  .regex(/[0-9]/, {
-    message: 'Include a number (0-9)',
-  })
-  // запрещаем пробелы в начале/конце
-  .refine((v: string) => v === v.trim(), {
-    message: 'Password must not start or end with a space',
-  });
-
-const nameSchema = z
-  .string()
-  .min(3, { message: 'Name is required' })
-  .regex(NAME_CITY_REGEX, { message: 'Only letters and spaces allowed' })
-  .max(50, { message: 'Max 50 characters' });
-
-const dateOfBirthSchema = z
-  .string()
-  .min(1, { message: 'Date of birth is required' })
-  .regex(/^\d{4}-\d{2}-\d{2}$/, {
-    message: 'Date of birth must be in YYYY-MM-DD format',
-  })
-  .refine(
-    (date) => {
-      const year = Number.parseInt(date.slice(0, 4), 10);
-      const currentYear = new Date().getFullYear();
-      return year <= currentYear - 18;
-    },
-    { message: 'You must be at least 18 years old' }
-  )
-  .refine(
-    (date) => {
-      const year = Number.parseInt(date.slice(0, 4), 10);
-      return year >= 1900;
-    },
-    { message: 'Date of birth year seems incorrect' }
-  );
-
-const streetNameSchema = z
-  .string()
-  .min(1, { message: 'Street name is required' })
-  .regex(NAME_CITY_REGEX, { message: 'Only letters and single spaces allowed' })
-  .max(100, { message: 'Street name must be less than 100 characters' });
-
-const citySchema = z
-  .string()
-  .min(1, { message: 'City is required' })
-  .regex(NAME_CITY_REGEX, { message: 'Only letters and spaces allowed' })
-  .max(50, { message: 'Max 50 characters' });
-
-const postalCodeSchema = z
-  .string()
-  .min(1, { message: 'Postal code is required' })
-  // допускаем символы A-Z / 0-9 / «-» и максимум ОДИН пробел
-  .regex(/^[A-Za-z0-9-]+(?: [A-Za-z0-9-]+)?$/, {
-    message:
-      'Use digits, Latin letters and “-”. Only one internal space allowed',
-  })
-  // без пробелов по краям
-  .refine((v) => v.trim() === v, {
-    message: 'Postal code must not start or end with a space',
-  });
-
-const countrySchema = z
-  .string()
-  .min(1, { message: 'Country is required' })
-  .regex(/^[A-Z]{2}$/, {
-    message: 'Country must be a 2-letter ISO code (e.g., US, DE)',
-  });
-
-const houseNumberSchema = z
-  .string()
-  .min(1, { message: 'House number is required' })
-  .max(10, { message: 'House number must be ≤ 10 chars' })
-  .refine((v) => v.trim() === v, {
-    message: 'No leading or trailing spaces',
-  });
-
-const apartmentSchema = z
-  .string()
-  .max(10, { message: 'Apartment must be ≤ 10 chars' })
-  .refine((v) => v.trim() === v, {
-    message: 'No leading or trailing spaces',
-  })
-  .optional();
-
-const loginFormSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-});
-
-const FALLBACK_POSTAL_RE = /^(?=.{3,10}$)[A-Za-z0-9-]+(?: [A-Za-z0-9-]+)?$/;
-
-const registerFormSchema = z
-  .object({
-    email: emailSchema,
-    password: passwordSchema,
-    firstName: nameSchema,
-    lastName: nameSchema,
-    dateOfBirth: dateOfBirthSchema,
-    streetName: streetNameSchema,
-    houseNumber: houseNumberSchema,
-    apartment: apartmentSchema,
-    city: citySchema,
-    postalCode: postalCodeSchema, // базовая проверка (символы + пробелы)
-    country: countrySchema,
-
-    // --- billing (все optional) ---
-    billingStreetName: streetNameSchema.optional(),
-    billingHouseNumber: houseNumberSchema.optional(),
-    billingApartment: apartmentSchema.optional(),
-    billingCity: citySchema.optional(),
-    billingPostalCode: postalCodeSchema.optional(),
-    billingCountry: countrySchema.optional(),
-  })
-  .superRefine((data, context) => {
-    // --- shipping ---
-    const shippingPattern =
-      POSTAL_CODE_PATTERNS[data.country] ?? FALLBACK_POSTAL_RE;
-
-    if (!shippingPattern.test(data.postalCode)) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['postalCode'],
-        message: 'Invalid postal code for selected country',
-      });
-    }
-
-    // --- billing (если страна указана) ---
-    if (data.billingPostalCode) {
-      const cc = data.billingCountry || data.country;
-      const billingPattern = POSTAL_CODE_PATTERNS[cc] ?? FALLBACK_POSTAL_RE;
-
-      if (!billingPattern.test(data.billingPostalCode)) {
-        context.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['billingPostalCode'],
-          message: 'Invalid billing postal code for selected country',
-        });
-      }
-    }
-  });
-
-type ValidationResult = {
-  success: boolean;
-  errors: Record<string, string>;
-};
-interface RegistrationValidationData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  streetName: string;
-  houseNumber: string;
-  apartment: string;
-  city: string;
-  postalCode: string;
-  country: string;
-  isBillingSameAsShipping?: boolean;
-  billingStreetName?: string;
-  billingHouseNumber?: string;
-  billingApartment?: string;
-  billingCity?: string;
-  billingPostalCode?: string;
-  billingCountry?: string;
-  defaultShippingAddress?: boolean;
-  defaultBillingAddress?: boolean;
-}
+import { RegisterFormData, ValidationResult } from '../../types/auth';
+import { validateLogin, validateRegister } from './validation';
 
 const inputParameters = [
   'text-3xl',
@@ -279,150 +46,6 @@ function touch(field: string): void {
   dirty[field] = true;
 }
 
-function markInvalidFieldsDirty(validation: ValidationResult): void {
-  for (const field of Object.keys(validation.errors)) {
-    dirty[field] = true; // теперь updateFieldErrors будет их подсвечивать
-  }
-}
-
-function validateLoginForm(email: string, password: string): ValidationResult {
-  try {
-    loginFormSchema.parse({ email, password });
-    return { success: true, errors: {} };
-  } catch (error) {
-    const formattedErrors: Record<string, string> = {};
-    if (error instanceof z.ZodError) {
-      for (const error_ of error.errors) {
-        if (error_.path.length > 0 && typeof error_.path[0] === 'string') {
-          const field = error_.path[0];
-          formattedErrors[field] = error_.message;
-        }
-      }
-    }
-    return { success: false, errors: formattedErrors };
-  }
-}
-
-function validateRegisterForm(
-  email: string,
-  password: string,
-  firstName: string,
-  lastName: string,
-  dateOfBirth: string,
-  streetName: string,
-  houseNumber: string,
-  apartment: string,
-  city: string,
-  postalCode: string,
-
-  country: string,
-  billingAddress?: {
-    billingStreetName?: string;
-    billingHouseNumber?: string;
-    billingApartment?: string;
-    billingCity?: string;
-    billingPostalCode?: string;
-    billingCountry?: string;
-  }
-): ValidationResult {
-  try {
-    const dataToValidate: RegistrationValidationData = {
-      email,
-      password,
-      firstName,
-      lastName,
-      dateOfBirth,
-      streetName,
-      houseNumber,
-      apartment,
-      city,
-      postalCode,
-      country,
-    };
-
-    if (billingAddress) {
-      if (billingAddress.billingStreetName)
-        dataToValidate.billingStreetName = billingAddress.billingStreetName;
-      if (billingAddress.billingHouseNumber)
-        dataToValidate.billingHouseNumber = billingAddress.billingHouseNumber;
-      if (billingAddress.billingApartment)
-        dataToValidate.billingApartment = billingAddress.billingApartment;
-      if (billingAddress.billingCity)
-        dataToValidate.billingCity = billingAddress.billingCity;
-      if (billingAddress.billingPostalCode)
-        dataToValidate.billingPostalCode = billingAddress.billingPostalCode;
-      if (billingAddress.billingCountry)
-        dataToValidate.billingCountry = billingAddress.billingCountry;
-    }
-
-    registerFormSchema.parse(dataToValidate);
-    // const cc = (dataToValidate.country || '').toUpperCase();
-    // const pcPattern = POSTAL_CODE_PATTERNS[cc] ?? /^[A-Za-z0-9\s-]{3,10}$/;
-    if (dataToValidate.postalCode !== dataToValidate.postalCode.trim()) {
-      return {
-        success: false,
-        errors: {
-          postalCode: 'Postal code must not start or end with a space',
-        },
-      };
-    }
-
-    if (
-      !isPostalCodeValid(
-        dataToValidate.postalCode.trim(),
-        dataToValidate.country
-      )
-    ) {
-      return {
-        success: false,
-        errors: { postalCode: 'Invalid postal code for selected country' },
-      };
-    }
-
-    if (billingAddress && billingAddress.billingPostalCode) {
-      if (
-        billingAddress.billingPostalCode !==
-        billingAddress.billingPostalCode.trim()
-      ) {
-        return {
-          success: false,
-          errors: {
-            billingPostalCode: 'Postal code must not start or end with a space',
-          },
-        };
-      }
-
-      if (
-        !isPostalCodeValid(
-          billingAddress.billingPostalCode.trim(),
-          billingAddress.billingCountry ?? dataToValidate.country
-        )
-      ) {
-        return {
-          success: false,
-          errors: {
-            billingPostalCode:
-              'Invalid billing postal code for selected country',
-          },
-        };
-      }
-    }
-
-    return { success: true, errors: {} };
-  } catch (error) {
-    const formattedErrors: Record<string, string> = {};
-    if (error instanceof z.ZodError) {
-      for (const error_ of error.errors) {
-        if (error_.path.length > 0 && typeof error_.path[0] === 'string') {
-          const field = error_.path[0];
-          formattedErrors[field] = error_.message;
-        }
-      }
-    }
-    return { success: false, errors: formattedErrors };
-  }
-}
-
 export function createLoginPage(container: HTMLElement): void {
   const { customer } = useCustomerStore.getState();
   if (customer) {
@@ -430,15 +53,12 @@ export function createLoginPage(container: HTMLElement): void {
     return;
   }
 
-  // Инициализация состояния
   const state = initializeAuthForm(container);
   for (const key of Object.keys(state.inputs)) {
     if (!dirty[key]) dirty[key] = false;
   }
 
-  // Получаем элементы из состояния
   const { title, basicFields } = state;
-  // const { title, basicFields, inputs, containers, errors } = state;
 
   const { element: titleLogin, loginText, registerText } = title;
 
@@ -468,9 +88,6 @@ export function createLoginPage(container: HTMLElement): void {
     'cursor-pointer',
     'relative',
   ]);
-
-  // TO DO
-  // loginButton.disabled = true;
 
   const svgSpinner = createSvgUse('#spinner', 'spinner');
   svgSpinner.classList.add('animate-spin');
@@ -1382,46 +999,38 @@ export function createLoginPage(container: HTMLElement): void {
     const { isLoginForm, basicFields, inputs } = state;
     const { emailInput, passwordInput } = basicFields;
 
-    console.log('Запустилась validateForm');
-
     if (isLoginForm) {
-      const validation = validateLoginForm(
-        emailInput?.value ?? '',
-        passwordInput?.value ?? ''
-      );
-      updateFieldErrors(state, validation);
-      return validation;
+      return validateLogin({
+        email: emailInput?.value ?? '',
+        password: passwordInput?.value ?? '',
+      });
     }
 
-    // Для формы регистрации
-    const billingDetails = inputs.billingAddressSameAsShipping?.checked
-      ? undefined
-      : {
-          billingStreetName: getInputValue(inputs.billingStreetName),
-          billingHouseNumber: getInputValue(inputs.billingHouseNumber),
-          billingApartment: getInputValue(inputs.billingApartment),
-          billingCity: getInputValue(inputs.billingCity),
-          billingPostalCode: getInputValue(inputs.billingPostalCode),
-          billingCountry: getDropdownValue(inputs.billingCountry),
-        };
+    const data: RegisterFormData = {
+      email: emailInput?.value ?? '',
+      password: passwordInput?.value ?? '',
+      firstName: getInputValue(inputs.firstName),
+      lastName: getInputValue(inputs.lastName),
+      dateOfBirth: getInputValue(inputs.dateOfBirth),
+      streetName: getInputValue(inputs.streetName),
+      houseNumber: getInputValue(inputs.houseNumber),
+      apartment: getInputValue(inputs.apartment) || undefined,
+      city: getInputValue(inputs.city),
+      postalCode: getInputValue(inputs.postalCode),
+      country: getDropdownValue(inputs.country),
+    };
 
-    const validation = validateRegisterForm(
-      emailInput?.value ?? '',
-      passwordInput?.value ?? '',
-      getInputValue(inputs.firstName),
-      getInputValue(inputs.lastName),
-      getInputValue(inputs.dateOfBirth),
-      getInputValue(inputs.streetName),
-      getInputValue(inputs.houseNumber),
-      getInputValue(inputs.apartment),
-      getInputValue(inputs.city),
-      getInputValue(inputs.postalCode),
-      getDropdownValue(inputs.country),
-      billingDetails
-    );
+    if (!inputs.billingAddressSameAsShipping?.checked) {
+      data.billingStreetName = getInputValue(inputs.billingStreetName);
+      data.billingHouseNumber = getInputValue(inputs.billingHouseNumber);
+      data.billingApartment =
+        getInputValue(inputs.billingApartment) || undefined;
+      data.billingCity = getInputValue(inputs.billingCity);
+      data.billingPostalCode = getInputValue(inputs.billingPostalCode);
+      data.billingCountry = getDropdownValue(inputs.billingCountry);
+    }
 
-    updateFieldErrors(state, validation);
-    return validation;
+    return validateRegister(data);
   }
 
   function updateFieldErrors(
@@ -1430,16 +1039,12 @@ export function createLoginPage(container: HTMLElement): void {
   ): void {
     const { isLoginForm, basicFields, inputs, errors, containers } = state;
 
-    console.log('Validation errors:', validation.errors);
-    console.log('Dirty fields:', dirty);
-    // Хелпер для обработки ошибок
     const handleFieldError = (
       fieldName: string,
       errorElement: HTMLElement | undefined,
       inputElement: HTMLElement | undefined
     ) => {
       if (!errorElement || !inputElement) return;
-      // if (!dirty[fieldName] || !errorElement || !inputElement) return;
 
       const message = validation.errors[fieldName];
       if (message) {
@@ -1451,7 +1056,6 @@ export function createLoginPage(container: HTMLElement): void {
       }
     };
 
-    // Обрабатываем основные поля
     handleFieldError(
       BASIC_FIELDS.email.name,
       basicFields.emailError,
@@ -1465,7 +1069,6 @@ export function createLoginPage(container: HTMLElement): void {
 
     if (isLoginForm) return;
 
-    // Обрабатываем поля регистрации
     for (const field of REGISTRATION_FIELDS) {
       let fieldElement: HTMLElement | undefined;
       if (field.isContainer) {
@@ -1545,7 +1148,7 @@ export function createLoginPage(container: HTMLElement): void {
     const password = passwordInput?.value ?? '';
 
     if (isLoginForm) {
-      const validation = validateLoginForm(email, password);
+      const validation = validateLogin({ email, password });
 
       if (!validation.success) {
         if (validation.errors.email)
@@ -1628,26 +1231,29 @@ export function createLoginPage(container: HTMLElement): void {
         };
       }
 
-      const validation = validateRegisterForm(
-        emailInput?.value ?? '',
-        passwordInput?.value ?? '',
-        state.inputs.firstName?.value || '',
-        // firstNameInput?.value || '',
-        state.inputs.lastName?.value || '',
-        state.inputs.dateOfBirth?.value || '',
-        shippingAddressData.streetName,
-        shippingAddressData.houseNumber,
-        shippingAddressData.apartment,
-        shippingAddressData.city,
-        shippingAddressData.postalCode,
-        shippingAddressData.country,
-        billingDetailsForValidation
-      );
+      const data = {
+        email: emailInput?.value ?? '',
+        password: passwordInput?.value ?? '',
+        firstName: state.inputs.firstName?.value || '',
+        lastName: state.inputs.lastName?.value || '',
+        dateOfBirth: state.inputs.dateOfBirth?.value || '',
+        streetName: shippingAddressData.streetName,
+        houseNumber: shippingAddressData.houseNumber,
+        apartment: shippingAddressData.apartment,
+        city: shippingAddressData.city,
+        postalCode: shippingAddressData.postalCode,
+        country: shippingAddressData.country,
+        ...billingDetailsForValidation,
+      };
+      const validation = validateRegister(data);
 
       updateFieldErrors(state, validation); // Update errors for all fields first
 
       if (!validation.success) {
-        markInvalidFieldsDirty(validation);
+        // Mark fields as dirty based on validation errors
+        for (const fieldName of Object.keys(validation.errors)) {
+          dirty[fieldName] = true;
+        }
         updateFieldErrors(state, validation);
         addNotification(
           'warning',
