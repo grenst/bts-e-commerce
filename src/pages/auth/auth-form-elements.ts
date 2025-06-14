@@ -53,7 +53,7 @@ export function createInputField({
     attributes: { for: id },
   });
 
-  const input = createElement({
+  const input = createElement<HTMLInputElement>({
     tag: 'input',
     parent: fieldContainer,
     classes: [
@@ -70,7 +70,7 @@ export function createInputField({
       'focus:border-b-10',
     ],
     attributes: { type, id, placeholder },
-  }) as HTMLInputElement;
+  });
 
   const error = createElement({
     tag: 'p',
@@ -113,7 +113,7 @@ export function createPasswordField({
     classes: ['relative'],
   });
 
-  const input = createElement({
+  const input = createElement<HTMLInputElement>({
     tag: 'input',
     parent: inputContainer,
     classes: [
@@ -128,13 +128,14 @@ export function createPasswordField({
       'focus:pb-2',
       'focus:mb-1',
       'pr-8',
+      'relative',
     ],
     attributes: {
       type: 'password',
       id,
       placeholder,
     },
-  }) as HTMLInputElement;
+  });
 
   createEyeToggleButton(inputContainer, input);
   // const eyeButton = createEyeToggleButton(inputContainer, input);

@@ -59,11 +59,11 @@ const dateOfBirthSchema = z
   .min(1, 'Date of birth is required')
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date of birth must be in YYYY-MM-DD format')
   .refine((date) => {
-    const year = parseInt(date.slice(0, 4), 10);
+    const year = Number.parseInt(date.slice(0, 4), 10);
     return year <= new Date().getFullYear() - 18;
   }, 'You must be at least 18 years old')
   .refine((date) => {
-    const year = parseInt(date.slice(0, 4), 10);
+    const year = Number.parseInt(date.slice(0, 4), 10);
     return year >= 1900;
   }, 'Date of birth year seems incorrect');
 
@@ -133,9 +133,9 @@ const registerFormSchema = z
     billingPostalCode: postalCodeSchema.optional(),
     billingCountry: countrySchema.optional(),
   })
-  .superRefine((data, ctx) => {
+  .superRefine((data, context) => {
     if (!isPostalCodeValid(data.postalCode, data.country)) {
-      ctx.addIssue({
+      context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['postalCode'],
         message: 'Invalid postal code for selected country',
@@ -145,7 +145,7 @@ const registerFormSchema = z
     if (data.billingPostalCode) {
       const country = data.billingCountry || data.country;
       if (!isPostalCodeValid(data.billingPostalCode, country)) {
-        ctx.addIssue({
+        context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['billingPostalCode'],
           message: 'Invalid billing postal code for selected country',
@@ -161,9 +161,11 @@ export function validateLogin(data: LoginFormData): ValidationResult {
   } catch (error) {
     const errors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
-      error.errors.forEach((err) => {
-        if (err.path.length) errors[err.path[0]] = err.message;
-      });
+      for (const error_ of error.errors) {
+        if (error_.path.length > 0) {
+          errors[error_.path[0]] = error_.message;
+        }
+      }
     }
     return { success: false, errors };
   }
@@ -176,9 +178,11 @@ export function validateRegister(data: RegisterFormData): ValidationResult {
   } catch (error) {
     const errors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
-      error.errors.forEach((err) => {
-        if (err.path.length) errors[err.path[0]] = err.message;
-      });
+      for (const error_ of error.errors) {
+        if (error_.path.length > 0) {
+          errors[error_.path[0]] = error_.message;
+        }
+      }
     }
     return { success: false, errors };
   }

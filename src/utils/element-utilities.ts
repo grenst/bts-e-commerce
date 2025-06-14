@@ -1,18 +1,18 @@
 export const { body } = document;
 
-interface CreateElementOptions {
+interface CreateElementOptions<T extends HTMLElement = HTMLElement> {
   tag?: string;
   text?: string;
   classes?: string[];
-  attributes?: Record<string, string>;
+  attributes?: Partial<T> & Record<string, string>;
   styles?: Record<string, string>;
   parent?: HTMLElement | null;
   children?: HTMLElement[];
 }
 
-function createElement(
-  options: CreateElementOptions & { tag?: string }
-): HTMLElement {
+function createElement<T extends HTMLElement = HTMLElement>(
+  options: CreateElementOptions<T> & { tag?: string }
+): T {
   const {
     tag = 'div',
     text = '',
@@ -24,13 +24,13 @@ function createElement(
     children = [],
   } = options;
 
-  const element = document.createElement(tag);
+  const element = document.createElement(tag) as T;
   element.textContent = text;
   element.classList.add(...classes);
 
   if (attributes) {
-    for (const key of Object.keys(attributes)) {
-      element.setAttribute(key, attributes[key]);
+    for (const [key, value] of Object.entries(attributes)) {
+      element.setAttribute(key, value as string);
     }
   }
 
