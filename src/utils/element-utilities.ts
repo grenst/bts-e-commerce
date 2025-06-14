@@ -10,7 +10,9 @@ interface CreateElementOptions {
   children?: HTMLElement[];
 }
 
-function createElement(options: CreateElementOptions): HTMLElement {
+function createElement(
+  options: CreateElementOptions & { tag?: string }
+): HTMLElement {
   const {
     tag = 'div',
     text = '',
@@ -131,10 +133,7 @@ export {
   createSvgUse,
   removeAllChild,
   shuffleArray,
-  // getRandomIntegerArr,
   createCounterID,
   getMaxID,
   getUUID,
-  // getRandomColor,
-  // rgbToHex,
 };

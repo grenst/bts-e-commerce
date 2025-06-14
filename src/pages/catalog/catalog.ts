@@ -76,7 +76,7 @@ export function createCatalogPage(container: HTMLElement): void {
     } catch (error) {
       console.error(
         'Error initializing catalog page:',
-        (error as Error).message
+        error instanceof Error ? error.message : String(error)
       );
     }
   }
@@ -113,7 +113,10 @@ export function createCatalogPage(container: HTMLElement): void {
       );
       renderProductList();
     } catch (error) {
-      console.error('Error fetching products:', (error as Error).message);
+      console.error(
+        'Error fetching products:',
+        error instanceof Error ? error.message : String(error)
+      );
     }
   }
 
@@ -134,31 +137,37 @@ export function createCatalogPage(container: HTMLElement): void {
   });
 
   navigation.addEventListener('search-change', (event: Event) => {
-    currentSearchTerm = (event as CustomEvent<{ searchTerm: string }>).detail
-      .searchTerm;
-    fetchProducts();
+    if (event instanceof CustomEvent && 'searchTerm' in event.detail) {
+      currentSearchTerm = event.detail.searchTerm;
+      fetchProducts();
+    }
   });
 
   subNavControl.element.addEventListener('filters-changed', (event: Event) => {
-    const detail = (
-      event as CustomEvent<{
-        selectedCategoryId: string | undefined;
-        selectedVolumes: Set<string>;
-      }>
-    ).detail;
-
-    selectedCategoryId = detail.selectedCategoryId;
-    selectedVolumes.clear();
-    for (const volume of detail.selectedVolumes) {
-      selectedVolumes.add(volume);
+    if (
+      event instanceof CustomEvent &&
+      'selectedCategoryId' in event.detail &&
+      'selectedVolumes' in event.detail
+    ) {
+      const detail = event.detail;
+      selectedCategoryId = detail.selectedCategoryId;
+      selectedVolumes.clear();
+      for (const volume of detail.selectedVolumes) {
+        selectedVolumes.add(volume);
+      }
+      fetchProducts();
     }
-
-    fetchProducts();
   });
 
   subNavControl.element.addEventListener('sort-changed', (event: Event) => {
-    currentSortMode = (event as CustomEvent<ActiveSortMode>).detail;
-    fetchProducts();
+    if (
+      event instanceof CustomEvent &&
+      'key' in event.detail &&
+      'asc' in event.detail
+    ) {
+      currentSortMode = event.detail;
+      fetchProducts();
+    }
   });
 
   navigation.addEventListener('apply-discount-filter', () => {
@@ -173,8 +182,8 @@ export function createCatalogPage(container: HTMLElement): void {
     discountOnly = false;
     currentSortMode = { key: 'name', asc: true };
     const searchInput = navigation.querySelector('input[type="text"]');
-    if (searchInput) {
-      (searchInput as HTMLInputElement).value = '';
+    if (searchInput instanceof HTMLInputElement) {
+      searchInput.value = '';
     }
     fetchProducts();
   });

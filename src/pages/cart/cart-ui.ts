@@ -99,9 +99,22 @@ export default class CartUI {
     this.render();
   }
 
+  private isCtCart(object: unknown): object is CtCart {
+    return (
+      !!object &&
+      typeof object === 'object' &&
+      'lineItems' in object &&
+      'totalPrice' in object &&
+      'version' in object &&
+      Array.isArray(object.lineItems) &&
+      typeof object.totalPrice === 'object' &&
+      typeof object.version === 'number'
+    );
+  }
+
   private async fetchCart(): Promise<void> {
     const c = await getOrCreateCart();
-    this.cart = c as unknown as CtCart;
+    this.cart = this.isCtCart(c) ? c : undefined;
   }
 
   private mapLineItem(li: CtLineItem): LineItem {
@@ -246,8 +259,12 @@ export default class CartUI {
     const token = await getAccessToken();
 
     const patch = async (version: number) => {
+      // Check cart exists before accessing its id
+      if (!this.cart) {
+        throw new Error('Cart is undefined during patch operation');
+      }
       const { data } = await apiInstance.post<CtCart>(
-        `/me/carts/${this.cart!.id}`,
+        `/me/carts/${this.cart.id}`,
         { version, actions },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -262,10 +279,14 @@ export default class CartUI {
       if (isAxiosError(error) && error.response?.status === 409) {
         try {
           const fresh = await getOrCreateCart();
-          this.cart = fresh as unknown as CtCart;
-          this.cart = await patch(this.cart.version); // patching with actual version!!!!
-          this.render();
-          showToast('Cart updated');
+          if (this.isCtCart(fresh)) {
+            this.cart = fresh;
+            this.cart = await patch(this.cart.version);
+            this.render();
+            showToast('Cart updated');
+          } else {
+            throw new Error('Invalid refreshed cart object');
+          }
         } catch (retryError) {
           showToast('Failed to update cart', true);
           console.error(retryError);

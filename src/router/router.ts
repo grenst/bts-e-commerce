@@ -175,7 +175,11 @@ export function createRouterLink(
     parent,
     classes: ['router-link', ...addClasses],
     attributes: { href: path },
-  }) as HTMLAnchorElement;
+  });
+
+  if (!(link instanceof HTMLAnchorElement)) {
+    throw new TypeError('Created element is not an HTMLAnchorElement');
+  }
 
   link.addEventListener('click', (event_) => {
     event_.preventDefault();

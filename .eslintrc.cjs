@@ -16,7 +16,12 @@ module.exports = {
   ignorePatterns: ['dist', '.eslintrc.cjs', 'vite.config.js'], // Ignore build output and config files
   rules: {
     'prettier/prettier': 'warn', // Show Prettier issues as warnings
-    '@typescript-eslint/no-unused-vars': 'warn', // Warn about unused variables
-    // Add any project-specific rules here
+    '@typescript-eslint/no-unused-vars': 'warn',
+
+    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
+    '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
+
+    '@typescript-eslint/no-non-null-assertion': 'error',
   },
 };

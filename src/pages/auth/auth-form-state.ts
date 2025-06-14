@@ -11,19 +11,19 @@ import createTitle from '../../components/layout/title/title'; // Import new cre
 export interface AuthFormState {
   isLoginForm: boolean;
   title: {
-    element: HTMLElement;
+    element?: HTMLElement;
     loginText: string;
     registerText: string;
   };
   basicFields: {
-    pageContainer: HTMLElement;
-    formContainer: HTMLElement;
-    emailContainer: HTMLElement;
-    emailInput: HTMLInputElement;
-    passwordInput: HTMLInputElement;
-    emailError: HTMLElement;
-    passwordError: HTMLElement;
-    errorContainer: HTMLElement;
+    pageContainer?: HTMLElement;
+    formContainer?: HTMLElement;
+    emailContainer?: HTMLElement;
+    emailInput?: HTMLInputElement;
+    passwordInput?: HTMLInputElement;
+    emailError?: HTMLElement;
+    passwordError?: HTMLElement;
+    errorContainer?: HTMLElement;
   };
   inputs: {
     firstName: HTMLInputElement | undefined;
@@ -47,49 +47,49 @@ export interface AuthFormState {
   };
 
   containers: {
-    shippingAddress: HTMLElement | undefined;
-    billingAddress: HTMLElement | undefined;
-    country: HTMLDivElement | undefined;
-    billingCountry: HTMLDivElement | undefined;
+    shippingAddress?: HTMLElement;
+    billingAddress?: HTMLElement;
+    country?: HTMLDivElement;
+    billingCountry?: HTMLDivElement;
   };
 
   errors: {
-    firstName: HTMLElement | undefined;
-    lastName: HTMLElement | undefined;
-    dateOfBirth: HTMLElement | undefined;
-    streetName: HTMLElement | undefined;
-    houseNumber: HTMLElement | undefined;
-    apartment: HTMLElement | undefined;
-    city: HTMLElement | undefined;
-    postalCode: HTMLElement | undefined;
-    country: HTMLElement | undefined;
+    firstName?: HTMLElement;
+    lastName?: HTMLElement;
+    dateOfBirth?: HTMLElement;
+    streetName?: HTMLElement;
+    houseNumber?: HTMLElement;
+    apartment?: HTMLElement;
+    city?: HTMLElement;
+    postalCode?: HTMLElement;
+    country?: HTMLElement;
 
     // Billing address errors
-    billingStreetName: HTMLElement | undefined;
-    billingHouseNumber: HTMLElement | undefined;
-    billingApartment: HTMLElement | undefined;
-    billingCity: HTMLElement | undefined;
-    billingPostalCode: HTMLElement | undefined;
-    billingCountry: HTMLElement | undefined;
+    billingStreetName?: HTMLElement;
+    billingHouseNumber?: HTMLElement;
+    billingApartment?: HTMLElement;
+    billingCity?: HTMLElement;
+    billingPostalCode?: HTMLElement;
+    billingCountry?: HTMLElement;
   };
 }
 
 export const initialAuthFormState: AuthFormState = {
   isLoginForm: true,
   title: {
-    element: undefined!, // Будет инициализировано
+    element: undefined, // Будет инициализировано
     loginText: 'Login',
     registerText: 'Register',
   },
   basicFields: {
-    pageContainer: undefined!,
-    formContainer: undefined!,
-    emailContainer: undefined!,
-    emailInput: undefined!, // Будет инициализировано при создании формы
-    passwordInput: undefined!,
-    emailError: undefined!,
-    passwordError: undefined!,
-    errorContainer: undefined!,
+    pageContainer: undefined,
+    formContainer: undefined,
+    emailContainer: undefined,
+    emailInput: undefined, // Будет инициализировано при создании формы
+    passwordInput: undefined,
+    emailError: undefined,
+    passwordError: undefined,
+    errorContainer: undefined,
   },
   inputs: {
     firstName: undefined,

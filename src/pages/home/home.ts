@@ -75,7 +75,7 @@ async function generateActualityList(
         name:
           categoryNameMap[categoryId] ||
           `Category ${categoryId.slice(0, 8)}...`, // Use fetched name
-        products: shuffledProducts.slice(0, 2) as Product[],
+        products: shuffledProducts.slice(0, 2),
       });
     }
   }
@@ -289,7 +289,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       animatedLineElements,
       { yPercent: 150 },
       {
-        yPercent: 18,
+        yPercent: 5,
         stagger: 0.25,
         duration: 0.8,
         ease: 'power2.out',
@@ -447,7 +447,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       'disabled:opacity-50',
     ],
     parent: actualityNavContainer,
-  }) as HTMLButtonElement;
+  });
 
   const nextCategoryButton = createElement({
     tag: 'button',
@@ -462,7 +462,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       'disabled:opacity-50',
     ],
     parent: actualityNavContainer,
-  }) as HTMLButtonElement;
+  });
 
   let actualityCategories: ActualityCategory[] = [];
   let currentActualityCategoryIndex = 0;
@@ -481,8 +481,8 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
         classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
         parent: actualityProductsContainer,
       });
-      previousCategoryButton.disabled = true;
-      nextCategoryButton.disabled = true;
+      previousCategoryButton.setAttribute('disabled', '');
+      nextCategoryButton.setAttribute('disabled', '');
       return;
     }
 
@@ -498,7 +498,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       });
     } else {
       for (const [index, product] of currentCategory.products.entries()) {
-        const card = createProductCardElement(product as Product);
+        const card = createProductCardElement(product);
         actualityProductsContainer.append(card);
 
         if (index === 0 && currentCategory.products.length > 1) {
@@ -519,8 +519,13 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
 
     const disableButtons =
       !actualityCategories || actualityCategories.length <= 1;
-    previousCategoryButton.disabled = disableButtons;
-    nextCategoryButton.disabled = disableButtons;
+    if (disableButtons) {
+      previousCategoryButton.setAttribute('disabled', '');
+      nextCategoryButton.setAttribute('disabled', '');
+    } else {
+      previousCategoryButton.removeAttribute('disabled');
+      nextCategoryButton.removeAttribute('disabled');
+    }
   }
 
   previousCategoryButton.addEventListener('click', () => {
@@ -553,14 +558,14 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
       .catch((error) => {
         console.error('Error initializing actuality section:', error);
         actualityCategoryTitle.textContent = 'Could not load special picks.';
-        previousCategoryButton.disabled = true;
-        nextCategoryButton.disabled = true;
+        previousCategoryButton.setAttribute('disabled', '');
+        nextCategoryButton.setAttribute('disabled', '');
       });
   } else {
     actualityCategoryTitle.textContent =
       'No products or categories available to pick from.';
-    previousCategoryButton.disabled = true;
-    nextCategoryButton.disabled = true;
+    previousCategoryButton.setAttribute('disabled', '');
+    nextCategoryButton.setAttribute('disabled', '');
   }
 
   /* ---------- ACTUAL PRODUCTS (Original list of all products) ---------- */

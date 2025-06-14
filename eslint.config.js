@@ -48,6 +48,12 @@ export default tseslint.config(
       ...unicorn.configs.recommended.rules,
       "prettier/prettier": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
+
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
+      '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
+
+      '@typescript-eslint/no-non-null-assertion': 'error',
     },
   }
 );

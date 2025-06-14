@@ -58,7 +58,7 @@ export const AuthService = {
         .getState()
         .addNotification(
           'error',
-          `Registration failed: ${(error as Error).message}`
+          `Registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
       return false;
     }

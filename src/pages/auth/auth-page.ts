@@ -293,8 +293,10 @@ function validateLoginForm(email: string, password: string): ValidationResult {
     const formattedErrors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
       for (const error_ of error.errors) {
-        const field = error_.path[0] as string;
-        formattedErrors[field] = error_.message;
+        if (error_.path.length > 0 && typeof error_.path[0] === 'string') {
+          const field = error_.path[0];
+          formattedErrors[field] = error_.message;
+        }
       }
     }
     return { success: false, errors: formattedErrors };
@@ -411,8 +413,10 @@ function validateRegisterForm(
     const formattedErrors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
       for (const error_ of error.errors) {
-        const field = error_.path[0] as string;
-        formattedErrors[field] = error_.message;
+        if (error_.path.length > 0 && typeof error_.path[0] === 'string') {
+          const field = error_.path[0];
+          formattedErrors[field] = error_.message;
+        }
       }
     }
     return { success: false, errors: formattedErrors };
@@ -498,11 +502,11 @@ export function createLoginPage(container: HTMLElement): void {
   });
 
   function clearErrorMessagesAndInputs(): void {
-    emailError.classList.add('hidden');
-    passwordError.classList.add('hidden');
-    errorContainer.classList.add('hidden');
-    emailInput.value = '';
-    passwordInput.value = '';
+    emailError?.classList.add('hidden');
+    passwordError?.classList.add('hidden');
+    errorContainer?.classList.add('hidden');
+    emailInput && (emailInput.value = '');
+    passwordInput && (passwordInput.value = '');
 
     for (const error of Object.values(state.errors)) {
       error?.classList.add('hidden');
@@ -576,7 +580,8 @@ export function createLoginPage(container: HTMLElement): void {
 
     clearErrorMessagesAndInputs();
 
-    titleLogin.textContent = state.isLoginForm ? loginText : registerText;
+    titleLogin &&
+      (titleLogin.textContent = state.isLoginForm ? loginText : registerText);
 
     loginButton.textContent = state.isLoginForm ? loginText : registerText;
     loginButton.prepend(svgSpinner);
@@ -634,12 +639,12 @@ export function createLoginPage(container: HTMLElement): void {
         state.errors.billingPostalCode = undefined;
         state.errors.billingCountry = undefined;
 
-        titleLogin.classList.add('before:w-20');
-        titleLogin.classList.remove('before:w-29');
+        titleLogin?.classList.add('before:w-20');
+        titleLogin?.classList.remove('before:w-29');
 
-        titleLogin.classList.add('reset-animation');
-        void titleLogin.offsetWidth;
-        titleLogin.classList.remove('reset-animation');
+        titleLogin?.classList.add('reset-animation');
+        void titleLogin?.offsetWidth;
+        titleLogin?.classList.remove('reset-animation');
       }
     } else {
       if (!firstNameInput) {
@@ -648,11 +653,11 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['mb-4'],
         });
         // emailContainer.before(firstNameContainer); // Will be reordered
-        titleLogin.classList.add('before:w-29');
-        titleLogin.classList.remove('before:w-20', 'login-name::before');
-        titleLogin.classList.add('reset-animation');
-        void titleLogin.offsetWidth;
-        titleLogin.classList.remove('reset-animation');
+        titleLogin?.classList.add('before:w-29');
+        titleLogin?.classList.remove('before:w-20', 'login-name::before');
+        titleLogin?.classList.add('reset-animation');
+        void titleLogin?.offsetWidth;
+        titleLogin?.classList.remove('reset-animation');
         createElement({
           tag: 'label',
           text: 'First Name',
@@ -660,7 +665,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'firstName' },
         });
-        state.inputs.firstName = createElement({
+        const firstNameElement = createElement({
           tag: 'input',
           parent: firstNameContainer,
           classes: inputParameters,
@@ -669,7 +674,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'firstName',
             placeholder: 'Enter your first name',
           },
-        }) as HTMLInputElement;
+        });
+        if (firstNameElement instanceof HTMLInputElement) {
+          state.inputs.firstName = firstNameElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.firstName = createElement({
           tag: 'p',
           parent: firstNameContainer,
@@ -688,7 +698,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'lastName' },
         });
-        state.inputs.lastName = createElement({
+        const lastNameElement = createElement({
           tag: 'input',
           parent: lastNameContainer,
           classes: inputParameters,
@@ -697,7 +707,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'lastName',
             placeholder: 'Enter your last name',
           },
-        }) as HTMLInputElement;
+        });
+        if (lastNameElement instanceof HTMLInputElement) {
+          state.inputs.lastName = lastNameElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.lastName = createElement({
           tag: 'p',
           parent: lastNameContainer,
@@ -711,7 +726,7 @@ export function createLoginPage(container: HTMLElement): void {
         // emailContainer.before(dateOfBirthContainer); // Will be reordered
 
         // firstName, lastName, dateOfBirth, THEN email, password
-        emailContainer.before(dateOfBirthContainer);
+        emailContainer?.before(dateOfBirthContainer);
         dateOfBirthContainer.before(lastNameContainer);
         lastNameContainer.before(firstNameContainer);
 
@@ -722,7 +737,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'dateOfBirth' },
         });
-        state.inputs.dateOfBirth = createElement({
+        const dateOfBirthElement = createElement({
           tag: 'input',
           parent: dateOfBirthContainer,
           classes: inputParameters,
@@ -731,7 +746,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'dateOfBirth',
             placeholder: 'YYYY-MM-DD',
           },
-        }) as HTMLInputElement;
+        });
+        if (dateOfBirthElement instanceof HTMLInputElement) {
+          state.inputs.dateOfBirth = dateOfBirthElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.dateOfBirth = createElement({
           tag: 'p',
           parent: dateOfBirthContainer,
@@ -780,7 +800,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'streetName' },
         });
-        state.inputs.streetName = createElement({
+        const streetNameElement = createElement({
           tag: 'input',
           parent: streetNameContainer,
           classes: inputParameters,
@@ -789,7 +809,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'streetName',
             placeholder: 'Enter street name',
           },
-        }) as HTMLInputElement;
+        });
+        if (streetNameElement instanceof HTMLInputElement) {
+          state.inputs.streetName = streetNameElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.streetName = createElement({
           tag: 'p',
           parent: streetNameContainer,
@@ -808,7 +833,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'houseNumber' },
         });
-        state.inputs.houseNumber = createElement({
+        const houseNumberElement = createElement({
           tag: 'input',
           parent: houseNumberContainer,
           classes: inputParameters,
@@ -817,7 +842,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'houseNumber',
             placeholder: 'e.g., 123A',
           },
-        }) as HTMLInputElement;
+        });
+        if (houseNumberElement instanceof HTMLInputElement) {
+          state.inputs.houseNumber = houseNumberElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.houseNumber = createElement({
           tag: 'p',
           parent: houseNumberContainer,
@@ -836,7 +866,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'apartment' },
         });
-        state.inputs.apartment = createElement({
+        const apartmentElement = createElement({
           tag: 'input',
           parent: apartmentContainer,
           classes: inputParameters,
@@ -845,7 +875,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'apartment',
             placeholder: 'e.g., Apt 4B',
           },
-        }) as HTMLInputElement;
+        });
+        if (apartmentElement instanceof HTMLInputElement) {
+          state.inputs.apartment = apartmentElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.apartment = createElement({
           tag: 'p',
           parent: apartmentContainer,
@@ -864,7 +899,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'city' },
         });
-        state.inputs.city = createElement({
+        const cityElement = createElement({
           tag: 'input',
           parent: cityContainer,
           classes: inputParameters,
@@ -873,7 +908,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'city',
             placeholder: 'Enter your city',
           },
-        }) as HTMLInputElement;
+        });
+        if (cityElement instanceof HTMLInputElement) {
+          state.inputs.city = cityElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.city = createElement({
           tag: 'p',
           parent: cityContainer,
@@ -892,7 +932,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'postalCode' },
         });
-        state.inputs.postalCode = createElement({
+        const postalCodeElement = createElement({
           tag: 'input',
           parent: postalCodeContainer,
           classes: inputParameters,
@@ -901,7 +941,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'postalCode',
             placeholder: 'Enter your postal code',
           },
-        }) as HTMLInputElement;
+        });
+        if (postalCodeElement instanceof HTMLInputElement) {
+          state.inputs.postalCode = postalCodeElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.postalCode = createElement({
           tag: 'p',
           parent: postalCodeContainer,
@@ -909,11 +954,14 @@ export function createLoginPage(container: HTMLElement): void {
         });
 
         // Country - Corrected Section
-        state.containers.country = createElement({
+        const countryContainer = createElement({
           tag: 'div',
           parent: state.containers.shippingAddress,
           classes: ['mb-4'],
-        }) as HTMLDivElement;
+        });
+        if (countryContainer instanceof HTMLDivElement) {
+          state.containers.country = countryContainer;
+        }
         createElement({
           tag: 'label',
           text: 'Country',
@@ -949,7 +997,7 @@ export function createLoginPage(container: HTMLElement): void {
         });
         state.containers.shippingAddress.after(checkboxContainer);
 
-        state.inputs.billingAddressSameAsShipping = createElement({
+        const billingCheckbox = createElement({
           tag: 'input',
           parent: checkboxContainer,
           classes: ['mr-2'],
@@ -958,7 +1006,10 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'billingSameAsShipping',
             checked: 'true',
           },
-        }) as HTMLInputElement;
+        });
+        if (billingCheckbox instanceof HTMLInputElement) {
+          state.inputs.billingAddressSameAsShipping = billingCheckbox;
+        }
 
         createElement({
           tag: 'label',
@@ -1001,7 +1052,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingStreetName' },
         });
-        state.inputs.billingStreetName = createElement({
+        const billingStreetNameElement = createElement({
           tag: 'input',
           parent: billingStreetNameContainer,
           classes: inputParameters,
@@ -1010,7 +1061,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'billingStreetName',
             placeholder: 'Enter street name',
           },
-        }) as HTMLInputElement;
+        });
+        if (billingStreetNameElement instanceof HTMLInputElement) {
+          state.inputs.billingStreetName = billingStreetNameElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.billingStreetName = createElement({
           tag: 'p',
           parent: billingStreetNameContainer,
@@ -1029,7 +1085,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingHouseNumber' },
         });
-        state.inputs.billingHouseNumber = createElement({
+        const billingHouseNumberElement = createElement({
           tag: 'input',
           parent: billingHouseNumberContainer,
           classes: inputParameters,
@@ -1038,7 +1094,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'billingHouseNumber',
             placeholder: 'e.g., 123A',
           },
-        }) as HTMLInputElement;
+        });
+        if (billingHouseNumberElement instanceof HTMLInputElement) {
+          state.inputs.billingHouseNumber = billingHouseNumberElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.billingHouseNumber = createElement({
           tag: 'p',
           parent: billingHouseNumberContainer,
@@ -1057,7 +1118,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingApartment' },
         });
-        state.inputs.billingApartment = createElement({
+        const billingApartmentElement = createElement({
           tag: 'input',
           parent: billingApartmentContainer,
           classes: inputParameters,
@@ -1066,7 +1127,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'billingApartment',
             placeholder: 'e.g., Apt 4B',
           },
-        }) as HTMLInputElement;
+        });
+        if (billingApartmentElement instanceof HTMLInputElement) {
+          state.inputs.billingApartment = billingApartmentElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.billingApartment = createElement({
           tag: 'p',
           parent: billingApartmentContainer,
@@ -1085,7 +1151,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingCity' },
         });
-        state.inputs.billingCity = createElement({
+        const billingCityElement = createElement({
           tag: 'input',
           parent: billingCityContainer,
           classes: inputParameters,
@@ -1094,7 +1160,12 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'billingCity',
             placeholder: 'Enter your city',
           },
-        }) as HTMLInputElement;
+        });
+        if (billingCityElement instanceof HTMLInputElement) {
+          state.inputs.billingCity = billingCityElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.billingCity = createElement({
           tag: 'p',
           parent: billingCityContainer,
@@ -1113,7 +1184,7 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1'],
           attributes: { for: 'billingPostalCode' },
         });
-        state.inputs.billingPostalCode = createElement({
+        const billingPostalCodeElement = createElement({
           tag: 'input',
           parent: billingPostalCodeContainer,
           classes: inputParameters,
@@ -1122,18 +1193,26 @@ export function createLoginPage(container: HTMLElement): void {
             id: 'billingPostalCode',
             placeholder: 'Enter your postal code',
           },
-        }) as HTMLInputElement;
+        });
+        if (billingPostalCodeElement instanceof HTMLInputElement) {
+          state.inputs.billingPostalCode = billingPostalCodeElement;
+        } else {
+          console.error('Created element is not an HTMLInputElement');
+        }
         state.errors.billingPostalCode = createElement({
           tag: 'p',
           parent: billingPostalCodeContainer,
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
-        state.containers.billingCountry = createElement({
+        const billingCountryContainer = createElement({
           tag: 'div',
           parent: state.containers.billingAddress,
           classes: ['mb-4'],
-        }) as HTMLDivElement;
+        });
+        if (billingCountryContainer instanceof HTMLDivElement) {
+          state.containers.billingCountry = billingCountryContainer;
+        }
         createElement({
           tag: 'label',
           text: 'Country',
@@ -1164,18 +1243,20 @@ export function createLoginPage(container: HTMLElement): void {
           classes: ['mt-1', 'text-sm', 'text-red-600', 'hidden'],
         });
 
-        state.inputs.billingAddressSameAsShipping.addEventListener(
-          'change',
-          () => {
-            if (state.containers.billingAddress) {
-              state.containers.billingAddress.classList.toggle(
-                'hidden',
-                billingAddressSameAsShippingCheckbox?.checked
-              );
+        if (state.inputs.billingAddressSameAsShipping) {
+          state.inputs.billingAddressSameAsShipping.addEventListener(
+            'change',
+            () => {
+              if (state.containers.billingAddress) {
+                state.containers.billingAddress.classList.toggle(
+                  'hidden',
+                  state.inputs.billingAddressSameAsShipping?.checked
+                );
+              }
+              validateForm(); // Re-validate when checkbox state changes
             }
-            validateForm(); // Re-validate when checkbox state changes
-          }
-        );
+          );
+        }
 
         // Добавляем обработчики после создания элементов
         setupValidationHandlers();
@@ -1185,8 +1266,8 @@ export function createLoginPage(container: HTMLElement): void {
       // validateForm();
     }
 
-    emailInput.value = '';
-    passwordInput.value = '';
+    emailInput && (emailInput.value = '');
+    passwordInput && (passwordInput.value = '');
     if (firstNameInput) firstNameInput.value = '';
     if (lastNameInput) lastNameInput.value = '';
     if (dateOfBirthInput) dateOfBirthInput.value = '';
@@ -1207,9 +1288,9 @@ export function createLoginPage(container: HTMLElement): void {
     if (billingPostalCodeInput) billingPostalCodeInput.value = '';
     if (billingCountryInput) billingCountryInput.setSelectedValue(undefined);
 
-    errorContainer.classList.add('hidden');
-    emailError.classList.add('hidden');
-    passwordError.classList.add('hidden');
+    errorContainer?.classList.add('hidden');
+    emailError?.classList.add('hidden');
+    passwordError?.classList.add('hidden');
     if (firstNameError) firstNameError.classList.add('hidden');
     if (lastNameError) lastNameError.classList.add('hidden');
     if (dateOfBirthError) dateOfBirthError.classList.add('hidden');
@@ -1248,8 +1329,8 @@ export function createLoginPage(container: HTMLElement): void {
     const { emailInput, passwordInput } = state.basicFields;
 
     // Обработка основных полей
-    setupInputHandler(emailInput, 'email');
-    setupInputHandler(passwordInput, 'password');
+    emailInput && setupInputHandler(emailInput, 'email');
+    passwordInput && setupInputHandler(passwordInput, 'password');
 
     // Обработка обычных инпутов
     for (const [fieldName, input] of Object.entries(state.inputs)) {
@@ -1282,13 +1363,17 @@ export function createLoginPage(container: HTMLElement): void {
   /****************************************************************** */
 
   function showFormError(message: string): void {
-    errorContainer.textContent = message;
-    errorContainer.classList.remove('hidden');
+    if (errorContainer) {
+      errorContainer.textContent = message;
+      errorContainer.classList.remove('hidden');
+    }
   }
 
   function hideFormError(): void {
-    errorContainer.textContent = '';
-    errorContainer.classList.add('hidden');
+    if (errorContainer) {
+      errorContainer.textContent = '';
+      errorContainer.classList.add('hidden');
+    }
   }
 
   /************************************************** */
@@ -1301,8 +1386,8 @@ export function createLoginPage(container: HTMLElement): void {
 
     if (isLoginForm) {
       const validation = validateLoginForm(
-        emailInput.value,
-        passwordInput.value
+        emailInput?.value ?? '',
+        passwordInput?.value ?? ''
       );
       updateFieldErrors(state, validation);
       return validation;
@@ -1321,8 +1406,8 @@ export function createLoginPage(container: HTMLElement): void {
         };
 
     const validation = validateRegisterForm(
-      emailInput.value,
-      passwordInput.value,
+      emailInput?.value ?? '',
+      passwordInput?.value ?? '',
       getInputValue(inputs.firstName),
       getInputValue(inputs.lastName),
       getInputValue(inputs.dateOfBirth),
@@ -1382,15 +1467,26 @@ export function createLoginPage(container: HTMLElement): void {
 
     // Обрабатываем поля регистрации
     for (const field of REGISTRATION_FIELDS) {
-      const input = field.isContainer
-        ? containers[field.inputKey as keyof typeof containers]
-        : inputs[field.inputKey];
+      let fieldElement: HTMLElement | undefined;
+      if (field.isContainer) {
+        if (Object.keys(containers).includes(field.inputKey)) {
+          const containerKey = field.inputKey;
+          if (containerKey in containers) {
+            fieldElement = containers[containerKey as keyof typeof containers];
+          }
+        }
+      } else {
+        const input = inputs[field.inputKey];
+        if (input instanceof HTMLElement) {
+          fieldElement = input;
+        } else if (input instanceof FilterableDropdown) {
+          fieldElement = input.getElement();
+        }
+      }
 
-      handleFieldError(
-        field.name,
-        errors[field.errorKey],
-        input as HTMLElement | undefined
-      );
+      if (fieldElement) {
+        handleFieldError(field.name, errors[field.errorKey], fieldElement);
+      }
     }
 
     // Обрабатываем billing поля
@@ -1399,15 +1495,24 @@ export function createLoginPage(container: HTMLElement): void {
       !inputs.billingAddressSameAsShipping.checked
     ) {
       for (const field of BILLING_FIELDS) {
-        const input = field.isContainer
-          ? containers[field.inputKey as keyof typeof containers]
-          : inputs[field.inputKey];
+        let fieldElement: HTMLElement | undefined;
+        if (field.isContainer) {
+          if (field.inputKey in containers) {
+            fieldElement =
+              containers[field.inputKey as keyof typeof containers];
+          }
+        } else {
+          const input = inputs[field.inputKey];
+          if (input instanceof HTMLElement) {
+            fieldElement = input;
+          } else if (input instanceof FilterableDropdown) {
+            fieldElement = input.getElement();
+          }
+        }
 
-        handleFieldError(
-          field.name,
-          errors[field.errorKey],
-          input as HTMLElement | undefined
-        );
+        if (fieldElement) {
+          handleFieldError(field.name, errors[field.errorKey], fieldElement);
+        }
       }
     }
   }
@@ -1436,27 +1541,28 @@ export function createLoginPage(container: HTMLElement): void {
       billingAddressSameAsShipping: billingAddressSameAsShippingCheckbox,
     } = state.inputs;
 
-    const email = emailInput.value;
-    const password = passwordInput.value;
+    const email = emailInput?.value ?? '';
+    const password = passwordInput?.value ?? '';
 
     if (isLoginForm) {
       const validation = validateLoginForm(email, password);
 
       if (!validation.success) {
         if (validation.errors.email)
-          showFieldError(emailError, validation.errors.email);
-        else hideFieldError(emailError);
+          emailError && showFieldError(emailError, validation.errors.email);
+        else emailError && hideFieldError(emailError);
         if (validation.errors.password)
-          showFieldError(passwordError, validation.errors.password);
-        else hideFieldError(passwordError);
+          passwordError &&
+            showFieldError(passwordError, validation.errors.password);
+        else passwordError && hideFieldError(passwordError);
         addNotification(
           'warning',
           'Please fix the form errors before submitting.'
         );
         return;
       }
-      hideFieldError(emailError);
-      hideFieldError(passwordError);
+      emailError && hideFieldError(emailError);
+      passwordError && hideFieldError(passwordError);
 
       // setLoading(true);
       svgSpinner.classList.add('spinner_active');
@@ -1523,8 +1629,8 @@ export function createLoginPage(container: HTMLElement): void {
       }
 
       const validation = validateRegisterForm(
-        emailInput.value,
-        passwordInput.value,
+        emailInput?.value ?? '',
+        passwordInput?.value ?? '',
         state.inputs.firstName?.value || '',
         // firstNameInput?.value || '',
         state.inputs.lastName?.value || '',
@@ -1569,8 +1675,8 @@ export function createLoginPage(container: HTMLElement): void {
       } = state.errors;
 
       // Clear all errors if validation passes
-      hideFieldError(emailError);
-      hideFieldError(passwordError);
+      emailError && hideFieldError(emailError);
+      passwordError && hideFieldError(passwordError);
       if (firstNameError) hideFieldError(firstNameError);
       if (lastNameError) hideFieldError(lastNameError);
       if (dateOfBirthError) hideFieldError(dateOfBirthError);
@@ -1618,8 +1724,8 @@ export function createLoginPage(container: HTMLElement): void {
 
       try {
         const success = await AuthService.register(
-          emailInput.value,
-          passwordInput.value,
+          emailInput?.value ?? '',
+          passwordInput?.value ?? '',
           state.inputs.firstName?.value || '',
           // firstNameInput?.value || '',
           state.inputs.lastName?.value || '',
@@ -1652,8 +1758,8 @@ export function createLoginPage(container: HTMLElement): void {
     }
   };
 
-  emailInput.addEventListener('keypress', handleEnterKey);
-  passwordInput.addEventListener('keypress', handleEnterKey);
+  emailInput?.addEventListener('keypress', handleEnterKey);
+  passwordInput?.addEventListener('keypress', handleEnterKey);
 
   state.isLoginForm = false;
   toggleForm(); // Initialize as login form
