@@ -9,6 +9,13 @@ import {
 import { createEl as createElement } from '../../utils/element-utilities';
 import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown';
 import { COUNTRIES } from '../../data/countries';
+import {
+  showFieldError,
+  hideFieldError,
+  setInputBorder,
+} from './field-utilities';
+import { validateLogin, validateRegister } from './validation';
+import { RegisterFormData } from '../../types/auth';
 
 export function renderAuthPage(
   state: AuthState,
@@ -39,6 +46,34 @@ export function renderAuthPage(
 
     const { loginButton } = createLoginButton(pageContainer);
     const registerLink = createRegisterLink(pageContainer);
+
+    const validateLoginField = () => {
+      const { errors } = validateLogin({
+        email: emailField.input.value,
+        password: passwordField.input.value,
+      });
+
+      // email validation
+      if (errors.email) {
+        showFieldError(emailField.error, errors.email);
+        setInputBorder(emailField.input, true);
+      } else {
+        hideFieldError(emailField.error);
+        setInputBorder(emailField.input, false);
+      }
+
+      // password validation
+      if (errors.password) {
+        showFieldError(passwordField.error, errors.password);
+        setInputBorder(passwordField.input, true);
+      } else {
+        hideFieldError(passwordField.error);
+        setInputBorder(passwordField.input, false);
+      }
+    };
+
+    emailField.input.addEventListener('blur', validateLoginField);
+    passwordField.input.addEventListener('blur', validateLoginField);
 
     const loginHandler = () => {
       const loginEvent = new CustomEvent('login', {
@@ -220,6 +255,60 @@ export function renderAuthPage(
         'cursor-pointer',
       ],
     });
+
+    const registerMap = {
+      firstName: firstNameField,
+      lastName: lastNameField,
+      email: emailField,
+      password: passwordField,
+      dateOfBirth: dobField,
+      streetName: streetField,
+      houseNumber: houseField,
+      apartment: apartmentField,
+      city: cityField,
+      postalCode: postalField,
+    };
+
+    const validateRegisterFields = () => {
+      const currentValues: RegisterFormData = {
+        firstName: firstNameField.input.value,
+        lastName: lastNameField.input.value,
+        email: emailField.input.value,
+        password: passwordField.input.value,
+        dateOfBirth: dobField.input.value,
+        streetName: streetField.input.value,
+        houseNumber: houseField.input.value,
+        apartment: apartmentField.input.value,
+        city: cityField.input.value,
+        postalCode: postalField.input.value,
+        country: selectedCountryCode ?? '',
+      };
+
+      const { errors } = validateRegister(currentValues);
+
+      for (const [key, field] of Object.entries(registerMap)) {
+        const message = errors[key];
+        if (message) {
+          showFieldError(field.error, message);
+          setInputBorder(field.input, true);
+        } else {
+          hideFieldError(field.error);
+          setInputBorder(field.input, false);
+        }
+      }
+
+      // dropdown (country)
+      if (errors.country) {
+        dropdown?.getElement().classList.add('border-red-500');
+      } else {
+        dropdown?.getElement().classList.remove('border-red-500');
+      }
+    };
+
+    for (const { input } of Object.values(registerMap)) {
+      input.addEventListener('blur', validateRegisterFields);
+    }
+    dropdown.getElement().addEventListener('blur', validateRegisterFields);
 
     const registerHandler = () => {
       // Touch all fields to show validation errors

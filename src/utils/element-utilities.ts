@@ -30,7 +30,7 @@ function createElement<T extends HTMLElement = HTMLElement>(
 
   if (attributes) {
     for (const [key, value] of Object.entries(attributes)) {
-      element.setAttribute(key, value as string);
+      element.setAttribute(key, String(value));
     }
   }
 
