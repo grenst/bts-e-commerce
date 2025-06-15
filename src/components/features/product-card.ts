@@ -1,19 +1,25 @@
 import { createEl as createElement } from '../../utils/element-utilities';
 import { Product } from '../../types/catalog-types';
 import {
-  createProductModal,
-  ProductModal,
+  // createProductModal,
+  // ProductModal,
+  ModalManager,
 } from '../../components/layout/modal/product-modal';
 import './product-card.scss';
 import priceHitImg from '@assets/images/price-hit.webp';
 
-let productModal: ProductModal;
+// let productModal: ProductModal;
 
 export function createProductCardElement(product: Product): HTMLElement {
-  if (!productModal) {
-    productModal = createProductModal();
-    document.body.append(productModal.modalElement);
-  }
+  // if (!productModal) {
+  //   productModal = createProductModal();
+  //   document.body.append(productModal.modalElement);
+
+  //   productModal.modalElement.classList.add('four');
+  // }
+
+  const productModal = ModalManager.getModal();
+  // productModal.modalElement.classList.add('four');
 
   // Get price information early to use in multiple places
   const price = product.masterVariant.prices?.[0];

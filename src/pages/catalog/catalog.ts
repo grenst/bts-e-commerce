@@ -6,11 +6,32 @@ import { getAllPublishedProducts as getAllProducts } from '../../api/products/pr
 import { getAllCategories } from '../../api/products/product-service';
 import { Product, Category, ActiveSortMode } from '../../types/catalog-types';
 import {
-  createProductModal,
-  ProductModal,
+  // createProductModal,
+  // ProductModal,
+  ModalManager,
 } from '../../components/layout/modal/product-modal';
 
-let productModal: ProductModal;
+// export let productModal: ProductModal;
+
+// export class ModalManager {
+//   private static instance: ProductModal | undefined = undefined;
+
+//   static getModal(): ProductModal {
+//     if (!this.instance) {
+//       this.instance = createProductModal();
+//       document.body.append(this.instance.modalElement);
+//       this.instance.modalElement.classList.add('first');
+//     }
+//     return this.instance;
+//   }
+
+//   static clearModal(): void {
+//     if (this.instance) {
+//       this.instance.modalElement.remove();
+//       this.instance = undefined;
+//     }
+//   }
+// }
 
 export function createCatalogPage(container: HTMLElement): void {
   container.innerHTML = '';
@@ -43,10 +64,13 @@ export function createCatalogPage(container: HTMLElement): void {
   );
   container.append(section);
 
-  if (!productModal) {
-    productModal = createProductModal();
-    document.body.append(productModal.modalElement);
-  }
+  // if (!productModal) {
+  //   productModal = createProductModal();
+  //   document.body.append(productModal.modalElement);
+  // }
+
+  const productModal = ModalManager.getModal();
+  // productModal.modalElement.classList.add('second');
 
   const state = globalThis.history.state;
   if (state?.openProductModal) {

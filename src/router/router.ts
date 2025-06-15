@@ -4,6 +4,7 @@ import {
 } from '../utils/element-utilities';
 import { createCatalogPage } from '../pages/catalog/catalog';
 import { createCartPage } from '../pages/cart/cart';
+import { ModalManager } from '../components/layout/modal/product-modal';
 
 export interface Route {
   path: string;
@@ -38,6 +39,24 @@ export class Router {
 
   navigateTo(path: string, state: RouteState = {}): void {
     if (this.currentPath === path && Object.keys(state).length === 0) return;
+
+    // Проверяем, является ли текущий переход открытием модалки
+    // const isOpeningModal = state?.openProductModal !== undefined;
+    // Закрываем модалку только если:
+    // 1. Это не переход открытия модалки
+    // 2. Путь не содержит ID продукта
+    const isProductPath = path.match(
+      /^\/(catalog|main)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+    );
+    const modal = ModalManager.getModal();
+    // if (modal && !isOpeningModal && !isProductPath) {
+    //   modal.hideModal();
+    // }
+    // Закрываем модалку только при явном переходе не на продукт
+    if (modal && !isProductPath && !state?.isModalOpen) {
+      modal.hideModal();
+    }
+
     globalThis.history.pushState(state, '', path);
     this.handleRouteChange();
   }
@@ -47,7 +66,42 @@ export class Router {
     if (this.currentPath === path) return;
 
     this.saveCurrentScrollPosition();
+    // this.currentPath = path;
+
+    /************************************************* */
+    const state = history.state;
+
+    const isOpeningModal = state?.isModalOpen;
+    // const isOpeningModal = state?.openProductModal !== undefined;
+    const isProductPath = path.match(
+      /^\/(catalog|main)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+    );
+    // const isComingFromProduct = this.currentPath.match(
+    //   /^\/(catalog|main)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+    // );
+
+    const modal = ModalManager.getModal();
+    console.log(modal);
+    if (modal && !isProductPath && !isOpeningModal) {
+      modal.hideModal();
+    }
+
+    // Закрываем модалку если:
+    // 1. Это не открытие модалки
+    // 2. Это не страница продукта
+    // 3. ИЛИ это переход назад с продукта на /main
+    // if (
+    //   (modal && !isOpeningModal && !isProductPath) ||
+    //   (isComingFromProduct && path === '/main')
+    // ) {
+    //   modal.hideModal();
+
+    //   // console.log(`Попытка закрыть ${modal}`);
+    // }
+
     this.currentPath = path;
+
+    /************************************************* */
 
     if (path === '/') {
       this.navigateTo('/main');
@@ -77,7 +131,13 @@ export class Router {
           return;
         }
 
-        this.navigateTo(basePath, { openProductModal: productId });
+        // this.navigateTo(basePath, { openProductModal: productId });
+        // Явно указываем, что это открытие модалки
+        this.navigateTo(basePath, {
+          isModalOpen: true,
+          productId: productId,
+          productSlug: product.slug,
+        });
         return;
       } catch (error) {
         console.error('Error checking product existence:', error);
