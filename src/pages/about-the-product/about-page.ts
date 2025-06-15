@@ -6,7 +6,7 @@ import aboutImg2 from '@assets/images/about-2.webp';
 // import aboutImg3 from '@assets/images/about-3.webp';
 import aboutImg3 from '@assets/images/honey-vulkan.png';
 
-export default function createAboutPage(container: HTMLElement): void {
+export default function createAboutInfoPage(container: HTMLElement): void {
   container.innerHTML = '';
 
   const profileContainer = createElement({
@@ -27,7 +27,7 @@ export default function createAboutPage(container: HTMLElement): void {
 
   createElement({
     tag: 'h1',
-    text: 'About Us',
+    text: 'About the Company',
     classes: [
       'text-3xl',
       'font-bold',
@@ -38,7 +38,7 @@ export default function createAboutPage(container: HTMLElement): void {
       "before:content-['']",
       'before:absolute',
       'before:h-6',
-      'before:w-36',
+      'before:w-75',
       'before:bg-yellow-400',
       'before:-z-1',
       'login-name',
@@ -71,6 +71,13 @@ export default function createAboutPage(container: HTMLElement): void {
   });
   containerAbout.append(titleAbout);
 
+  const prefaceH3 = createElement({
+    tag: 'h3',
+    text: 'With Bubble Tea Shop, choose the type of tea, milk, syrups, toppings, sweetness level and temperature - and get a unique drink created by you! Try it right now and feel the taste of real creativity in every sip!',
+    classes: ['preface-h3'],
+  });
+  containerAbout.append(prefaceH3);
+
   const pIntroduction = createElement({
     tag: 'p',
     text: 'Create your perfect Bubble Tea 🧋 online!',
@@ -95,13 +102,6 @@ export default function createAboutPage(container: HTMLElement): void {
     classes: ['container-text-preface'],
   });
   prefaceContainer.append(containerTextPreface);
-
-  const prefaceH3 = createElement({
-    tag: 'h3',
-    text: 'With Bubble Tea Shop, choose the type of tea, milk, syrups, toppings, sweetness level and temperature - and get a unique drink created by you! Try it right now and feel the taste of real creativity in every sip!',
-    classes: ['preface-h3'],
-  });
-  containerTextPreface.append(prefaceH3);
 
   const descriptionUl = createElement({
     tag: 'ul',

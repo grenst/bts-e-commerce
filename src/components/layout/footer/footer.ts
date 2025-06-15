@@ -58,7 +58,7 @@ const createFooter = (parent: HTMLElement) => {
     text: 'About the Company',
     classes: ['yellow-lane'],
     attributes: {
-      href: '/about',
+      href: '/aboutInfo',
     },
   });
   liCompany.append(aLinkCompany);
@@ -180,6 +180,22 @@ const createFooter = (parent: HTMLElement) => {
     },
   });
   liBasket.append(aLinkBasket);
+
+  const liUs = createElement({
+    tag: 'li',
+    classes: ['li-Company'],
+    parent: ulContainerAnchor,
+  });
+
+  const aLinkUs = createElement({
+    tag: 'a',
+    text: 'About the Us',
+    classes: ['yellow-lane'],
+    attributes: {
+      href: '/aboutUs',
+    },
+  });
+  liUs.append(aLinkUs);
   // two section
 
   // four section
