@@ -6,6 +6,12 @@ import { getAnonymousToken } from '../../components/auth-services/token.service'
 import { isAxiosError } from 'axios';
 import { LineItem, createCartItem } from './cart-item';
 import { validatePromo } from './promo-validation';
+import { addNotification } from '../../store/store';
+
+interface DiscountCodeReference {
+  id: string;
+  typeId: string;
+}
 
 /* ────────── CT types ────────── */
 interface CtMoney {
@@ -74,7 +80,7 @@ type CartAction =
   | { action: 'changeLineItemQuantity'; lineItemId: string; quantity: number }
   | { action: 'removeLineItem'; lineItemId: string }
   | { action: 'addDiscountCode'; code: string }
-  | { action: 'removeDiscountCode'; discountCode: { id: string } };
+  | { action: 'removeDiscountCode'; discountCode: DiscountCodeReference };
 
 /* ────────── main class ────────── */
 export default class CartUI {
@@ -350,6 +356,7 @@ export default class CartUI {
         const validation = validatePromo({ code });
         if (!validation.success) {
           message.textContent = validation.errors.code ?? 'Invalid promo code';
+          addNotification('error', 'Invalid promo code');
           message.style.color = 'red';
           return;
         }
@@ -367,6 +374,7 @@ export default class CartUI {
           button.classList.add('cancel');
           discountDisplay.textContent = '-' + formatPrice(saved);
           message.textContent = 'Promo code applied successfully!';
+          addNotification('success', 'Promo code applied');
           message.style.color = 'green';
         } catch {
           message.textContent = 'Failed to apply promo code';
@@ -378,7 +386,10 @@ export default class CartUI {
           await this.enqueueUpdate([
             {
               action: 'removeDiscountCode',
-              discountCode: { id: this.discountCode.id },
+              discountCode: {
+                id: this.discountCode.id, // existing id from cart
+                typeId: 'discount-code', // REQUIRED by API
+              },
             },
           ]);
           this.discountCode = undefined;
@@ -387,8 +398,7 @@ export default class CartUI {
           button.textContent = 'Apply';
           button.classList.remove('cancel');
           discountDisplay.textContent = formatPrice(0);
-          message.textContent = 'Promo code removed';
-          message.style.color = 'green';
+          addNotification('warning', 'Promo code removed');
         } catch {
           message.textContent = 'Failed to remove promo code';
           message.style.color = 'red';
