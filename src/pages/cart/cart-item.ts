@@ -101,10 +101,10 @@ export function createCartItem(
     attributes: {
       type: 'button',
       'aria-label': 'Decrease quantity',
-      disabled: item.quantity <= 1 ? 'true' : '',
     },
     text: '−',
   });
+  if (item.quantity <= 1) minus.setAttribute('disabled', '');
 
   const qtyDisplay = createElement({
     tag: 'span',
@@ -152,7 +152,11 @@ export function createCartItem(
 
   // Event handlers with loading states
   const updateQuantity = (newQty: number) => {
-    if (newQty < 1) return;
+    if (newQty <= 1) {
+      minus.setAttribute('disabled', '');
+    } else {
+      minus.removeAttribute('disabled');
+    }
 
     // Add updating state
     root.classList.add('updating');
@@ -160,7 +164,7 @@ export function createCartItem(
     subtotal.textContent = format(item.price * newQty);
 
     // Update disabled state for minus button
-    minus.setAttribute('disabled', newQty <= 1 ? 'true' : '');
+    // minus.setAttribute('disabled', newQty <= 1 ? 'true' : '');
 
     actions.onQuantityChange(newQty);
 
