@@ -5,39 +5,43 @@ import {
 // import { useCustomerStore } from '../../store/customer-store';
 import './about-style.scss';
 import { gsap } from 'gsap';
-// import aboutImg1 from '@assets/images/about-1.webp';
-// import aboutImg2 from '@assets/images/about-2.webp';
-// import aboutImg3 from '@assets/images/about-3.webp';
-// import aboutImg3 from '@assets/images/honey-vulkan.png';
 
-type TextVal = { key: string; val: string };
+enum TextKeys {
+  ANSWER = 'answer',
+  ANDRII = 'Andrii',
+  VITALI = 'Vitali',
+  SERGEY = 'Sergey',
+  RSS = 'Rss',
+}
+
+type TextVal = { key: TextKeys; val: string };
 
 export default function createAboutUsPage(container: HTMLElement): void {
   container.innerHTML = '';
   const big_text_container: TextVal[] = [
     {
-      key: 'answer',
+      key: TextKeys.ANSWER,
       val: 'Our team works on equal terms, without strict hierarchy, We appreciate the contribution of each participant, We are building effective cooperation, Based on mutual respect and support!',
     },
     {
-      key: 'Andreii',
+      key: TextKeys.ANDRII,
       val: 'Andreii is a Team Leader The role in the project: Organizing the work of the team, working with the commercetools API, making key technical decisions, coordinating development and timing control. Contribution: Andrey implemented the SPA architecture, organized the project assembly process using Vite, provided integration with commercetools, and tirelessly motivated the team to create the Bubble Tea Shop.Collaboration methods: Regular meetings, code review, and setting up CI/CD processes.Brief biography: An experienced developer specializing in TypeScript, js, a variety of libraries and a modern interface. You can also check out his GitHub page:',
     },
     {
-      key: 'Vitali',
+      key: TextKeys.VITALI,
       val: 'Vitali is the senior developer of the project Vitali is responsible for the development of key modules, actively works with the commercetools API, writes tests and ensures high-quality code. His contributions include setting up linters (ESLint, Prettier), implementing Tailwind for styling, as well as writing and maintaining tests for Jest and TypeScript. Collaboration methods: Vitali actively participates in discussions, helps colleagues solve complex problems, maintains a unified code style and is the soul of the team. Brief biography: Specialist in layout and testing and working with commercetools. You can also check out his GitHub page:',
     },
     {
-      key: 'Sergey',
+      key: TextKeys.SERGEY,
       val: 'Sergey is a user interface developer Sergey is responsible for the implementation of functionality, support and improvement of the user interface. His contributions include writing interface components, implementing a SPA, and participating in performance optimization. Collaboration methods: Sergey is actively involved in joint task planning, uses TypeScript and SCSS for development, and regularly participates in code review. Brief biography: Frontend is a developer who is passionate about modern technology and creating high-quality code. You can also check out his GitHub page:',
     },
     {
-      key: 'Rss',
+      key: TextKeys.RSS,
       val: "This project was created specifically for the R.S.School as part of one of the school's unique assignments, of which there are a lot. To whom are we grateful? Our team would like to thank all the mentors and mentors of the R.S.School for their efforts and support. What do we value at R.S.School? We would like to thank R.S.School for the excellent educational program, the tremendous amount of knowledge, the wonderful mentors and the unforgettable experience that we received. Where can I find out more? You can also view the courses offered by clicking on the link — just click on the name of the school",
     },
   ];
 
-  function getTextByKey(key: string): string | undefined {
+  function getTextByKey(key: TextKeys): string | undefined {
     const item = big_text_container.find((el) => el.key === key);
     return item?.val;
   }
@@ -111,21 +115,6 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   divAboutInfoCompanyContainer.append(prefaceContainer);
 
-  // const containerImgPreface = createElement({
-  //   tag: 'div',
-  //   classes: ['container-img-preface'],
-  // });
-  // prefaceContainer.append(containerImgPreface);
-
-  // const ImgPreface = createElement({
-  //   tag: 'img',
-  //   classes: ['ImgPreface'],
-  //   attributes: {
-  //     src: aboutImg1,
-  //   },
-  // });
-  // containerImgPreface.append(ImgPreface);
-
   const containerTextPreface = createElement({
     tag: 'div',
     classes: ['container-text-preface-us'],
@@ -193,7 +182,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const titleDescriptionPUser2 = createElement({
     tag: 'p',
-    text: getTextByKey('answer'),
+    text: getTextByKey(TextKeys.ANSWER),
   });
   pointOne.append(titleDescriptionPUser2);
 
@@ -291,7 +280,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const technologiesTitleP3 = createElement({
     tag: 'p',
-    text: getTextByKey('Andreii'),
+    text: getTextByKey(TextKeys.ANDRII),
   });
   titleMasegeAndreiUser3.append(technologiesTitleP3);
 
@@ -399,7 +388,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const technologiesTitleVit = createElement({
     tag: 'p',
-    text: getTextByKey('Vitali'),
+    text: getTextByKey(TextKeys.VITALI),
   });
   technologiesTitleP3Vit.append(technologiesTitleVit);
 
@@ -500,7 +489,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const technologiesTitleP4Ser = createElement({
     tag: 'p',
-    text: getTextByKey('Sergey'),
+    text: getTextByKey(TextKeys.SERGEY),
   });
   technologiesTitleP3Ser.append(technologiesTitleP4Ser);
 
@@ -608,7 +597,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const textPRss2 = createElement({
     tag: 'p',
-    text: getTextByKey('Rss'),
+    text: getTextByKey(TextKeys.RSS),
   });
   userRssli.append(textPRss2);
 
