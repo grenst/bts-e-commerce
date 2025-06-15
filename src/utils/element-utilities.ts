@@ -1,18 +1,16 @@
 export const { body } = document;
 
-interface CreateElementOptions<T extends HTMLElement = HTMLElement> {
+interface CreateElementOptions {
   tag?: string;
   text?: string;
   classes?: string[];
-  attributes?: Partial<T> & Record<string, string>;
+  attributes?: Record<string, string>;
   styles?: Record<string, string>;
   parent?: HTMLElement | null;
   children?: HTMLElement[];
 }
 
-function createElement<T extends HTMLElement = HTMLElement>(
-  options: CreateElementOptions<T> & { tag?: string }
-): T {
+function createElement(options: CreateElementOptions): HTMLElement {
   const {
     tag = 'div',
     text = '',
@@ -24,7 +22,7 @@ function createElement<T extends HTMLElement = HTMLElement>(
     children = [],
   } = options;
 
-  const element = document.createElement(tag) as T;
+  const element = document.createElement(tag);
   element.textContent = text;
   element.classList.add(...classes);
 

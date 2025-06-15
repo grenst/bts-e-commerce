@@ -56,8 +56,8 @@ async function createExternalCart(): Promise<Cart> {
         country: 'DE', // критично для выбора цены
         taxMode: 'External',
         shippingAddress: { country: 'DE' },
-      }
-      // Header with Authorization removed
+      },
+      { params: { expand: 'discountCodes[*].discountCode' } }
     )
   );
   return data;
@@ -69,8 +69,10 @@ export async function getOrCreateCart(): Promise<Cart> {
   if (activeCart) return activeCart;
 
   try {
-    const { data } = await withLog(
-      () => apiInstance.get<Cart>('/me/active-cart') // Authorization header removed
+    const { data } = await withLog(() =>
+      apiInstance.get<Cart>('/me/active-cart', {
+        params: { expand: 'discountCodes[*].discountCode' },
+      })
     );
 
     /* 1a. корзина уже External и страна = DE */
@@ -95,8 +97,8 @@ export async function getOrCreateCart(): Promise<Cart> {
               { action: 'setCountry', country: 'DE' },
               { action: 'setShippingAddress', address: { country: 'DE' } },
             ],
-          }
-          // Header with Authorization removed
+          },
+          { params: { expand: 'discountCodes[*].discountCode' } }
         )
       );
       activeCart = patched;
@@ -141,8 +143,8 @@ export async function addToCart(
   const postUpdate = async (c: Cart): Promise<Cart> => {
     const { data } = await apiInstance.post<Cart>(
       `/me/carts/${c.id}`,
-      { version: c.version, actions }
-      // Header with Authorization removed
+      { version: c.version, actions },
+      { params: { expand: 'discountCodes[*].discountCode' } }
     );
     return data;
   };
@@ -158,4 +160,16 @@ export async function addToCart(
     }
     throw error;
   }
+}
+
+export async function applyDiscount(code: string): Promise<Cart> {
+  const cart = await getOrCreateCart();
+  const actions = [{ action: 'addDiscountCode', code }];
+  const { data } = await apiInstance.post<Cart>(
+    `/me/carts/${cart.id}`,
+    { version: cart.version, actions },
+    { params: { expand: 'discountCodes[*].discountCode' } }
+  );
+  activeCart = data;
+  return data;
 }
