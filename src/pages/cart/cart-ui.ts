@@ -13,7 +13,6 @@ interface DiscountCodeReference {
   typeId: string;
 }
 
-/* ────────── CT types ────────── */
 interface CtMoney {
   centAmount: number;
 }
@@ -63,7 +62,6 @@ interface CtCart {
   discountCodes?: CtDiscountCodeInfo[];
 }
 
-/* ────────── helpers ────────── */
 const formatPrice = (c: number): string =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
     c / 100
@@ -75,14 +73,12 @@ interface Labeled {
 const isLabeled = (v: unknown): v is Labeled =>
   typeof v === 'object' && v !== null && 'label' in v;
 
-/* ────────── actions ────────── */
 type CartAction =
   | { action: 'changeLineItemQuantity'; lineItemId: string; quantity: number }
   | { action: 'removeLineItem'; lineItemId: string }
   | { action: 'addDiscountCode'; code: string }
   | { action: 'removeDiscountCode'; discountCode: DiscountCodeReference };
 
-/* ────────── main class ────────── */
 export default class CartUI {
   private readonly container: HTMLElement;
 
@@ -103,7 +99,6 @@ export default class CartUI {
     this.render();
   }
 
-  /* ───── internal helpers ───── */
   private isCtCart(o: unknown): o is CtCart {
     return (
       !!o &&
@@ -122,7 +117,6 @@ export default class CartUI {
     }
   }
 
-  /** Extract first discount‑code (regardless of state) */
   private updateDiscountStateFromCart(): void {
     if (this.cart?.discountCodes?.length) {
       const info = this.cart.discountCodes[0];
@@ -156,7 +150,6 @@ export default class CartUI {
     };
   }
 
-  /* ───── render helpers ───── */
   private render(): void {
     if (!this.cart) return;
     this.container.innerHTML = '';
@@ -241,7 +234,7 @@ export default class CartUI {
       0,
       subtotal - this.cart.totalPrice.centAmount
     );
-    const tax = 0; // External-tax included in price
+    const tax = 0;
 
     const summary = createElement({ tag: 'div', classes: ['cart-summary'] });
 
@@ -318,18 +311,16 @@ export default class CartUI {
     const button = createElement({
       tag: 'button',
       attributes: { type: 'submit' },
-      text: 'Apply',
+      text: this.discountCode ? 'Cancel' : 'Apply',
     });
     const discountDisplay = createElement({
       tag: 'div',
       classes: ['discount-display'],
     });
 
-    /* initial UI state */
     if (this.discountCode) {
       input.placeholder = this.discountCode.code;
       input.disabled = true;
-      button.textContent = 'Cancel';
       button.classList.add('cancel');
       discountDisplay.textContent =
         '-' + formatPrice(Math.max(0, discountAmount));
@@ -356,52 +347,42 @@ export default class CartUI {
         const validation = validatePromo({ code });
         if (!validation.success) {
           message.textContent = validation.errors.code ?? 'Invalid promo code';
-          addNotification('error', 'Invalid promo code');
           message.style.color = 'red';
+          addNotification('error', 'Invalid promo code');
           return;
         }
 
-        const previousTotal = this.cart.totalPrice.centAmount;
+        button.setAttribute('disabled', 'true');
         try {
           await this.enqueueUpdate([{ action: 'addDiscountCode', code }]);
-          const newTotal = this.cart.totalPrice.centAmount;
-          const saved = previousTotal - newTotal;
-          this.discountCode = { id: '', code }; // id will be updated in next patch
-          input.value = '';
-          input.placeholder = code;
-          input.disabled = true;
-          button.textContent = 'Cancel';
-          button.classList.add('cancel');
-          discountDisplay.textContent = '-' + formatPrice(saved);
-          message.textContent = 'Promo code applied successfully!';
           addNotification('success', 'Promo code applied');
-          message.style.color = 'green';
         } catch {
-          message.textContent = 'Failed to apply promo code';
+          message.textContent = 'Promo code not found';
           message.style.color = 'red';
+          addNotification('error', 'Promo code not found');
+        } finally {
+          button.removeAttribute('disabled');
         }
       } else {
         if (!this.discountCode) return;
+        button.setAttribute('disabled', 'true');
         try {
           await this.enqueueUpdate([
             {
               action: 'removeDiscountCode',
               discountCode: {
-                id: this.discountCode.id, // existing id from cart
-                typeId: 'discount-code', // REQUIRED by API
+                id: this.discountCode.id,
+                typeId: 'discount-code',
               },
             },
           ]);
-          this.discountCode = undefined;
-          input.disabled = false;
-          input.placeholder = 'Promo code';
-          button.textContent = 'Apply';
-          button.classList.remove('cancel');
-          discountDisplay.textContent = formatPrice(0);
           addNotification('warning', 'Promo code removed');
         } catch {
           message.textContent = 'Failed to remove promo code';
           message.style.color = 'red';
+          addNotification('error', 'Failed to remove promo code');
+        } finally {
+          button.removeAttribute('disabled');
         }
       }
     });
@@ -409,19 +390,24 @@ export default class CartUI {
     return container;
   }
 
-  /* ───── update helpers ───── */
-  private enqueueUpdate(actions: CartAction[]): void {
-    this.updateQueue = this.updateQueue.then(() => this.applyUpdate(actions));
+  private enqueueUpdate(actions: CartAction[]): Promise<void> {
+    this.updateQueue = this.updateQueue
+      .catch(() => {})
+      .then(() => this.applyUpdate(actions));
+    return this.updateQueue;
   }
 
   private async applyUpdate(actions: CartAction[]): Promise<void> {
-    if (!this.cart) return;
+    const cart = this.cart;
+    if (!cart) return;
 
+    const cartId = cart.id;
     const token = await this.getAccessToken();
-    const patch = async (v: number): Promise<CtCart> => {
+
+    const patch = async (version: number): Promise<CtCart> => {
       const { data } = await apiInstance.post<CtCart>(
-        `/me/carts/${this.cart?.id ?? ''}`,
-        { version: v, actions },
+        `/me/carts/${cartId}`,
+        { version, actions },
         {
           headers: { Authorization: `Bearer ${token}` },
           params: { expand: 'discountCodes[*].discountCode' },
@@ -431,7 +417,7 @@ export default class CartUI {
     };
 
     try {
-      this.cart = await patch(this.cart.version);
+      this.cart = await patch(cart.version);
       this.updateDiscountStateFromCart();
       this.render();
     } catch (error) {
@@ -444,7 +430,7 @@ export default class CartUI {
           return;
         }
       }
-      console.error(error);
+      throw error;
     }
   }
 
