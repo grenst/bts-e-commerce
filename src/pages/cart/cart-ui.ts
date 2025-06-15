@@ -163,24 +163,41 @@ export default class CartUI {
   }
 
   private renderEmpty(): void {
-    this.container.append(
-      createElement({
-        tag: 'p',
-        classes: ['empty-cart'],
-        text: 'Your cart is empty 🤷‍♂️',
-      })
-    );
+    const emptyContainer = createElement({
+      tag: 'div',
+      classes: ['empty-cart'],
+    });
+
+    const icon = createElement({
+      tag: 'div',
+      classes: ['empty-icon'],
+      text: '🛒',
+    });
+
+    const message = createElement({
+      tag: 'h2',
+      classes: ['empty-message'],
+      text: 'Your cart is empty',
+    });
+
+    const subtitle = createElement({
+      tag: 'p',
+      classes: ['empty-subtitle'],
+      text: 'Add some products to get started',
+    });
 
     const button = createElement({
       tag: 'button',
       classes: ['go-shopping'],
-      text: 'Go shopping',
+      text: 'Start Shopping',
     });
-    button.addEventListener(
-      'click',
-      () => (globalThis.location.hash = '/catalog')
-    );
-    this.container.append(button);
+
+    button.addEventListener('click', () => {
+      globalThis.location.hash = '/catalog';
+    });
+
+    emptyContainer.append(icon, message, subtitle, button);
+    this.container.append(emptyContainer);
   }
 
   private renderItem(ct: CtLineItem): void {
@@ -214,38 +231,72 @@ export default class CartUI {
     const tax = this.cart.totalPrice.centAmount - subtotal;
 
     const summary = createElement({ tag: 'div', classes: ['cart-summary'] });
-    summary.append(
-      createElement({ tag: 'div', text: `Subtotal: ${formatPrice(subtotal)}` })
+
+    // Subtotal row
+    const subtotalRow = createElement({
+      tag: 'div',
+      classes: ['summary-row'],
+    });
+    subtotalRow.append(
+      createElement({ tag: 'span', text: 'Subtotal' }),
+      createElement({ tag: 'span', text: formatPrice(subtotal) })
     );
-    summary.append(
-      createElement({ tag: 'div', text: `Tax (19 %): ${formatPrice(tax)}` })
+
+    // Tax row
+    const taxRow = createElement({
+      tag: 'div',
+      classes: ['summary-row'],
+    });
+    taxRow.append(
+      createElement({ tag: 'span', text: 'Tax (19%)' }),
+      createElement({ tag: 'span', text: formatPrice(tax) })
     );
-    summary.append(
+
+    // Total row
+    const totalRow = createElement({
+      tag: 'div',
+      classes: ['summary-row', 'total'],
+    });
+    totalRow.append(
+      createElement({ tag: 'span', text: 'Total' }),
       createElement({
-        tag: 'div',
-        classes: ['total'],
-        text: `Total: ${formatPrice(this.cart.totalPrice.centAmount)}`,
+        tag: 'span',
+        text: formatPrice(this.cart.totalPrice.centAmount),
       })
     );
 
+    // Checkout button
+    const checkoutAttributes: Record<string, string> = {};
+    if (this.cart.lineItems.length === 0) {
+      checkoutAttributes['disabled'] = 'true';
+    }
+
     const checkout = createElement({
       tag: 'button',
-      classes: [
-        'mt-4',
-        'w-full',
-        'py-2',
-        'rounded-md',
-        'text-white',
+      classes: ['checkout-button'],
+      attributes: checkoutAttributes,
+      text:
         this.cart.lineItems.length > 0
-          ? 'bg-black'
-          : 'bg-gray-400 cursor-not-allowed',
-      ],
-      text: 'Proceed to checkout',
+          ? 'Proceed to Checkout'
+          : 'Cart is Empty',
     });
-    if (this.cart.lineItems.length > 0)
-      checkout.addEventListener('click', () => alert('Not implemented'));
-    summary.append(checkout);
 
+    if (this.cart.lineItems.length > 0) {
+      checkout.addEventListener('click', () => {
+        // Add loading state
+        checkout.textContent = 'Processing...';
+        checkout.setAttribute('disabled', 'true');
+
+        // Simulate checkout process
+        setTimeout(() => {
+          alert('Checkout functionality not implemented yet');
+          checkout.textContent = 'Proceed to Checkout';
+          checkout.removeAttribute('disabled');
+        }, 1000);
+      });
+    }
+
+    summary.append(subtotalRow, taxRow, totalRow, checkout);
     this.container.append(summary);
   }
 

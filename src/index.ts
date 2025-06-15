@@ -1,9 +1,15 @@
 import { Buffer } from 'buffer/';
-interface WindowWithBuffer extends Window {
-  Buffer: typeof Buffer;
+
+declare global {
+  interface Window {
+    Buffer: typeof Buffer;
+  }
 }
 
-(globalThis as unknown as WindowWithBuffer).Buffer = Buffer;
+// The Buffer polyfill doesn't implement all Node.js Buffer methods
+// but we only need basic functionality in the browser
+// @ts-ignore: Buffer polyfill doesn't implement full Node.js API
+window.Buffer = Buffer;
 import '@styles/global.scss';
 import '@styles/tailwind.css';
 import './animations/gsap-init';

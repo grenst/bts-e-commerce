@@ -6,6 +6,7 @@ function format(cents: number): string {
     currency: 'EUR',
   }).format(cents / 100);
 }
+
 export interface LineItem {
   id: string;
   productId: string;
@@ -30,116 +31,184 @@ export function createCartItem(
       'cart-item',
       'grid',
       'grid-cols-1',
-      'md:grid-cols-[60px_2fr_1fr_auto]',
+      'md:grid-cols-[80px_1fr_auto_auto]',
       'gap-4',
       'items-center',
     ],
   });
 
-  /* image */
-  root.append(
-    createElement({
-      tag: 'img',
-      attributes: { src: item.imageUrl, alt: item.name },
-      classes: ['w-16', 'h-16', 'object-cover', 'rounded-md'],
-    })
-  );
+  // Product image with better styling
+  const imageWrapper = createElement({
+    tag: 'div',
+    classes: ['flex', 'justify-center', 'md:justify-start'],
+  });
 
-  /* name + volume */
-  const details = createElement({ tag: 'div', classes: ['flex', 'flex-col'] });
-  details.append(
-    createElement({ tag: 'span', classes: ['font-medium'], text: item.name })
-  );
-  details.append(
-    createElement({
-      tag: 'span',
-      classes: ['text-sm', 'text-gray-500'],
-      text: item.volume,
-    })
-  );
+  const image = createElement({
+    tag: 'img',
+    attributes: {
+      src: item.imageUrl || '/placeholder-product.jpg',
+      alt: item.name,
+      loading: 'lazy',
+    },
+    classes: ['cart-item-image'],
+  });
+
+  // Handle image load errors
+  image.addEventListener('error', () => {
+    image.setAttribute(
+      'src',
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjFGNUY5Ii8+CjxwYXRoIGQ9Ik0yNCAzMkw0MCA0OEw1NiAzMiIgc3Ryb2tlPSIjOTRBM0I4IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K'
+    );
+  });
+
+  imageWrapper.append(image);
+  root.append(imageWrapper);
+
+  // Product details with improved typography
+  const details = createElement({
+    tag: 'div',
+    classes: ['cart-item-details', 'min-w-0'],
+  });
+
+  const nameElement = createElement({
+    tag: 'h3',
+    classes: ['item-name'],
+    text: item.name,
+  });
+
+  const volumeElement = createElement({
+    tag: 'p',
+    classes: ['item-volume'],
+    text: item.volume || 'Standard size',
+  });
+
+  details.append(nameElement, volumeElement);
   root.append(details);
 
-  /* qty controls */
+  // Quantity controls with better UX
+  const qtyWrapper = createElement({
+    tag: 'div',
+    classes: ['flex', 'justify-center', 'md:justify-start'],
+  });
+
   const qtyBox = createElement({
     tag: 'div',
-    classes: ['flex', 'items-center'],
+    classes: ['quantity-controls'],
   });
+
   const minus = createElement({
     tag: 'button',
-    classes: [
-      'w-8',
-      'h-8',
-      'border',
-      'border-gray-300',
-      'rounded-l-md',
-      'bg-gray-50',
-      'hover:bg-gray-100',
-    ],
+    attributes: {
+      type: 'button',
+      'aria-label': 'Decrease quantity',
+      disabled: item.quantity <= 1 ? 'true' : '',
+    },
     text: '−',
   });
+
   const qtyDisplay = createElement({
     tag: 'span',
-    classes: [
-      'w-10',
-      'h-8',
-      'flex',
-      'items-center',
-      'justify-center',
-      'border-y',
-      'border-gray-300',
-    ],
+    classes: ['quantity-display'],
     text: String(item.quantity),
   });
+
   const plus = createElement({
     tag: 'button',
-    classes: [
-      'w-8',
-      'h-8',
-      'border',
-      'border-gray-300',
-      'rounded-r-md',
-      'bg-gray-50',
-      'hover:bg-gray-100',
-    ],
+    attributes: {
+      type: 'button',
+      'aria-label': 'Increase quantity',
+    },
     text: '+',
   });
-  qtyBox.append(minus, qtyDisplay, plus);
-  root.append(qtyBox);
 
-  /* subtotal + remove */
-  const priceBox = createElement({
+  qtyBox.append(minus, qtyDisplay, plus);
+  qtyWrapper.append(qtyBox);
+  root.append(qtyWrapper);
+
+  // Price and remove section
+  const priceWrapper = createElement({
     tag: 'div',
-    classes: ['flex', 'items-center', 'gap-4'],
+    classes: ['cart-item-price'],
   });
+
   const subtotal = createElement({
     tag: 'span',
-    classes: ['font-medium'],
+    classes: ['subtotal'],
     text: format(item.price * item.quantity),
   });
+
   const removeButton = createElement({
     tag: 'button',
-    classes: ['text-red-600', 'hover:text-red-800'],
-    text: '🗑',
+    classes: ['remove-button'],
+    attributes: {
+      type: 'button',
+      'aria-label': `Remove ${item.name} from cart`,
+    },
+    text: '🗑️',
   });
-  priceBox.append(subtotal, removeButton);
-  root.append(priceBox);
 
-  /* mobile layout */
-  root.append(
-    createElement({
-      tag: 'div',
-      classes: ['md:hidden', 'col-span-full', 'h-px', 'bg-gray-200', 'mt-4'],
-    })
-  );
+  priceWrapper.append(subtotal, removeButton);
+  root.append(priceWrapper);
 
-  /* handlers */
-  minus.addEventListener('click', () => {
-    if (item.quantity > 1) actions.onQuantityChange(item.quantity - 1);
+  // Event handlers with loading states
+  const updateQuantity = (newQty: number) => {
+    if (newQty < 1) return;
+
+    // Add updating state
+    root.classList.add('updating');
+    qtyDisplay.textContent = String(newQty);
+    subtotal.textContent = format(item.price * newQty);
+
+    // Update disabled state for minus button
+    minus.setAttribute('disabled', newQty <= 1 ? 'true' : '');
+
+    actions.onQuantityChange(newQty);
+
+    // Remove updating state after a short delay
+    setTimeout(() => {
+      root.classList.remove('updating');
+    }, 500);
+  };
+
+  minus.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (item.quantity > 1) {
+      updateQuantity(item.quantity - 1);
+    }
   });
-  plus.addEventListener('click', () =>
-    actions.onQuantityChange(item.quantity + 1)
-  );
-  removeButton.addEventListener('click', () => actions.onRemove());
+
+  plus.addEventListener('click', (event) => {
+    event.preventDefault();
+    updateQuantity(item.quantity + 1);
+  });
+
+  removeButton.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    // Add fade out animation
+    root.style.transition = 'all 0.3s ease';
+    root.style.opacity = '0.5';
+    root.style.transform = 'scale(0.95)';
+
+    // Confirm removal for accessibility
+    if (confirm(`Remove ${item.name} from your cart?`)) {
+      actions.onRemove();
+    } else {
+      // Restore if cancelled
+      root.style.opacity = '1';
+      root.style.transform = 'scale(1)';
+    }
+  });
+
+  // Add keyboard navigation support
+  for (const button of [minus, plus, removeButton]) {
+    button.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        button.click();
+      }
+    });
+  }
 
   return root;
 }
