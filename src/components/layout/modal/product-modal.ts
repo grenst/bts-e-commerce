@@ -720,7 +720,7 @@ export function createProductModal(): ProductModal {
       tag: 'button',
       parent: submitOrder,
       text: 'ADD TO CART',
-      classes: ['order-cart', 'w-20'],
+      classes: ['order-cart', 'w-25'],
     }) as HTMLButtonElement;
 
     const price = createElement({

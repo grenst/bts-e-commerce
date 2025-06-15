@@ -1,24 +1,29 @@
 import { Buffer } from 'buffer/';
-interface WindowWithBuffer extends Window {
-  Buffer: typeof Buffer;
+
+declare global {
+  interface Window {
+    Buffer: typeof Buffer;
+  }
 }
 
-(globalThis as unknown as WindowWithBuffer).Buffer = Buffer;
+// The Buffer polyfill doesn't implement all Node.js Buffer methods
+// but we only need basic functionality in the browser
+// @ts-ignore: Buffer polyfill doesn't implement full Node.js API
+window.Buffer = Buffer;
 import '@styles/global.scss';
 import '@styles/tailwind.css';
-import './animations/gsap-init'; // Initialize GSAP and plugins
-import { createAnimatedBackground } from './components/layout/animated-background'; // Import createAnimatedBackground
+import './animations/gsap-init';
+import { createAnimatedBackground } from './components/layout/animated-background';
 import {
   createHeaderElements,
   updateUserNavOnHeader,
-} from './components/layout/header/header'; // Import header functions
-
+} from './components/layout/header/header';
 import svgSpriteElement from './sources/svg-sprite';
 import createFooter from './components/layout/footer/footer';
 import { body, createEl as createElement } from './utils/element-utilities';
 import { createRouter, Route } from './router/router';
 import createHomePage from './pages/home/home';
-import { createLoginPage } from './pages/auth/auth-page';
+import createAuthPage from './pages/auth/auth-page';
 import createProfilePage from './pages/profile/profile';
 import createAboutPage from './pages/about/about-page';
 import {
@@ -66,7 +71,7 @@ const routes: Route[] = [
   },
   {
     path: '/login',
-    component: createLoginPage,
+    component: createAuthPage,
     preserveState: false, // можно и не ставить
   },
   {
@@ -121,7 +126,7 @@ createLoadingIndicator(body);
 addNotification('info', 'Welcome to the E-commerce App!');
 
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 618) {
+  if (window.scrollY > 118) {
     header.classList.add('bg-white/50');
     header.classList.remove('bg-transparent');
     mainTitle.classList.add('text-xl');

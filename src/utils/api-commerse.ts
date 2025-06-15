@@ -1,4 +1,4 @@
-import { createClient, type Middleware } from '@commercetools/sdk-client-v2'; // Import Middleware type
+import { createClient } from '@commercetools/sdk-client-v2';
 import { createAuthMiddlewareForClientCredentialsFlow } from '@commercetools/sdk-middleware-auth';
 import { createHttpMiddleware } from '@commercetools/sdk-middleware-http';
 import {
@@ -57,8 +57,7 @@ export function createCommercetoolsClient() {
   });
 
   const client = createClient({
-    // results to Middleware type
-    middlewares: [authMiddleware as Middleware, httpMiddleware as Middleware],
+    middlewares: [authMiddleware, httpMiddleware],
   });
 
   return client;

@@ -96,9 +96,11 @@ function validatePersonalInfo(data: {
   } catch (error) {
     const formattedErrors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
-      for (const error_ of error.errors) {
-        const field = error_.path[0] as string;
-        formattedErrors[field] = error_.message;
+      for (const errorItem of error.errors) {
+        const firstPath = errorItem.path[0];
+        if (typeof firstPath === 'string') {
+          formattedErrors[firstPath] = errorItem.message;
+        }
       }
     }
     return { success: false, errors: formattedErrors };
@@ -160,7 +162,10 @@ function createFormField(
       'bac-col',
     ],
     parent: wrapper,
-  }) as HTMLInputElement;
+  });
+  if (!(input instanceof HTMLInputElement)) {
+    throw new TypeError('Created element is not an input');
+  }
   return input;
 }
 
@@ -409,7 +414,7 @@ export default async function createProfilePage(
     } catch (error) {
       addNotification(
         'error',
-        (error as Error).message || 'Failed to update profile'
+        error instanceof Error ? error.message : 'Failed to update profile'
       );
     } finally {
       savePersonalButton.textContent = 'Save Personal Info';
@@ -461,12 +466,15 @@ export default async function createProfilePage(
       triggerHeaderUpdate(); // Update header navigation
       return;
     } catch (error) {
-      if ((error as Error).message.includes('InvalidCredentials')) {
+      if (
+        error instanceof Error &&
+        error.message.includes('InvalidCredentials')
+      ) {
         addNotification('error', 'Current password is incorrect');
       } else {
         addNotification(
           'error',
-          (error as Error).message ?? 'Failed to update password'
+          error instanceof Error ? error.message : 'Failed to update password'
         );
       }
     } finally {
@@ -512,17 +520,16 @@ export default async function createProfilePage(
       parent: contextSelector,
     });
 
-    const input = createElement({
-      tag: 'input',
-      attributes: {
-        type: 'radio',
-        name: 'addressContext',
-        value,
-        ...(checked && { checked: '' }),
-      },
-      classes: ['peer', 'hidden'],
-      parent: wrapper,
-    }) as HTMLInputElement;
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'addressContext';
+    input.value = value;
+    if (checked) {
+      input.checked = true;
+    }
+    input.classList.add('peer', 'hidden');
+    wrapper.append(input);
+    return input;
 
     createElement({
       tag: 'span',
@@ -620,18 +627,25 @@ export default async function createProfilePage(
         classes: ['flex', 'justify-end', 'gap-2', 'mt-2'],
         parent: card,
       });
-      const editButton = createElement({
-        tag: 'button',
-        text: 'edit',
-        classes: ['text-xs', 'italic', 'text-blue-600', 'hover:underline'],
-        parent: actions,
-      }) as HTMLButtonElement;
-      const removeButton = createElement({
-        tag: 'button',
-        text: 'remove',
-        classes: ['text-xs', 'italic', 'text-red-600', 'hover:underline'],
-        parent: actions,
-      }) as HTMLButtonElement;
+      const editButton = document.createElement('button');
+      editButton.textContent = 'edit';
+      editButton.classList.add(
+        'text-xs',
+        'italic',
+        'text-blue-600',
+        'hover:underline'
+      );
+      actions.append(editButton);
+
+      const removeButton = document.createElement('button');
+      removeButton.textContent = 'remove';
+      removeButton.classList.add(
+        'text-xs',
+        'italic',
+        'text-red-600',
+        'hover:underline'
+      );
+      actions.append(removeButton);
 
       editButton.addEventListener('click', () => handleEditAddress(address));
       removeButton.addEventListener('click', () =>
@@ -654,7 +668,7 @@ export default async function createProfilePage(
       classes: ['block', 'text-sm', 'mb-1', 'font-medium', 'text-gray-700'],
       parent: row,
     });
-    return createElement({
+    const input = createElement({
       tag: 'input',
       classes: [
         'text-2xl',
@@ -669,7 +683,11 @@ export default async function createProfilePage(
       ],
       parent: row,
       attributes: { id: key, name: String(key), value: value ?? '' },
-    }) as HTMLInputElement;
+    });
+    if (!(input instanceof HTMLInputElement)) {
+      throw new TypeError('Created element is not an input');
+    }
+    return input;
   }
 
   function openEditAddressModal(addr: Address, context_: AddressContext): void {
@@ -786,7 +804,10 @@ export default async function createProfilePage(
           'self-start',
         ],
         parent: form,
-      }) as HTMLButtonElement;
+      });
+      if (!(copyButton instanceof HTMLButtonElement)) {
+        throw new TypeError('Failed to create button');
+      }
 
       copyButton.addEventListener('click', () => {
         street.value = otherDefault.streetName ?? '';
@@ -847,7 +868,7 @@ export default async function createProfilePage(
       } catch (error) {
         addNotification(
           'error',
-          (error as Error).message || 'Failed to save address'
+          error instanceof Error ? error.message : 'Failed to save address'
         );
         saveButton.textContent = 'Save';
         saveButton.removeAttribute('disabled');
@@ -871,7 +892,7 @@ export default async function createProfilePage(
     } catch (error) {
       addNotification(
         'error',
-        (error as Error).message || 'Failed to remove address'
+        error instanceof Error ? error.message : 'Failed to remove address'
       );
     }
   };

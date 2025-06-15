@@ -4,8 +4,8 @@
   height: 20px;
   position: absolute;
   right: 20px;
-  top: 20px;
-  transform: translate(50%, -50%);
+  // top: 50%;
+  transform: translateY(50%);
   cursor: pointer;
   color: var( --color-gray-600);
 

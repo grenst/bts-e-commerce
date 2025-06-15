@@ -2,9 +2,8 @@ import {
   createEl as createElement,
   removeAllChild,
 } from '../utils/element-utilities';
-// import { createCatalogPage } from '../pages/catalog/catalog';
-// import { ModalManager } from '../pages/catalog/catalog';
-// import { productModal } from '../pages/catalog/catalog';
+import { createCatalogPage } from '../pages/catalog/catalog';
+import { createCartPage } from '../pages/cart/cart';
 import { ModalManager } from '../components/layout/modal/product-modal';
 
 export interface Route {
@@ -236,7 +235,11 @@ export function createRouterLink(
     parent,
     classes: ['router-link', ...addClasses],
     attributes: { href: path },
-  }) as HTMLAnchorElement;
+  });
+
+  if (!(link instanceof HTMLAnchorElement)) {
+    throw new TypeError('Created element is not an HTMLAnchorElement');
+  }
 
   link.addEventListener('click', (event_) => {
     event_.preventDefault();
@@ -251,11 +254,16 @@ let routerInstance: Router | undefined;
 export function createRouter(container: HTMLElement): Router {
   if (!routerInstance) {
     routerInstance = new Router(container);
-    // routerInstance.addRoute({
-    //   path: '/catalog',
-    //   component: createCatalogPage,
-    //   preserveState: true,
-    // });
+    routerInstance.addRoute({
+      path: '/catalog',
+      component: createCatalogPage,
+      preserveState: true,
+    });
+    routerInstance.addRoute({
+      path: '/cart',
+      component: createCartPage,
+      preserveState: true,
+    });
   }
   return routerInstance;
 }

@@ -23,62 +23,8 @@ export function createPageContainer(parent: HTMLElement) {
   });
 }
 
-export function createTitleLogin(parent: HTMLElement) {
-  return createElement({
-    tag: 'h1',
-    text: 'Login',
-    parent,
-    classes: [
-      'text-2xl',
-      'font-bold',
-      'mb-6',
-      'z-30',
-      'text-center',
-      'text-gray-800',
-      "before:content-['']",
-      'before:absolute',
-      'before:h-6',
-      'before:w-20',
-      'before:bg-yellow-400',
-      'before:-z-1',
-      'login-name',
-    ],
-  });
-}
-
-// function createTitle(
-//   text: string,
-//   parent: HTMLElement,
-//   addClasses: string[] = []
-//   // tag = 'h1'
-// ): HTMLHeadElement {
-//   return createElement({
-//     tag: 'h1',
-//     text,
-//     parent,
-//     classes: [
-//       'text-3xl',
-//       'font-bold',
-//       'z-1',
-//       'text-center',
-//       'text-gray-800',
-//       "before:content-['']",
-//       'before:absolute',
-//       'before:h-6',
-//       // 'before:w-full',
-//       'before:w-[calc(100%+0.8rem)]',
-//       'before:bg-yellow-400',
-//       'before:-z-1',
-//       'absolute',
-//       'top-11',
-//       // 'top-6',
-//       'left-1/2',
-//       '-translate-x-1/2',
-//       'login-name',
-//       ...addClasses,
-//     ],
-//   }) as HTMLHeadElement;
-// }
+// createTitleLogin function removed.
+// Commented out createTitle function removed.
 
 export function createInputField({
   container,
@@ -107,7 +53,7 @@ export function createInputField({
     attributes: { for: id },
   });
 
-  const input = createElement({
+  const input = createElement<HTMLInputElement>({
     tag: 'input',
     parent: fieldContainer,
     classes: [
@@ -124,7 +70,7 @@ export function createInputField({
       'focus:border-b-10',
     ],
     attributes: { type, id, placeholder },
-  }) as HTMLInputElement;
+  });
 
   const error = createElement({
     tag: 'p',
@@ -167,7 +113,7 @@ export function createPasswordField({
     classes: ['relative'],
   });
 
-  const input = createElement({
+  const input = createElement<HTMLInputElement>({
     tag: 'input',
     parent: inputContainer,
     classes: [
@@ -182,13 +128,14 @@ export function createPasswordField({
       'focus:pb-2',
       'focus:mb-1',
       'pr-8',
+      'relative',
     ],
     attributes: {
       type: 'password',
       id,
       placeholder,
     },
-  }) as HTMLInputElement;
+  });
 
   createEyeToggleButton(inputContainer, input);
   // const eyeButton = createEyeToggleButton(inputContainer, input);

@@ -27,8 +27,8 @@ function createElement(options: CreateElementOptions): HTMLElement {
   element.classList.add(...classes);
 
   if (attributes) {
-    for (const key of Object.keys(attributes)) {
-      element.setAttribute(key, attributes[key]);
+    for (const [key, value] of Object.entries(attributes)) {
+      element.setAttribute(key, String(value));
     }
   }
 
@@ -131,10 +131,7 @@ export {
   createSvgUse,
   removeAllChild,
   shuffleArray,
-  // getRandomIntegerArr,
   createCounterID,
   getMaxID,
   getUUID,
-  // getRandomColor,
-  // rgbToHex,
 };

@@ -58,7 +58,7 @@ export const AuthService = {
         .getState()
         .addNotification(
           'error',
-          `Registration failed: ${(error as Error).message}`
+          `Registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
       return false;
     }
@@ -112,6 +112,17 @@ export const AuthService = {
     } catch (error) {
       debug('Refresh error', error);
       await this.logout();
+      return undefined;
+    }
+  },
+
+  async getAnonymousToken(): Promise<string | undefined> {
+    try {
+      const token = await getAnonymousToken();
+      persistTokens(token);
+      return token.access_token;
+    } catch (error) {
+      debug('Get anonymous token error', error);
       return undefined;
     }
   },

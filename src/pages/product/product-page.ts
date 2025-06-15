@@ -253,7 +253,7 @@ export function createProductModal(): ProductModal {
         parent: quantity,
         text: label,
         classes: ['order-btn', 'm-[1px]'],
-      }) as HTMLButtonElement;
+      });
 
     const minus = button('−');
     const qtyElement = h({
@@ -280,7 +280,11 @@ export function createProductModal(): ProductModal {
     const update = () => {
       qtyElement.textContent = String(qty);
       price.textContent = `${(unitPrice * qty).toFixed(2)} Eur`;
-      minus.disabled = qty <= 1;
+      if (qty <= 1) {
+        minus.setAttribute('disabled', '');
+      } else {
+        minus.removeAttribute('disabled');
+      }
     };
     plus.addEventListener('click', () => {
       qty += 1;

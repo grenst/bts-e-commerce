@@ -25,10 +25,17 @@ export interface UIState {
   resetStore: () => void;
 }
 
-const initialState = {
+const initialState: UIState = {
   isLoading: false,
   notifications: [],
-  theme: 'light' as 'light' | 'dark',
+  theme: 'light',
+  setLoading: () => {},
+  addNotification: () => '',
+  removeNotification: () => {},
+  clearNotifications: () => {},
+  toggleTheme: () => {},
+  setTheme: () => {},
+  resetStore: () => {},
 };
 
 // Use createStore for vanilla JS
