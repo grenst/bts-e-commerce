@@ -71,6 +71,13 @@ export default function createAboutInfoPage(container: HTMLElement): void {
   });
   containerAbout.append(titleAbout);
 
+  const prefaceH3 = createElement({
+    tag: 'h3',
+    text: 'With Bubble Tea Shop, choose the type of tea, milk, syrups, toppings, sweetness level and temperature - and get a unique drink created by you! Try it right now and feel the taste of real creativity in every sip!',
+    classes: ['preface-h3'],
+  });
+  containerAbout.append(prefaceH3);
+
   const pIntroduction = createElement({
     tag: 'p',
     text: 'Create your perfect Bubble Tea 🧋 online!',
@@ -95,13 +102,6 @@ export default function createAboutInfoPage(container: HTMLElement): void {
     classes: ['container-text-preface'],
   });
   prefaceContainer.append(containerTextPreface);
-
-  const prefaceH3 = createElement({
-    tag: 'h3',
-    text: 'With Bubble Tea Shop, choose the type of tea, milk, syrups, toppings, sweetness level and temperature - and get a unique drink created by you! Try it right now and feel the taste of real creativity in every sip!',
-    classes: ['preface-h3'],
-  });
-  containerTextPreface.append(prefaceH3);
 
   const descriptionUl = createElement({
     tag: 'ul',

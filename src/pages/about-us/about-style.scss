@@ -23,7 +23,6 @@
   justify-content: space-between;
   flex-direction: column;
   margin: 0 auto;
-  padding: 0.3rem;
 }
 
 .preface-container-us {
@@ -45,14 +44,6 @@
 .preface-h3 {
   color: #718096;
   margin:0.8rem 0;
-}
-
-.container-img-preface {
-  width: 35%;
-}
-
-.ImgPreface {
- width: 20rem;
 }
 
 .description-ul-us {
@@ -327,10 +318,6 @@
 
 .sergei-link:hover::before {
   content: '->';
-}
-
-.img-technologies {
-  width: 60rem;
 }
 
 .objectives-project-title-container {

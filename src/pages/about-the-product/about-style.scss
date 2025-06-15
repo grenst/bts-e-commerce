@@ -15,6 +15,7 @@
   font-size: 1rem;
   color: #2d3748;
   font-style: italic;
+  text-align: center;
 }
 
 .about-info-company {
@@ -30,31 +31,40 @@
   justify-content: space-between;
   align-items: center;
   margin: 0 1rem;
+  @media (max-width: 769px) {
+    flex-direction: column;
+  }
 }
 
 .container-text-preface {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 60%;
 }
 
 .preface-h3 {
   color: #718096;
   margin:0.8rem 0;
+  width: 60%;
 }
 
-.container-img-preface {
-  width: 35%;
-}
+// .container-img-preface {
+//   width: 35%;
+// }
 
 .ImgPreface {
- width: 20rem;
+ width: auto;
+  @media (max-width: 769px) {
+    width: 15rem;
+  }
 }
 
 .description-ul {
   display: flex;
   flex-direction: column;
+  @media (max-width: 769px) {
+    text-align: center;
+  }
 }
 
 .title-description {
@@ -75,7 +85,9 @@
   justify-content: space-between;
   align-items: center;
   margin: 0 1rem;
-  width: 90%;
+   @media (max-width: 769px) {
+    flex-direction: column-reverse;
+  }
 }
 
 .container-technologies-text {
@@ -83,7 +95,7 @@
   justify-content: center;
   flex-direction: column;
   align-items: center;
-  width: 55%;
+  padding: 0 1rem;
 }
 
 .technologies-Title-h3 {
@@ -96,16 +108,19 @@
   font-size: 0.8rem;
   color: #718096;
   margin: 0.8rem;
-  padding: 0.3rem;
   text-align: end;
-}
-
-.container-img-technologies {
-  width: 35%;
+  @media (max-width: 769px) {
+    text-align: center;
+    margin: 0%;
+    width: 100%;
+  }
 }
 
 .img-technologies {
   width: 60rem;
+   @media (max-width: 769px) {
+    width: 10rem;
+  }
 }
 
 .objectives-project-title-container {
