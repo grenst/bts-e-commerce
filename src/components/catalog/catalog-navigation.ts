@@ -1,24 +1,22 @@
 import './search-input.scss';
 import searchIconPath from '@/assets/images/search.svg';
-import { createEl as createElement } from '../../utils/element-utilities';
+import {
+  createEl as createElement,
+  createHtmlElement,
+} from '../../utils/element-utilities';
 
 export function createCatalogNavigationElement(): HTMLElement {
-  // Create navigation container
   const nav = createElement({
     tag: 'div',
     attributes: {
       class: 'space-x-3 filter_atributes justify-items-center items-center',
-      // 'flex space-x-3 w-auto max-[680px]:w-full justify-items-center items-center justify-center p-4 max-[680px]:p-0 max-[680px]:pb-2 bg-white shadow-md flex-col gap-2 min-[680px]:flex-row min-[680px]:gap-0',
     },
   });
 
-  // Create search container
   const searchContainer = createElement({
     tag: 'div',
     attributes: { class: 'search' },
   });
-
-  // Create SVG icon with new structure!!!
 
   const iconImg = createElement({
     tag: 'img',
@@ -30,16 +28,6 @@ export function createCatalogNavigationElement(): HTMLElement {
   });
 
   searchContainer.append(iconImg);
-  // const svg = createElement({
-  //   tag: 'svg',
-  //   attributes: {
-  //     x: '0px',
-  //     y: '0px',
-  //     viewBox: '0 0 24 24',
-  //     width: '20px',
-  //     height: '20px'
-  //   }
-  // });
 
   const g = createElement({
     tag: 'g',
@@ -78,13 +66,11 @@ export function createCatalogNavigationElement(): HTMLElement {
   iconImg.append(g);
   searchContainer.append(iconImg);
 
-  // Create wrapper div for input
   const inputWrapper = createElement({
     tag: 'div',
   });
 
-  // Create search input
-  const searchInput = createElement({
+  const searchInput = createHtmlElement({
     tag: 'input',
     attributes: {
       class:
@@ -92,9 +78,8 @@ export function createCatalogNavigationElement(): HTMLElement {
       type: 'text',
       placeholder: 'Search your drink...',
     },
-  }) as HTMLInputElement;
+  });
 
-  // Event listeners remain unchanged
   searchInput.addEventListener('input', () => {
     const event = new CustomEvent('search-change', {
       detail: { searchTerm: searchInput.value },
@@ -105,7 +90,6 @@ export function createCatalogNavigationElement(): HTMLElement {
   inputWrapper.append(searchInput);
   searchContainer.append(inputWrapper);
 
-  // Create animated placeholder
   const placeholderText = searchInput.placeholder;
   const placeholderWords = placeholderText.split(/ +/);
   const placeholderSpansContainer = createElement({ tag: 'div' });
@@ -113,37 +97,38 @@ export function createCatalogNavigationElement(): HTMLElement {
   if (placeholderWords.length > 0) {
     for (const word of placeholderWords) {
       const span = createElement({ tag: 'span' });
-      span.innerHTML = word + '&nbsp;';
+      span.textContent = word;
+      span.append(document.createTextNode('\u00A0'));
       placeholderSpansContainer.append(span);
     }
     inputWrapper.append(placeholderSpansContainer);
   }
 
-  // Click to open search
   searchContainer.addEventListener('click', (event) => {
     if (
       event.target !== searchInput &&
-      !searchInput.contains(event.target as Node)
+      event.target instanceof Node &&
+      !searchInput.contains(event.target)
     ) {
       searchContainer.classList.add('open');
       requestAnimationFrame(() => {
         searchInput.focus();
-        // searchInput.select(); // focusing placeholder
         setTimeout(() => {
           searchInput.focus();
-        }, 800); // Focus on input field by delay- in css its .75
+        }, 800);
       });
     }
   });
 
-  // Click outside to close
   document.addEventListener('click', (event) => {
-    if (!searchContainer.contains(event.target as Node)) {
+    if (
+      event.target instanceof Node &&
+      !searchContainer.contains(event.target)
+    ) {
       searchContainer.classList.remove('open');
     }
   });
 
-  // Create filters button
   const filtersButton = createElement({
     tag: 'button',
     attributes: {
@@ -156,7 +141,6 @@ export function createCatalogNavigationElement(): HTMLElement {
     nav.dispatchEvent(new CustomEvent('filter-toggle'));
   });
 
-  // Create sort button
   const sortButton = createElement({
     tag: 'button',
     attributes: {
@@ -173,13 +157,11 @@ export function createCatalogNavigationElement(): HTMLElement {
     tag: 'div',
     attributes: {
       class: 'flex space-x-3 flex-row gap-2 filter_buttons',
-      // 'flex space-x-3 max-[400px]:w-full flex-col flex-1 gap-2 min-[400px]:flex-row min-[400px]:gap-0',
     },
   });
   buttonsContainer.append(filtersButton);
   buttonsContainer.append(sortButton);
 
-  // Add Actions button
   const actionsButton = createElement({
     tag: 'button',
     attributes: {
@@ -194,7 +176,6 @@ export function createCatalogNavigationElement(): HTMLElement {
 
   buttonsContainer.append(actionsButton);
 
-  // Add Reset button
   const resetButton = createElement({
     tag: 'button',
     attributes: {

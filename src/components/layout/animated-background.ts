@@ -1,7 +1,6 @@
 import { gsap } from 'gsap';
 import { setupBackgroundAnimations } from '../../animations/gsap-init';
 import { body, createEl as createElement } from '../../utils/element-utilities';
-// import './glass.scss';
 
 export function createAnimatedBackground(): void {
   const animatedBackgroundContainer = createElement({
@@ -26,13 +25,20 @@ export function createAnimatedBackground(): void {
     tag: 'canvas',
     attributes: { id: 'bubblesCanvas' },
     parent: animatedBackgroundContainer,
-  }) as HTMLCanvasElement;
+  });
 
-  const context = canvas.getContext('2d');
+  if (!(canvas instanceof HTMLCanvasElement)) {
+    console.error('Canvas element not found or is not an HTMLCanvasElement.');
+    return;
+  }
+
+  const canvasElement: HTMLCanvasElement = canvas;
+
+  const context = canvasElement.getContext('2d');
   if (!context) return;
 
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvasElement.width = window.innerWidth;
+  canvasElement.height = window.innerHeight;
 
   class Bubble {
     x = 0;
@@ -53,8 +59,8 @@ export function createAnimatedBackground(): void {
     }
 
     reset(): void {
-      this.x = Math.random() * canvas.width;
-      this.y = Math.random() * canvas.height;
+      this.x = Math.random() * canvasElement.width;
+      this.y = Math.random() * canvasElement.height;
       this.radius = 0;
       this.maxRadius = 50;
       this.vx = (Math.random() - 0.5) * 0.3;
@@ -128,7 +134,7 @@ export function createAnimatedBackground(): void {
 
   function animate(): void {
     if (!context) return;
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
     for (const bubble of bubbles) {
       bubble.update();
@@ -160,8 +166,8 @@ export function createAnimatedBackground(): void {
   animate();
 
   window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvasElement.width = window.innerWidth;
+    canvasElement.height = window.innerHeight;
     for (const bubble of bubbles) {
       bubble.reset();
     }

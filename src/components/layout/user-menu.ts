@@ -266,7 +266,8 @@ export function createUserDropdown(
 
       handleOutsideClick = (event_: MouseEvent) => {
         if (
-          !dropdownContainer.contains(event_.target as Node) &&
+          event_.target instanceof Node &&
+          !dropdownContainer.contains(event_.target) &&
           !dropdownMenu.classList.contains('hidden')
         ) {
           dropdownMenu.classList.add('hidden');

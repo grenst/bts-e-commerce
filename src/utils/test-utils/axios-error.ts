@@ -6,7 +6,7 @@ export function createAxiosError(
 ): AxiosError {
   const error = new AxiosError('Axios error');
 
-  error.response = {
+  const axiosResponse: AxiosResponse = {
     data: responseData,
     status,
     statusText: 'Error',
@@ -16,7 +16,8 @@ export function createAxiosError(
       url: '/mock-url',
       method: 'get',
     },
-  } as AxiosResponse;
+  };
+  error.response = axiosResponse;
 
   return error;
 }

@@ -1,8 +1,7 @@
-import { 
+import {
   createEl as createElement,
   createSvgUse,
 } from '../../utils/element-utilities';
-// import { useCustomerStore } from '../../store/customer-store';
 import './about-style.scss';
 import { gsap } from 'gsap';
 
@@ -14,11 +13,11 @@ enum TextKeys {
   RSS = 'Rss',
 }
 
-type TextVal = { key: TextKeys; val: string };
+type TextValue = { key: TextKeys; val: string };
 
 export default function createAboutUsPage(container: HTMLElement): void {
   container.innerHTML = '';
-  const big_text_container: TextVal[] = [
+  const big_text_container: TextValue[] = [
     {
       key: TextKeys.ANSWER,
       val: 'Our team works on equal terms, without strict hierarchy, We appreciate the contribution of each participant, We are building effective cooperation, Based on mutual respect and support!',
@@ -42,7 +41,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
   ];
 
   function getTextByKey(key: TextKeys): string | undefined {
-    const item = big_text_container.find((el) => el.key === key);
+    const item = big_text_container.find((element) => element.key === key);
     return item?.val;
   }
 
@@ -320,8 +319,6 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   containerImgTechnologies.append(footerLinkGithubAndrei);
 
-  //----------------------------------------------------
-
   const technologiesTitleContainerVit = createElement({
     tag: 'div',
     classes: ['technologies-title-container-about'],
@@ -420,8 +417,6 @@ export default function createAboutUsPage(container: HTMLElement): void {
     text: 'Vitali GitHub Page',
   });
   containerImgTechnologiesVit.append(footerLinkGithubVitaly);
-
-  //--------------------------------------------------------------------
 
   const technologiesTitleContainerSer = createElement({
     tag: 'div',
@@ -628,30 +623,30 @@ export default function createAboutUsPage(container: HTMLElement): void {
   const svgRSS = createSvgUse('#rss', 'about-svg_rss');
   linkRss.append(svgRSS);
 
-  const revealOrder: { el: HTMLElement, time: number }[] = [
-    { el: containerMesegUser1!, time: 1 },
-    { el: containerMesegUser2!, time: 3 },
-    { el: containerInfoUsAndreiUser1!, time: 6 },
-    { el: containerInfoUsAndreiUser2!, time: 9 },
-    { el: containerInfoUsAndreiUser22!, time: 12 },
-    { el: containerInfoUsAndreiUser222!, time: 15 },
-    { el: containerTechnologiesTextVit!, time: 18 },
-    { el: containerTechnologiesTextVit1!, time: 21 },
-    { el: containerTechnologiesTextVit11!, time: 24 },
-    { el: containerTechnologiesTextSer!, time: 27 },
-    { el: containerTechnologiesTextSer1!, time: 30 },
-    { el: containerTechnologiesTextSer11!, time: 33 },
-    { el: containeriRss!, time: 36 },
-    { el: userRssUl!, time: 39 },
-    { el: userRssUl1!, time: 42 },
+  const revealOrder: { element: HTMLElement; time: number }[] = [
+    { element: containerMesegUser1, time: 1 },
+    { element: containerMesegUser2, time: 3 },
+    { element: containerInfoUsAndreiUser1, time: 6 },
+    { element: containerInfoUsAndreiUser2, time: 9 },
+    { element: containerInfoUsAndreiUser22, time: 12 },
+    { element: containerInfoUsAndreiUser222, time: 15 },
+    { element: containerTechnologiesTextVit, time: 18 },
+    { element: containerTechnologiesTextVit1, time: 21 },
+    { element: containerTechnologiesTextVit11, time: 24 },
+    { element: containerTechnologiesTextSer, time: 27 },
+    { element: containerTechnologiesTextSer1, time: 30 },
+    { element: containerTechnologiesTextSer11, time: 33 },
+    { element: containeriRss, time: 36 },
+    { element: userRssUl, time: 39 },
+    { element: userRssUl1, time: 42 },
   ];
 
   gsap.set(
-    revealOrder.map((item) => item.el),
+    revealOrder.map((item) => item.element),
     {
       autoAlpha: 0,
-      x: (_index, el: HTMLElement) =>
-        el.classList.contains('container-meseg-user-1') ? -100 : 100,
+      x: (_index, element: HTMLElement) =>
+        element.classList.contains('container-meseg-user-1') ? -100 : 100,
     }
   );
 
@@ -662,9 +657,9 @@ export default function createAboutUsPage(container: HTMLElement): void {
     },
   });
 
-  revealOrder.forEach(({ el, time }) => {
+  for (const { element, time } of revealOrder) {
     tl.to(
-      el,
+      element,
       {
         duration: 2.5,
         autoAlpha: 1,
@@ -673,5 +668,5 @@ export default function createAboutUsPage(container: HTMLElement): void {
       },
       time
     );
-  });
+  }
 }

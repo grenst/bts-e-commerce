@@ -16,8 +16,8 @@ export const authInstance = axios.create({
   baseURL: environmentVariables.AUTH_URL,
   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   auth: {
-    username: environmentVariables.CLIENT_ID,
-    password: environmentVariables.CLIENT_SECRET,
+    username: environmentVariables.CLIENT_ID ?? '',
+    password: environmentVariables.CLIENT_SECRET ?? '',
   },
 });
 

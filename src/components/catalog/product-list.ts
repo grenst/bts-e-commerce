@@ -1,13 +1,7 @@
 import { Product, Category } from '../../types/catalog-types';
 import { createProductCardElement } from '../features/product-card';
 import { createEl as createElement } from '../../utils/element-utilities';
-import {
-  // createProductModal,
-  // ProductModal,
-  ModalManager,
-} from '../../components/layout/modal/product-modal';
-
-// let productModal: ProductModal;
+import { ModalManager } from '../../components/layout/modal/product-modal';
 
 export function createProductListElement(
   products: Product[],
@@ -19,15 +13,8 @@ export function createProductListElement(
   });
 
   // Initialize product modal if not already initialized
-  // if (!productModal) {
-  //   productModal = createProductModal();
-  //   document.body.append(productModal.modalElement);
-  //   productModal.modalElement.classList.add('third');
-  // }
 
   ModalManager.getModal();
-  // const productModal = ModalManager.getModal();
-  // productModal.modalElement.classList.add('third');
 
   // Handle empty product list
   if (products.length === 0) {
@@ -55,7 +42,10 @@ export function createProductListElement(
     (entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) {
-          const placeholder = entry.target as HTMLElement;
+          if (!(entry.target instanceof HTMLElement)) {
+            return;
+          }
+          const placeholder: HTMLElement = entry.target;
           const product = placeholder.dataset.product
             ? JSON.parse(placeholder.dataset.product)
             : undefined;
@@ -90,11 +80,6 @@ export function createProductListElement(
         Object.values(category.name)[0] || // любая доступная локализация
         'Unnamed category'
       : 'Uncategorized';
-
-    // Debug logging to verify category lookup
-    if (!category) {
-      console.warn(`Category not found for ID: ${categoryId}`);
-    }
 
     // Create category header
     const header = createElement({

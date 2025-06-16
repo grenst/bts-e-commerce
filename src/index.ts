@@ -1,15 +1,15 @@
 import { Buffer } from 'buffer/';
 
 declare global {
-  interface Window {
+  interface GlobalThis {
     Buffer: typeof Buffer;
   }
 }
 
 // The Buffer polyfill doesn't implement all Node.js Buffer methods
 // but we only need basic functionality in the browser
-// @ts-ignore: Buffer polyfill doesn't implement full Node.js API
-window.Buffer = Buffer;
+// @ts-expect-error: Buffer polyfill doesn't implement full Node.js API
+globalThis.Buffer = Buffer;
 import '@styles/global.scss';
 import '@styles/tailwind.css';
 import './animations/gsap-init';
@@ -131,8 +131,8 @@ createLoadingIndicator(body);
 
 addNotification('info', 'Welcome to the E-commerce App!');
 
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 118) {
+globalThis.addEventListener('scroll', () => {
+  if (globalThis.scrollY > 118) {
     header.classList.add('bg-white/50');
     header.classList.remove('bg-transparent');
     mainTitle.classList.add('text-xl');

@@ -1,10 +1,7 @@
 import { apiInstance } from '../axios-instances';
-import { AxiosError, isAxiosError } from 'axios'; // Added isAxiosError
-// import { useTokenStore } from '../../store/token-store'; // No longer needed for token fetching
-// import { getAnonymousToken } from '../../components/auth-services/token.service'; // No longer needed
+import { isAxiosError } from 'axios'; // Added isAxiosError
 import { Product, Category } from '../../types/catalog-types';
 
-// Conditional logger for this file
 const logger = {
   log: (...arguments_: unknown[]) => {
     if (import.meta.env.MODE !== 'production') console.log(...arguments_);
@@ -41,7 +38,6 @@ export async function getAllPublishedProducts(
   text?: string
 ): Promise<Product[]> {
   try {
-    // Token fetching logic removed
     const parameters: Record<string, string | string[]> = {
       staged: 'false',
       limit: '200',
@@ -59,8 +55,6 @@ export async function getAllPublishedProducts(
       );
       if (needsPriceCurrency) {
         parameters.priceCurrency = 'EUR';
-      } else {
-        // No else logic needed
       }
 
       const nameSort = (Array.isArray(sort) ? sort : [sort]).find((s) =>
@@ -69,8 +63,6 @@ export async function getAllPublishedProducts(
       if (nameSort) {
         const locale = nameSort.split('.')[1].split(' ')[0];
         parameters.localeProjection = locale;
-      } else {
-        // No else logic needed
       }
     }
 
@@ -82,15 +74,14 @@ export async function getAllPublishedProducts(
       '/product-projections/search',
       {
         params: parameters,
-        // headers: { Authorization: ... } removed
       }
     );
 
     return response.data.results;
   } catch (error_: unknown) {
-    const error = error_ as AxiosError | Error;
-    if (isAxiosError(error) && error.response?.data) {
-      logger.dir(error.response!.data, { depth: undefined });
+    const error = error_ instanceof Error ? error_ : new Error(String(error_));
+    if (isAxiosError(error_) && error_.response?.data) {
+      logger.dir(error_.response.data, { depth: undefined });
     }
     logger.error('Error fetching published products:', error.message, error);
     if (isAxiosError(error)) {
@@ -99,7 +90,7 @@ export async function getAllPublishedProducts(
           "Forbidden: token lacks the 'view_published_products' scope."
         );
       } else {
-        // No else logic needed
+        logger.error('Unhandled error status:', error.response?.status);
       }
     }
     throw error;
@@ -108,21 +99,18 @@ export async function getAllPublishedProducts(
 
 export async function getAllCategories(): Promise<Category[]> {
   try {
-    // Token fetching logic removed
-    const response = await apiInstance.get<CategoryPagedQueryResponse>(
-      '/categories'
-      // headers: { Authorization: ... } removed
-    );
+    const response =
+      await apiInstance.get<CategoryPagedQueryResponse>('/categories');
 
     return response.data.results;
   } catch (error_: unknown) {
-    const error = error_ as AxiosError | Error;
+    const error = error_ instanceof Error ? error_ : new Error(String(error_));
     logger.error('Error fetching categories:', error.message, error);
     if (isAxiosError(error)) {
       if (error.response?.status === 403) {
         logger.error("Forbidden: token lacks the 'view_categories' scope.");
       } else {
-        // No else logic needed
+        logger.error('Unhandled error status:', error.response?.status);
       }
     }
     throw error;
@@ -133,17 +121,14 @@ export async function getProductById(
   productId: string
 ): Promise<Product | undefined> {
   try {
-    // Token fetching logic removed
     const response = await apiInstance.get<Product>(
       `/product-projections/${productId}`,
       {
-        params: { staged: 'false' }, // staged: 'false' was in original getProductById, keeping it.
-        // headers: { Authorization: ... } removed
+        params: { staged: 'false' },
       }
     );
 
     const product = response.data;
-    // Slug generation logic from original file
     if (product.masterVariant.sku) {
       product.slug = product.masterVariant.sku
         .toLowerCase()
@@ -151,13 +136,14 @@ export async function getProductById(
     }
     return product;
   } catch (error_: unknown) {
-    const error = error_ as AxiosError | Error;
-    // logger.error for 404 was in .ref_structure, but original code returned undefined. Let's match original.
+    const error = error_ instanceof Error ? error_ : new Error(String(error_));
     if (isAxiosError(error) && error.response?.status === 404) {
-      logger.error(`Product with ID ${productId} not found.`); // Added logger for 404 as per .ref_structure suggestion
+      logger.error(`Product with ID ${productId} not found.`);
       return undefined;
     } else {
-      // No else logic needed
+      if (isAxiosError(error)) {
+        logger.error('Unhandled error status:', error.response?.status);
+      }
     }
     logger.error(
       `Error fetching product by ID ${productId}:`,
@@ -170,7 +156,9 @@ export async function getProductById(
           "Forbidden: token lacks the 'view_published_products' scope."
         );
       } else {
-        // No else logic needed
+        if (isAxiosError(error)) {
+          logger.error('Unhandled error status:', error.response?.status);
+        }
       }
     }
     throw error;
@@ -208,10 +196,7 @@ export async function getProductsByCategory(
 ): Promise<Product[]> {
   const ids = Array.isArray(categoryIds) ? categoryIds : [categoryIds];
 
-  // categories.id:"id1"  OR  categories.id:"id1","id2",…
   const filters = ids.map((id) => `categories.id:"${id}"`);
 
-  // getAllPublishedProducts already accepts string | string[],
-  // so we can forward the array to create multiple filter.query params
   return getAllPublishedProducts(filters);
 }

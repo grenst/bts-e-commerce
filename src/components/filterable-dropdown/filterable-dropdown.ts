@@ -53,13 +53,15 @@ export class FilterableDropdown {
       li.classList.add('no-match');
       this.dropdownList.append(li);
     } else {
+      const fragment = document.createDocumentFragment();
       for (const item of itemsToRender) {
         const li = document.createElement('li');
         li.textContent = item.displayName;
         li.dataset.value = item.code;
         li.addEventListener('click', () => this.selectItem(item));
-        this.dropdownList.append(li);
+        fragment.append(li);
       }
+      this.dropdownList.append(fragment);
     }
   }
 
@@ -91,7 +93,10 @@ export class FilterableDropdown {
   }
 
   private handleClickOutside(event: MouseEvent): void {
-    if (!this.element.contains(event.target as Node)) {
+    if (
+      !(event.target instanceof Node) ||
+      !this.element.contains(event.target)
+    ) {
       this.hideDropdown();
     }
   }

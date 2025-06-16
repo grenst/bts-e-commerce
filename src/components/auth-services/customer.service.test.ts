@@ -1,14 +1,20 @@
-import { apiInstance } from '../../api/axios-instances';
 import {
   signupCustomer,
   fetchMyCustomer,
   CustomerDraft,
 } from './customer.service.ts';
-// import { AxiosError } from 'axios';
 import { createAxiosError } from '../../utils/test-utils/axios-error.ts';
 import type { Address } from '../../types/commercetools';
 
-jest.mock('../../api/axios-instances');
+const mockPost = jest.fn();
+const mockGet = jest.fn();
+
+jest.mock('../../api/axios-instances', () => ({
+  apiInstance: {
+    post: mockPost,
+    get: mockGet,
+  },
+}));
 
 describe('signupCustomer', () => {
   const mockAddress: Address = {
@@ -28,7 +34,7 @@ describe('signupCustomer', () => {
   it('should handle API error', async () => {
     const mockError = createAxiosError({ message: 'Error details' }, 400);
 
-    (apiInstance.post as jest.Mock).mockRejectedValue(mockError);
+    mockPost.mockRejectedValue(mockError);
 
     await expect(signupCustomer(mockDraft, mockToken)).rejects.toThrow();
   });
@@ -47,11 +53,11 @@ describe('fetchMyCustomer', () => {
   });
 
   it('should fetch customer data', async () => {
-    (apiInstance.get as jest.Mock).mockResolvedValue({ data: mockCustomer });
+    mockGet.mockResolvedValue({ data: mockCustomer });
 
     const result = await fetchMyCustomer(mockToken);
     expect(result).toEqual(mockCustomer);
-    expect(apiInstance.get).toHaveBeenCalledWith(
+    expect(mockGet).toHaveBeenCalledWith(
       '/me',
       expect.objectContaining({
         params: { expand: 'addresses[*]' },
