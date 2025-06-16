@@ -1,3 +1,4 @@
+import { apiInstance } from '../../api/axios-instances';
 import {
   signupCustomer,
   fetchMyCustomer,
@@ -6,15 +7,7 @@ import {
 import { createAxiosError } from '../../utils/test-utils/axios-error.ts';
 import type { Address } from '../../types/commercetools';
 
-const mockPost = jest.fn();
-const mockGet = jest.fn();
-
-jest.mock('../../api/axios-instances', () => ({
-  apiInstance: {
-    post: mockPost,
-    get: mockGet,
-  },
-}));
+jest.mock('../../api/axios-instances');
 
 describe('signupCustomer', () => {
   const mockAddress: Address = {
@@ -34,9 +27,81 @@ describe('signupCustomer', () => {
   it('should handle API error', async () => {
     const mockError = createAxiosError({ message: 'Error details' }, 400);
 
-    mockPost.mockRejectedValue(mockError);
+    (apiInstance.post as jest.Mock).mockRejectedValue(mockError);
 
     await expect(signupCustomer(mockDraft, mockToken)).rejects.toThrow();
+  });
+  it('should duplicate a single address for shipping and billing', async () => {
+    const singleAddressDraft: CustomerDraft = {
+      email: 'single@example.com',
+      password: 'password123',
+      addresses: [mockAddress],
+    };
+
+    (apiInstance.post as jest.Mock).mockResolvedValue({ data: {} });
+
+    await signupCustomer(singleAddressDraft, mockToken);
+
+    expect(apiInstance.post).toHaveBeenCalledWith(
+      '/me/signup',
+      expect.objectContaining({
+        addresses: [
+          { ...mockAddress, key: 'default-shipping' },
+          { ...mockAddress, key: 'default-billing' },
+        ],
+        defaultShippingAddress: 0,
+        defaultBillingAddress: 1,
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('should not modify addresses if multiple are provided', async () => {
+    const multipleAddresses: Address[] = [
+      { streetName: 'Street 1', country: 'US', city: 'City 1' },
+      { streetName: 'Street 2', country: 'US', city: 'City 2' },
+    ];
+    const multipleAddressDraft: CustomerDraft = {
+      email: 'multiple@example.com',
+      password: 'password123',
+      addresses: multipleAddresses,
+    };
+
+    (apiInstance.post as jest.Mock).mockResolvedValue({ data: {} });
+
+    await signupCustomer(multipleAddressDraft, mockToken);
+
+    expect(apiInstance.post).toHaveBeenCalledWith(
+      '/me/signup',
+      expect.objectContaining({
+        addresses: multipleAddresses,
+        defaultShippingAddress: 0,
+        defaultBillingAddress: 1,
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('should handle no addresses provided', async () => {
+    const noAddressDraft: CustomerDraft = {
+      email: 'noaddress@example.com',
+      password: 'password123',
+      addresses: [],
+    };
+
+    (apiInstance.post as jest.Mock).mockResolvedValue({ data: {} });
+
+    await signupCustomer(noAddressDraft, mockToken);
+
+    expect(apiInstance.post).toHaveBeenCalledWith(
+      '/me/signup',
+      expect.objectContaining({
+        addresses: [],
+        defaultShippingAddress: 0,
+        defaultBillingAddress: 1,
+      }),
+      expect.any(Object)
+    );
   });
 });
 
@@ -53,11 +118,11 @@ describe('fetchMyCustomer', () => {
   });
 
   it('should fetch customer data', async () => {
-    mockGet.mockResolvedValue({ data: mockCustomer });
+    (apiInstance.get as jest.Mock).mockResolvedValue({ data: mockCustomer });
 
     const result = await fetchMyCustomer(mockToken);
     expect(result).toEqual(mockCustomer);
-    expect(mockGet).toHaveBeenCalledWith(
+    expect(apiInstance.get).toHaveBeenCalledWith(
       '/me',
       expect.objectContaining({
         params: { expand: 'addresses[*]' },
