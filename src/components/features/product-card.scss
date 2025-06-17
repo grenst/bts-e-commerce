@@ -58,6 +58,9 @@
         color: #f8fafc;
       }
     }
+    .add-to-cart-btn {
+      transform: translateY(0);
+    }
   }
 
   .product_preview {
@@ -75,9 +78,10 @@
     padding: 0.5rem;
     position: relative;
     transition: background-color 0.3s, color 0.3s;
+  z-index: 5;
 
     &::before {
-      content: 'ADD';
+    content: 'PRICE:';
       padding-right: 0.75rem;
       padding-left: 0.55rem;
       position: absolute;
@@ -86,7 +90,14 @@
       z-index: 10;
       transition: color 0.3s, background-color 0.3s;
     }
-
-    // Удаляем прямой hover для .pricee — он теперь срабатывает через карточку
   }
+}
+
+.add-to-cart-btn {
+  z-index: 1;
+  transform: translateY(-7px);
+}
+
+.description_on_cards {
+  min-height: 40px;
 }

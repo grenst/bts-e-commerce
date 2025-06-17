@@ -1,47 +1,24 @@
 import { createEl as createElement } from '../../utils/element-utilities';
 import { Product } from '../../types/catalog-types';
-import {
-  // createProductModal,
-  // ProductModal,
-  ModalManager,
-} from '../../components/layout/modal/product-modal';
+import { ModalManager } from '../../components/layout/modal/product-modal';
+import { isProductInCart } from '../../api/cart/cart-service';
 import './product-card.scss';
 import priceHitImg from '@assets/images/price-hit.webp';
 
-// let productModal: ProductModal;
-
 export function createProductCardElement(product: Product): HTMLElement {
-  // if (!productModal) {
-  //   productModal = createProductModal();
-  //   document.body.append(productModal.modalElement);
-
-  //   productModal.modalElement.classList.add('four');
-  // }
-
   const productModal = ModalManager.getModal();
-  // productModal.modalElement.classList.add('four');
 
-  // Get price information early to use in multiple places
   const price = product.masterVariant.prices?.[0];
 
   const card = createElement({
     tag: 'div',
-    classes: [
-      'product-card',
-      'bg-white',
-      'cursor-pointer',
-      // 'overflow-hidden',
-      // 'border',
-      'flex',
-      'flex-col',
-    ],
+    classes: ['product-card', 'bg-white', 'cursor-pointer', 'flex', 'flex-col'],
   });
 
   const imageContainer = createElement({
     tag: 'div',
     parent: card,
     classes: ['w-full', 'h-48', 'bg-white', 'relative'],
-    // classes: ['w-full', 'h-48', 'bg-white', 'overflow-hidden', 'relative'],
   });
 
   createElement({
@@ -73,7 +50,6 @@ export function createProductCardElement(product: Product): HTMLElement {
     classes: ['object-cover', 'object-top', 'h-[140%]', 'product_preview'],
   });
 
-  // Add discount badge if product has discount
   if (price && price.discounted) {
     createElement({
       tag: 'img',
@@ -106,7 +82,6 @@ export function createProductCardElement(product: Product): HTMLElement {
       'z-10',
       'card_description',
     ],
-    // classes: ['p-5', 'flex', 'flex-col', 'flex-grow', 'bg-gray-200', 'bg-opacity-50'],
   });
 
   createElement({
@@ -121,7 +96,13 @@ export function createProductCardElement(product: Product): HTMLElement {
       tag: 'p',
       parent: contentContainer,
       text: product.description['en-US'],
-      classes: ['text-sm', 'text-gray-600', 'mb-3', 'line-clamp-3'],
+      classes: [
+        'text-sm',
+        'text-gray-600',
+        'mb-3',
+        'line-clamp-3',
+        'description_on_cards',
+      ],
     });
   }
 
@@ -132,7 +113,6 @@ export function createProductCardElement(product: Product): HTMLElement {
   });
 
   if (price && price.discounted) {
-    // Create container for both prices
     const priceElement = createElement({
       tag: 'p',
       parent: priceContainer,
@@ -149,7 +129,13 @@ export function createProductCardElement(product: Product): HTMLElement {
       ],
     });
 
-    // Original price with line-through
+    // createElement({
+    //   tag: 'span',
+    //   parent: priceElement,
+    //   text: 'ADD',
+    //   classes: ['price-status'],
+    // });
+
     createElement({
       tag: 'span',
       parent: priceElement,
@@ -157,7 +143,6 @@ export function createProductCardElement(product: Product): HTMLElement {
       classes: ['line-through', 'text-sm', 'pr-2', 'old_price'],
     });
 
-    // Discounted price
     createElement({
       tag: 'span',
       parent: priceElement,
@@ -165,7 +150,6 @@ export function createProductCardElement(product: Product): HTMLElement {
       classes: ['text-xl', 'discount_price'],
     });
   } else if (price) {
-    // Display regular price without discount
     createElement({
       tag: 'p',
       parent: priceContainer,
@@ -182,7 +166,6 @@ export function createProductCardElement(product: Product): HTMLElement {
       ],
     });
   } else {
-    // Handle missing price
     createElement({
       tag: 'p',
       parent: priceContainer,
@@ -199,6 +182,49 @@ export function createProductCardElement(product: Product): HTMLElement {
       ],
     });
   }
+
+  // Create button container
+  const buttonContainer = createElement({
+    tag: 'div',
+    parent: contentContainer,
+    classes: ['px-2', 'mt-auto', 'z-1'],
+  });
+
+  const button = createElement({
+    tag: 'button',
+    parent: buttonContainer,
+    text: 'ADD TO CART',
+    classes: [
+      'w-full',
+      'pt-1',
+      'rounded-b-lg',
+      // 'px-4',
+      'bg-gray-600',
+      'text-white',
+      'hover:bg-gray-900',
+      'transition',
+      'duration-200',
+      'add-to-cart-btn',
+    ],
+  }) as HTMLButtonElement;
+
+  // Check if product is in cart and update button
+  isProductInCart(product.id).then(({ isInCart }) => {
+    if (isInCart) {
+      // const priceStatus = document.querySelector('.price-status');
+      // if (priceStatus) {
+      //   priceStatus.textContent = "IT’S IN CART";
+      // }
+      button.textContent = 'IT’S IN CART';
+    }
+  });
+
+  button.addEventListener('click', (event_) => {
+    event_.stopPropagation();
+    if (!button.disabled) {
+      productModal.showModal(product.id, { x: event_.pageX, y: event_.pageY });
+    }
+  });
 
   card.addEventListener('click', (event_: MouseEvent) => {
     productModal.showModal(product.id, { x: event_.pageX, y: event_.pageY });

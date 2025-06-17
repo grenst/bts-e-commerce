@@ -11,7 +11,13 @@ import { Product, ProductVariant } from '../../../types/catalog-types';
 import './product-modal.scss';
 import leftSvg from '@assets/images/left.svg';
 import rightSvg from '@assets/images/right.svg';
-import { addToCart } from '../../../api/cart/cart-service';
+import {
+  addToCart,
+  isProductInCart,
+  removeLineItem,
+  changeLineItemQuantity,
+  getOrCreateCart,
+} from '../../../api/cart/cart-service';
 import { useCustomerStore } from '../../../store/customer-store';
 import { addNotification } from '../../../store/store';
 
@@ -677,7 +683,7 @@ export function createProductModal(): ProductModal {
           ],
         });
 
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
           selectedVariant = variant;
           unitPrice = getUnitPrice(selectedVariant);
           updatePrice();
@@ -686,6 +692,9 @@ export function createProductModal(): ProductModal {
             button_.classList.remove('bg-gray-900', 'border', 'text-white');
           }
           button.classList.add('bg-gray-900', 'border', 'text-white');
+
+          // Update cart button state for new variant selection
+          await updateCartButton();
         });
       }
     }
@@ -720,7 +729,7 @@ export function createProductModal(): ProductModal {
       tag: 'button',
       parent: submitOrder,
       text: 'ADD TO CART',
-      classes: ['order-cart', 'w-25'],
+      classes: ['order-cart', 'w-28'],
     }) as HTMLButtonElement;
 
     const price = createElement({
@@ -735,17 +744,83 @@ export function createProductModal(): ProductModal {
       minus.disabled = qty <= 1;
     };
 
-    plus.addEventListener('click', () => {
+    plus.addEventListener('click', async () => {
       qty += 1;
       updatePrice();
+
+      if (isInCart && lineItemId) {
+        try {
+          await changeLineItemQuantity(lineItemId, qty);
+          await updateCartButton();
+        } catch {
+          addNotification('error', 'Failed to increase quantity.');
+        }
+      }
     });
-    minus.addEventListener('click', () => {
-      if (qty > 1) {
-        qty -= 1;
-        updatePrice();
+    minus.addEventListener('click', async () => {
+      if (qty <= 1) {
+        if (isInCart && lineItemId) {
+          try {
+            await removeLineItem(lineItemId);
+            qty = 1;
+            updatePrice();
+            await updateCartButton();
+            addNotification('success', 'Product removed from cart.');
+          } catch {
+            addNotification('error', 'Failed to remove product from cart.');
+          }
+        }
+        return;
+      }
+
+      qty -= 1;
+      updatePrice();
+
+      if (isInCart && lineItemId) {
+        try {
+          await changeLineItemQuantity(lineItemId, qty);
+          await updateCartButton();
+        } catch {
+          addNotification('error', 'Failed to decrease quantity.');
+        }
       }
     });
     updatePrice();
+
+    let isInCart = false;
+    let lineItemId: string | undefined;
+
+    const updateCartButton = async () => {
+      const result = await isProductInCart(product.id, selectedVariant.id);
+      isInCart = result.isInCart;
+      lineItemId = result.lineItemId;
+
+      if (isInCart) {
+        addToCartButton.textContent = 'Remove from cart';
+        addToCartButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        addToCartButton.classList.add('bg-red-600', 'hover:bg-red-700');
+
+        const cart = await getOrCreateCart();
+        const currentItem = cart.lineItems.find(
+          (item) =>
+            item.productId === product.id &&
+            item.variant.id === selectedVariant.id
+        );
+        if (currentItem?.quantity) {
+          qty = currentItem.quantity;
+          updatePrice();
+        }
+      } else {
+        qty = 1;
+        updatePrice();
+        addToCartButton.textContent = 'ADD TO CART';
+        addToCartButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+        addToCartButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+      }
+    };
+
+    // Initial cart status check
+    updateCartButton();
 
     addToCartButton.addEventListener('click', async () => {
       const isLoggedIn = Boolean(useCustomerStore.getState().customer);
@@ -762,11 +837,22 @@ export function createProductModal(): ProductModal {
         return;
       }
 
-      try {
-        await addToCart(product.id, selectedVariant.id, qty);
-        addNotification('success', 'Product added to cart!');
-      } catch {
-        addNotification('error', 'Failed to add product to cart.');
+      if (isInCart && lineItemId) {
+        try {
+          await removeLineItem(lineItemId);
+          addNotification('success', 'Product removed from cart!');
+          await updateCartButton();
+        } catch {
+          addNotification('error', 'Failed to remove product from cart.');
+        }
+      } else {
+        try {
+          await addToCart(product.id, selectedVariant.id, qty);
+          addNotification('success', 'Product added to cart!');
+          await updateCartButton();
+        } catch {
+          addNotification('error', 'Failed to add product to cart.');
+        }
       }
     });
 

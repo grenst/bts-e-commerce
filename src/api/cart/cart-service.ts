@@ -19,13 +19,20 @@ interface Address {
   country: string;
 }
 
+interface LineItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  variant: { id: number };
+}
+
 interface Cart {
   id: string;
   version: number;
   taxMode: TaxMode;
   country?: string;
   shippingAddress?: Address;
-  lineItems: Array<{ id: string; productId: string }>;
+  lineItems: LineItem[];
 }
 
 let activeCart: Cart | undefined;
@@ -176,6 +183,59 @@ export async function clearCart(): Promise<Cart> {
   );
   activeCart = data;
   return data;
+}
+
+export async function isProductInCart(
+  productId: string,
+  variantId?: number
+): Promise<{ isInCart: boolean; lineItemId?: string }> {
+  const cart = await getOrCreateCart();
+
+  const lineItem = cart.lineItems.find((item) => {
+    if (typeof variantId === 'number') {
+      return item.productId === productId && item.variant?.id === variantId;
+    }
+    return item.productId === productId;
+  });
+
+  return {
+    isInCart: !!lineItem,
+    lineItemId: lineItem?.id,
+  };
+}
+
+export async function removeLineItem(lineItemId: string): Promise<void> {
+  const cart = await getOrCreateCart();
+  const actions = [{ action: 'removeLineItem', lineItemId }];
+  const { data } = await apiInstance.post<Cart>(
+    `/me/carts/${cart.id}`,
+    { version: cart.version, actions },
+    { params: { expand: 'discountCodes[*].discountCode' } }
+  );
+  activeCart = data;
+}
+
+export async function changeLineItemQuantity(
+  lineItemId: string,
+  quantity: number
+): Promise<void> {
+  const cart = await getOrCreateCart();
+
+  const actions = [
+    {
+      action: 'changeLineItemQuantity',
+      lineItemId,
+      quantity,
+    },
+  ];
+
+  const { data } = await apiInstance.post<Cart>(
+    `/me/carts/${cart.id}`,
+    { version: cart.version, actions },
+    { params: { expand: 'discountCodes[*].discountCode' } }
+  );
+
+  activeCart = data;
 }
 
 export async function applyDiscount(code: string): Promise<Cart> {

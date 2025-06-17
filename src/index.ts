@@ -30,7 +30,6 @@ import createAboutUsPage from './pages/about-us/about-us';
 import {
   createNotificationsContainer,
   createLoadingIndicator,
-  addNotification,
 } from './store/store';
 import createErrorPage from './pages/error/error-page';
 import { createCatalogPage } from './pages/catalog/catalog';
