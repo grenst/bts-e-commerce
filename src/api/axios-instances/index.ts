@@ -3,14 +3,14 @@ import { environmentVariables } from '../../config/commerce-tools-api';
 import { useTokenStore } from '../../store/token-store';
 import { AuthService } from '../../services/auth.service';
 
-const isProd = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const logger = {
-  log: (...args: unknown[]): void => {
-    if (!isProd) console.log(...args);
+  log: (...arguments_: unknown[]): void => {
+    if (!isProduction) console.log(...arguments_);
   },
-  error: (...args: unknown[]): void => {
-    if (!isProd) console.error(...args);
+  error: (...arguments_: unknown[]): void => {
+    if (!isProduction) console.error(...arguments_);
   },
 };
 

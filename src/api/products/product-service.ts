@@ -4,13 +4,13 @@ import { Product, Category } from '../../types/catalog-types';
 
 const logger = {
   log: (...arguments_: unknown[]) => {
-    if (import.meta.env.MODE !== 'production') console.log(...arguments_);
+    if (process.env.NODE_ENV !== 'production') console.log(...arguments_);
   },
   dir: (...arguments_: unknown[]) => {
-    if (import.meta.env.MODE !== 'production') console.dir(...arguments_);
+    if (process.env.NODE_ENV !== 'production') console.dir(...arguments_);
   },
   error: (...arguments_: unknown[]) => {
-    if (import.meta.env.MODE !== 'production') console.error(...arguments_);
+    if (process.env.NODE_ENV !== 'production') console.error(...arguments_);
   },
 };
 

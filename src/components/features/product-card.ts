@@ -68,6 +68,7 @@ export function createProductCardElement(product: Product): HTMLElement {
     attributes: {
       src: product.masterVariant.images?.[1]?.url ?? '',
       alt: product.name['en-US'] || 'Product Image',
+      loading: 'lazy',
     },
     classes: ['object-cover', 'object-top', 'h-[140%]', 'product_preview'],
   });
@@ -80,6 +81,7 @@ export function createProductCardElement(product: Product): HTMLElement {
       attributes: {
         src: priceHitImg,
         alt: 'Discount',
+        loading: 'lazy',
       },
       classes: ['absolute', 'top-0', 'right-0', 'w-12', 'z-10', 'price_hit'],
     });

@@ -391,10 +391,11 @@ export default class CartUI {
   }
 
   private enqueueUpdate(actions: CartAction[]): Promise<void> {
-    this.updateQueue = this.updateQueue
-      .catch(() => {})
-      .then(() => this.applyUpdate(actions));
-    return this.updateQueue;
+    const newUpdatePromise = this.updateQueue.then(() =>
+      this.applyUpdate(actions)
+    );
+    this.updateQueue = newUpdatePromise;
+    return newUpdatePromise;
   }
 
   private async applyUpdate(actions: CartAction[]): Promise<void> {
@@ -422,15 +423,17 @@ export default class CartUI {
       this.render();
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 409) {
-        const fresh = await getOrCreateCart();
+        const fresh = await getOrCreateCart(); // Second call to getOrCreateCart
         if (this.isCtCart(fresh)) {
-          this.cart = await patch(fresh.version);
+          this.cart = await patch(fresh.version); // Retry the patch with fresh version
           this.updateDiscountStateFromCart();
           this.render();
-          return;
+          return; // Successfully handled 409 and retried
         }
+        // If fresh is not a CtCart, or if the second patch fails, the original error is re-thrown
+        throw error; // Re-throw the original 409 error if fresh cart is invalid
       }
-      throw error;
+      throw error; // Re-throw any other errors
     }
   }
 

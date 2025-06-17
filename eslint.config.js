@@ -1,8 +1,9 @@
-import js from "@eslint/js";
+// eslint.config.js
+import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
-import prettier from "eslint-plugin-prettier";
+import prettierPlugin from "eslint-plugin-prettier";
 import eslintConfigPrettier from "eslint-config-prettier";
-import unicorn from "eslint-plugin-unicorn";
+import unicornPlugin from "eslint-plugin-unicorn";
 import globals from "globals";
 
 export default tseslint.config(
@@ -19,10 +20,13 @@ export default tseslint.config(
     ],
   },
 
-  js.configs.recommended,
+  // Базові правила ESLint
+  eslint.configs.recommended,
 
+  // Рекомендовані правила для TypeScript
   ...tseslint.configs.recommended,
 
+  // Налаштування для TS/TSX файлів
   {
     files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
@@ -40,20 +44,47 @@ export default tseslint.config(
     },
     plugins: {
       "@typescript-eslint": tseslint.plugin,
-      "prettier": prettier,
-      "unicorn": unicorn,
+      "prettier": prettierPlugin,
+      "unicorn": unicornPlugin,
     },
     rules: {
+      // Вимикаємо правила, що конфліктують з Prettier
       ...eslintConfigPrettier.rules,
-      ...unicorn.configs.recommended.rules,
+
+      // Unicorn: рекомендовані правила
+      ...unicornPlugin.configs.recommended.rules,
+
+      // Prettier як правило ESLint
       "prettier/prettier": "warn",
+
+      // TypeScript-правила
       "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+      "@typescript-eslint/consistent-type-assertions": ["error", { assertionStyle: "never" }],
+      "@typescript-eslint/no-non-null-assertion": "error",
+    },
+  },
 
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
-      '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
+  // Ігноруємо тестові файли від правил Unicorn та деяких TS-правил
+  {
+    files: ["**/*.test.ts", "**/*.spec.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+      "@typescript-eslint/no-explicit-any": "off",
+      // Unicorn для тестів
+      "unicorn/filename-case": "off",
+      "unicorn/prevent-abbreviations": "off",
+      "unicorn/no-null": "off",
+      "unicorn/prefer-dom-node-text-content": "off",
+      "unicorn/no-useless-undefined": "off",
+      "unicorn/numeric-separators-style": "off",
 
-      '@typescript-eslint/no-non-null-assertion': 'error',
+
+      // TypeScript-асерти в тестах
+      "@typescript-eslint/consistent-type-assertions": "off",
+      "unicorn/consistent-assert": "off",
+      "unicorn/prefer-node-protocol": "off",
     },
   }
 );

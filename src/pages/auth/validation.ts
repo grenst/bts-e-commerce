@@ -36,9 +36,12 @@ export function isPostalCodeValid(code: string, country: string): boolean {
 export const emailSchema = z
   .string()
   .min(1, 'Please enter your email')
-  .email('Please enter a valid email (e.g., user@example.com)')
   .refine((v) => v === v.trim(), 'Email must not start or end with spaces')
-  .refine((v) => !/\s/.test(v), 'Email must not contain spaces');
+  .refine((v) => !/\s/.test(v), 'Email must not contain spaces')
+  .refine(
+    (v) => z.string().email().safeParse(v).success,
+    'Please enter a valid email (e.g., user@example.com)'
+  );
 
 export const passwordSchema = z
   .string()
@@ -79,14 +82,22 @@ export const citySchema = z
   .regex(NAME_CITY_REGEX, 'Only letters and spaces allowed')
   .max(50, 'Max 50 characters');
 
-export const postalCodeSchema = z
+export const basePostalCodeSchema = z
   .string()
   .min(1, 'Postal code is required')
-  .regex(/^\d{5}$/, 'Postal code must be 5 digits')
   .refine(
     (v) => v.trim() === v,
     'Postal code must not start or end with a space'
   );
+
+export const postalCodeSchema = basePostalCodeSchema.refine(
+  (v) =>
+    z
+      .string()
+      .regex(/^\d{5}$/)
+      .safeParse(v).success,
+  'Postal code must be 5 digits'
+);
 
 export const countrySchema = z
   .string()
@@ -121,17 +132,21 @@ export const registerFormSchema = z
     houseNumber: houseNumberSchema,
     apartment: apartmentSchema,
     city: citySchema,
-    postalCode: postalCodeSchema,
+    postalCode: basePostalCodeSchema,
     country: countrySchema,
     billingStreetName: streetNameSchema.optional(),
     billingHouseNumber: houseNumberSchema.optional(),
     billingApartment: apartmentSchema.optional(),
     billingCity: citySchema.optional(),
-    billingPostalCode: postalCodeSchema.optional(),
+    billingPostalCode: basePostalCodeSchema.optional(),
     billingCountry: countrySchema.optional(),
   })
   .superRefine((data, context) => {
-    if (typeof data.postalCode === 'string' && typeof data.country === 'string' && !isPostalCodeValid(data.postalCode, data.country)) {
+    if (
+      typeof data.postalCode === 'string' &&
+      typeof data.country === 'string' &&
+      !isPostalCodeValid(data.postalCode, data.country)
+    ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['postalCode'],
@@ -140,8 +155,20 @@ export const registerFormSchema = z
     }
 
     if (data.billingPostalCode) {
-      const country = data.billingCountry || data.country;
-      if (typeof data.billingPostalCode === 'string' && typeof country === 'string' && !isPostalCodeValid(data.billingPostalCode, country)) {
+      const effectiveCountry = data.billingCountry || data.country;
+
+      if (!effectiveCountry) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['billingCountry'],
+          message:
+            'Billing country is required when billing postal code is provided',
+        });
+      } else if (
+        typeof data.billingPostalCode === 'string' &&
+        typeof effectiveCountry === 'string' &&
+        !isPostalCodeValid(data.billingPostalCode, effectiveCountry)
+      ) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['billingPostalCode'],
@@ -159,7 +186,7 @@ export function validateLogin(data: LoginFormData): ValidationResult {
     const errors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
       for (const error_ of error.errors) {
-        if (error_.path.length > 0) {
+        if (error_.path.length > 0 && !errors[error_.path[0]]) {
           errors[error_.path[0]] = error_.message;
         }
       }
@@ -176,7 +203,7 @@ export function validateRegister(data: RegisterFormData): ValidationResult {
     const errors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
       for (const error_ of error.errors) {
-        if (error_.path.length > 0) {
+        if (error_.path.length > 0 && !errors[error_.path[0]]) {
           errors[error_.path[0]] = error_.message;
         }
       }
