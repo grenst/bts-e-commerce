@@ -195,13 +195,13 @@ export function createProductCardElement(product: Product): HTMLElement {
     parent: buttonContainer,
     text: 'ADD TO CART',
     classes: [
+      'text-black',
       'w-full',
       'pt-1',
       'rounded-b-lg',
       // 'px-4',
-      'bg-gray-600',
-      'text-white',
-      'hover:bg-gray-900',
+      'bg-gray-100',
+      'hover:bg-gray-400',
       'transition',
       'duration-200',
       'add-to-cart-btn',
@@ -215,7 +215,9 @@ export function createProductCardElement(product: Product): HTMLElement {
       // if (priceStatus) {
       //   priceStatus.textContent = "IT’S IN CART";
       // }
-      button.textContent = 'IT’S IN CART';
+      button.textContent = 'ALREADY IN CART';
+      button.classList.remove('bg-gray-100');
+      button.classList.add('bg-gray-400');
     }
   });
 
