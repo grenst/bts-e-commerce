@@ -129,7 +129,11 @@ export default class CartUI {
     }
   }
 
-  private mapLineItem(li: CtLineItem): LineItem {
+  private mapLineItem(
+    li: CtLineItem,
+    discountAmount: number,
+    subtotal: number
+  ): LineItem {
     const volAttribute = li.variant.attributes?.find(
       (a) => a.name === 'volume'
     );
@@ -138,6 +142,18 @@ export default class CartUI {
       volume =
         volAttribute.value.label['en-US'] ?? volAttribute.value.label.en ?? '';
     }
+
+    // Calculate discounted price if discount exists
+    let discountedPrice: number | undefined;
+    if (discountAmount > 0 && subtotal > 0) {
+      const itemSubtotal = li.price.value.centAmount * li.quantity;
+      const discountRatio = itemSubtotal / subtotal;
+      const itemDiscount = discountAmount * discountRatio;
+      discountedPrice = Math.round(
+        li.price.value.centAmount - itemDiscount / li.quantity
+      );
+    }
+
     return {
       id: li.id,
       productId: li.productId,
@@ -145,6 +161,7 @@ export default class CartUI {
       variantId: li.variant.id,
       volume,
       price: li.price.value.centAmount,
+      discountedPrice,
       quantity: li.quantity,
       imageUrl: li.variant.images?.[0]?.url ?? '',
     };
@@ -163,14 +180,67 @@ export default class CartUI {
       createElement({ tag: 'h1', classes: ['cart-title'], text: 'Your Cart' })
     );
 
+    // Add clear cart button
+    const clearButton = createElement({
+      tag: 'button',
+      classes: ['clear-cart-button'],
+      text: 'Clear your cart',
+    });
+    clearButton.addEventListener('click', () =>
+      this.showClearCartConfirmation()
+    );
+    this.container.append(clearButton);
+
     this.itemsWrapper = createElement({
       tag: 'div',
       classes: ['cart-items-grid'],
     });
     this.container.append(this.itemsWrapper);
 
-    for (const li of this.cart.lineItems) this.renderItem(li);
+    // Calculate discount amount for cart
+    const subtotal = this.cart.lineItems.reduce(
+      (s, li) => s + li.price.value.centAmount * li.quantity,
+      0
+    );
+    const discountAmount = Math.max(
+      0,
+      subtotal - this.cart.totalPrice.centAmount
+    );
+
+    for (const li of this.cart.lineItems)
+      this.renderItem(li, discountAmount, subtotal);
     this.renderSummary();
+  }
+
+  private async showClearCartConfirmation(): Promise<void> {
+    if (!this.cart || this.cart.lineItems.length === 0) return;
+
+    try {
+      const module = await import(
+        '../../components/layout/modal/confirmation-modal'
+      );
+      const createConfirmationModal = module.default;
+      const modal = createConfirmationModal(
+        'Are you sure you want to clear your entire cart?',
+        'Clear',
+        'Cancel'
+      );
+
+      modal.onConfirm(() => {
+        const actions: CartAction[] = this.cart!.lineItems.map((li) => ({
+          action: 'removeLineItem' as const,
+          lineItemId: li.id,
+        }));
+        this.enqueueUpdate(actions);
+      });
+
+      modal.onCancel(() => {
+        modal.close();
+      });
+    } catch (error) {
+      console.error('Failed to load confirmation modal:', error);
+      addNotification('error', 'Failed to load confirmation dialog', 5000);
+    }
   }
 
   private renderEmpty(): void {
@@ -195,7 +265,7 @@ export default class CartUI {
         });
         button.addEventListener(
           'click',
-          () => (globalThis.location.hash = '/catalog')
+          () => (globalThis.location.pathname = '/catalog')
         );
         return button;
       })()
@@ -203,9 +273,13 @@ export default class CartUI {
     this.container.append(wrap);
   }
 
-  private renderItem(ct: CtLineItem): void {
+  private renderItem(
+    ct: CtLineItem,
+    discountAmount: number,
+    subtotal: number
+  ): void {
     if (!this.itemsWrapper) return;
-    const item = this.mapLineItem(ct);
+    const item = this.mapLineItem(ct, discountAmount, subtotal);
     const element = createCartItem(item, {
       onQuantityChange: (q) =>
         this.enqueueUpdate([
@@ -215,11 +289,38 @@ export default class CartUI {
             quantity: q,
           },
         ]),
-      onRemove: () =>
-        this.enqueueUpdate([{ action: 'removeLineItem', lineItemId: item.id }]),
+      onRemove: () => this.showItemRemoveConfirmation(item),
     });
     element.dataset.lineItemId = item.id;
     this.itemsWrapper.append(element);
+  }
+
+  private showItemRemoveConfirmation(item: LineItem): void {
+    (async () => {
+      try {
+        const { default: createConfirmationModal } = await import(
+          '../../components/layout/modal/confirmation-modal'
+        );
+        const modal = createConfirmationModal(
+          `Are you sure you want to remove ${item.name} from your cart?`,
+          'Remove',
+          'Cancel'
+        );
+
+        modal.onConfirm(() => {
+          this.enqueueUpdate([
+            { action: 'removeLineItem', lineItemId: item.id },
+          ]);
+        });
+
+        modal.onCancel(() => {
+          modal.close();
+        });
+      } catch (error) {
+        console.error('Failed to load confirmation modal:', error);
+        addNotification('error', 'Failed to load confirmation dialog', 5000);
+      }
+    })();
   }
 
   private renderSummary(): void {
@@ -234,7 +335,8 @@ export default class CartUI {
       0,
       subtotal - this.cart.totalPrice.centAmount
     );
-    const tax = 0;
+    const taxRate = 0.19; // 19% tax rate
+    const tax = Math.round(subtotal * taxRate);
 
     const summary = createElement({ tag: 'div', classes: ['cart-summary'] });
 
@@ -260,7 +362,7 @@ export default class CartUI {
     );
     summary.append(this.createPromoSection(discountAmount));
     summary.append(
-      row('Total', formatPrice(this.cart.totalPrice.centAmount), ['total'])
+      row('Total', formatPrice(subtotal - discountAmount + tax), ['total'])
     );
 
     const checkoutAttributes: Record<string, string> = {};

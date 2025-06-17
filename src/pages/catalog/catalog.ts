@@ -212,5 +212,13 @@ export function createCatalogPage(container: HTMLElement): void {
     fetchProducts();
   });
 
+  // Add event listener for PROMO CODES button
+  const promoButton = navigation.querySelector('.promo-codes-button');
+  if (promoButton) {
+    promoButton.addEventListener('click', () => {
+      subNavControl.toggle('promo');
+    });
+  }
+
   initializePage();
 }

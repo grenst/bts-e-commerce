@@ -1,5 +1,6 @@
 import './search-input.scss';
-import searchIconPath from '@/assets/images/search.svg';
+// Use SVG mock for Jest
+import searchIconPath from '../../assets/images/search.svg';
 import {
   createEl as createElement,
   createHtmlElement,
@@ -189,6 +190,17 @@ export function createCatalogNavigationElement(): HTMLElement {
   });
 
   buttonsContainer.append(resetButton);
+
+  const promoCodesButton = createElement({
+    tag: 'span',
+    attributes: {
+      class:
+        'text-gray-700 hover:text-gray-900 cursor-pointer promo-codes-button',
+    },
+    text: 'PROMO CODES',
+  });
+
+  buttonsContainer.append(promoCodesButton);
 
   nav.append(searchContainer);
   nav.append(buttonsContainer);

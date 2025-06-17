@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosHeaders } from 'axios';
 import {
   getAllPublishedProducts,
   getAllCategories,
@@ -209,7 +209,9 @@ describe('Product Service', () => {
         status: 404,
         statusText: 'Not Found',
         headers: {},
-        config: { headers: { 'Content-Type': 'application/json' } },
+        config: {
+          headers: new AxiosHeaders({ 'Content-Type': 'application/json' }),
+        },
         data: 'Product not found',
       });
       mockApiInstance.get = jest.fn().mockRejectedValue(error);

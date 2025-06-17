@@ -162,6 +162,22 @@ export async function addToCart(
   }
 }
 
+export async function clearCart(): Promise<Cart> {
+  const cart = await getOrCreateCart();
+  const actions = cart.lineItems.map((li) => ({
+    action: 'removeLineItem',
+    lineItemId: li.id,
+  }));
+
+  const { data } = await apiInstance.post<Cart>(
+    `/me/carts/${cart.id}`,
+    { version: cart.version, actions },
+    { params: { expand: 'discountCodes[*].discountCode' } }
+  );
+  activeCart = data;
+  return data;
+}
+
 export async function applyDiscount(code: string): Promise<Cart> {
   const cart = await getOrCreateCart();
   const actions = [{ action: 'addDiscountCode', code }];

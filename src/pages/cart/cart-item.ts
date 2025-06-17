@@ -13,7 +13,8 @@ export interface LineItem {
   name: string;
   variantId: number;
   volume: string;
-  price: number; // centAmount
+  price: number; // centAmount - original price
+  discountedPrice?: number; // centAmount - after discounts
   quantity: number;
   imageUrl: string;
 }
@@ -134,8 +135,11 @@ export function createCartItem(
   const subtotal = createElement({
     tag: 'span',
     classes: ['subtotal'],
-    text: format(item.price * item.quantity),
+    text: format((item.discountedPrice ?? item.price) * item.quantity),
   });
+
+  // Add data attribute for original price
+  subtotal.dataset.originalPrice = format(item.price * item.quantity);
 
   const removeButton = createElement({
     tag: 'button',
@@ -148,6 +152,11 @@ export function createCartItem(
   });
 
   priceWrapper.append(subtotal, removeButton);
+
+  // Add class when discounted
+  if (item.discountedPrice !== undefined) {
+    subtotal.classList.add('has-discount');
+  }
   root.append(priceWrapper);
 
   // Event handlers with loading states
@@ -195,13 +204,13 @@ export function createCartItem(
     root.style.transform = 'scale(0.95)';
 
     // Confirm removal for accessibility
-    if (confirm(`Remove ${item.name} from your cart?`)) {
-      actions.onRemove();
-    } else {
-      // Restore if cancelled
-      root.style.opacity = '1';
-      root.style.transform = 'scale(1)';
-    }
+    // if (confirm(`Remove ${item.name} from your cart?`)) {
+    actions.onRemove();
+    // } else {
+    //   // Restore if cancelled
+    root.style.opacity = '1';
+    root.style.transform = 'scale(1)';
+    // }
   });
 
   // Add keyboard navigation support

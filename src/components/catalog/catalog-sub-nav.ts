@@ -1,5 +1,6 @@
 import './catalog-sub-nav.scss';
-import arrowsIconPath from '@/assets/images/arrows.svg';
+// Use SVG mock for Jest
+import arrowsIconPath from '../../__mocks__/svgMock';
 import { createEl as createElement } from '../../utils/element-utilities';
 import { getAllCategories } from '../../api/products/product-service';
 
@@ -19,10 +20,10 @@ export interface Category {
 
 interface CatalogSubNavControl {
   element: HTMLElement;
-  show: (mode: 'filters' | 'sort') => void;
+  show: (mode: 'filters' | 'sort' | 'promo') => void;
   hide: () => void;
-  toggle: (mode: 'filters' | 'sort') => void;
-  getCurrentMode: () => 'filters' | 'sort' | undefined;
+  toggle: (mode: 'filters' | 'sort' | 'promo') => void;
+  getCurrentMode: () => 'filters' | 'sort' | 'promo' | undefined;
 }
 
 export function createCatalogSubNavElement(): CatalogSubNavControl {
@@ -31,7 +32,7 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
     classes: ['catalog-sub-nav', 'bg-white', 'shadow-md', 'rounded-b-lg'],
   });
 
-  let currentMode: 'filters' | 'sort' | undefined;
+  let currentMode: 'filters' | 'sort' | 'promo' | undefined;
   const contentElement = createElement({
     tag: 'div',
     classes: ['py-2', 'flex', 'flex-wrap', 'gap-2'],
@@ -205,7 +206,41 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
     }
   };
 
-  const show = (mode: 'filters' | 'sort'): void => {
+  const renderPromoCodes = (): void => {
+    contentElement.innerHTML = '';
+
+    const promoContainer = createElement({
+      tag: 'div',
+      classes: [
+        'promo-container',
+        'flex',
+        'flex-wrap',
+        'gap-2',
+        'items-center',
+      ],
+    });
+
+    const promoButton = createElement({
+      tag: 'button',
+      attributes: {
+        class: 'px-4 py-2 bg-yellow-300 text-black rounded-full font-medium',
+      },
+      text: 'SUMMER15',
+    });
+
+    const promoText = createElement({
+      tag: 'span',
+      attributes: {
+        class: 'text-gray-700',
+      },
+      text: '15% summer sale',
+    });
+
+    promoContainer.append(promoButton, promoText);
+    contentElement.append(promoContainer);
+  };
+
+  const show = (mode: 'filters' | 'sort' | 'promo'): void => {
     if (currentMode === mode) return;
     currentMode = mode;
     element.classList.add('open');
@@ -237,8 +272,10 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
             );
           });
       }
-    } else {
+    } else if (mode === 'sort') {
       renderSortOptions();
+    } else if (mode === 'promo') {
+      renderPromoCodes();
     }
   };
 
@@ -247,7 +284,7 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
     element.classList.remove('open');
   };
 
-  const toggle = (mode: 'filters' | 'sort'): void => {
+  const toggle = (mode: 'filters' | 'sort' | 'promo'): void => {
     if (currentMode === mode) {
       hide();
     } else {
@@ -255,7 +292,8 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
     }
   };
 
-  const getCurrentMode = (): 'filters' | 'sort' | undefined => currentMode;
+  const getCurrentMode = (): 'filters' | 'sort' | 'promo' | undefined =>
+    currentMode;
 
   return { element, show, hide, toggle, getCurrentMode };
 }

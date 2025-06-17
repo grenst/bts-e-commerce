@@ -23,6 +23,7 @@ jest.mock('../../utils/element-utilities', () => ({
     }
     return mockElement;
   }),
+  body: document.body,
 }));
 
 const mockProduct: Product = {
@@ -149,10 +150,6 @@ describe('Product Page Modal', () => {
       'click',
       expect.any(Function)
     );
-    expect(addEventListenerSpy).toHaveBeenCalledWith(
-      'transitionend',
-      expect.any(Function)
-    );
   });
 
   describe('showModal', () => {
@@ -275,6 +272,10 @@ describe('Product Page Modal', () => {
       expect(classListRemoveSpy).toHaveBeenCalledWith('open');
       expect(classListRemoveSpy).toHaveBeenCalledWith('lock');
       expect(removePropertySpy).toHaveBeenCalledWith('--scrollbar-width');
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'transitionend',
+        expect.any(Function)
+      );
 
       // Simulate transition end
       const overlay = modal.modalElement;
