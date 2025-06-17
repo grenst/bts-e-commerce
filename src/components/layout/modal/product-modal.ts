@@ -615,13 +615,13 @@ export function createProductModal(): ProductModal {
     const quantity = createElement({
       tag: 'div',
       parent: orderParameters,
-      classes: [
-        'order-quantity',
-        'flex',
-        'items-center',
-        'justify-between',
-        // 'm-2',
-      ],
+      classes: ['order-quantity', 'flex', 'items-center', 'justify-between'],
+    });
+
+    const lockerQuantity = createElement({
+      tag: 'div',
+      parent: quantity,
+      classes: ['locker-quantity', 'inherit', 'absolute', 'hidden'],
     });
 
     createElement({
@@ -744,7 +744,20 @@ export function createProductModal(): ProductModal {
       minus.disabled = qty <= 1;
     };
 
+    function showLocker() {
+      lockerQuantity.classList.remove('hidden');
+      lockerQuantity.classList.add('block');
+    }
+
+    function hideLocker() {
+      lockerQuantity.classList.remove('block');
+      lockerQuantity.classList.add('hidden');
+    }
+
     plus.addEventListener('click', async () => {
+      // Show loader during API operation
+      showLocker();
+
       qty += 1;
       updatePrice();
 
@@ -752,12 +765,22 @@ export function createProductModal(): ProductModal {
         try {
           await changeLineItemQuantity(lineItemId, qty);
           await updateCartButton();
+          addNotification('success', 'Product was increased in cart.');
         } catch {
           addNotification('error', 'Failed to increase quantity.');
+        } finally {
+          // Hide loader after API response
+          hideLocker();
         }
+      } else {
+        // Hide loader if no API call was made
+        hideLocker();
       }
     });
     minus.addEventListener('click', async () => {
+      // Show loader during API operation
+      showLocker();
+
       if (qty <= 1) {
         if (isInCart && lineItemId) {
           try {
@@ -768,7 +791,13 @@ export function createProductModal(): ProductModal {
             addNotification('success', 'Product removed from cart.');
           } catch {
             addNotification('error', 'Failed to remove product from cart.');
+          } finally {
+            // Hide loader after API response
+            hideLocker();
           }
+        } else {
+          // Hide loader if no API call was made
+          hideLocker();
         }
         return;
       }
@@ -780,9 +809,16 @@ export function createProductModal(): ProductModal {
         try {
           await changeLineItemQuantity(lineItemId, qty);
           await updateCartButton();
+          addNotification('success', 'Product was decreased in cart.');
         } catch {
           addNotification('error', 'Failed to decrease quantity.');
+        } finally {
+          // Hide loader after API response
+          hideLocker();
         }
+      } else {
+        // Hide loader if no API call was made
+        hideLocker();
       }
     });
     updatePrice();

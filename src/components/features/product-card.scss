@@ -105,3 +105,11 @@
 .description_on_cards {
   min-height: 40px;
 }
+
+.locker-quantity {
+  height: 2rem;
+  width: 6rem;
+  z-index: 0;
+  // display: none;
+  cursor: progress;
+}
