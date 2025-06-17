@@ -53,8 +53,8 @@ export default function createConfirmationModal(
     parent: buttonContainer,
   });
 
-  let confirmCallback: (() => void) | null = null;
-  let cancelCallback: (() => void) | null = null;
+  let confirmCallback: (() => void) | undefined = undefined;
+  let cancelCallback: (() => void) | undefined = undefined;
 
   confirmButton.addEventListener('click', () => {
     if (confirmCallback) confirmCallback();

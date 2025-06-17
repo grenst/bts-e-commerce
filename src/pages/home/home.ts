@@ -328,7 +328,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   });
 
   gsap.to(catalogButton, {
-    top: '70%',
+    // top: '70%',
     ease: 'none',
     scrollTrigger: {
       trigger: homeContainer,
@@ -382,7 +382,7 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
 
   createElement({
     tag: 'h2',
-    text: 'Fresh Picks For You',
+    text: 'Best in category',
     classes: [
       'text-3xl',
       'font-nexa-bold',
@@ -393,7 +393,6 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
     parent: actualityWrapper,
   });
 
-  // --- Actuality Category Header (Title + Nav Buttons) ---
   const actualityCategoryHeader = createElement({
     tag: 'div',
     classes: [
@@ -569,174 +568,174 @@ export async function createHomePage(container: HTMLElement): Promise<void> {
   }
 
   /* ---------- ACTUAL PRODUCTS (Original list of all products) ---------- */
-  const actualSection = createElement({
-    tag: 'section',
-    attributes: { id: 'actual-products' },
-    classes: ['py-8', 'backdrop-blur-sm', 'bg-white/30'],
-    parent: homeContainer,
-  });
+  // const actualSection = createElement({
+  //   tag: 'section',
+  //   attributes: { id: 'actual-products' },
+  //   classes: ['py-8', 'backdrop-blur-sm', 'bg-white/30'],
+  //   parent: homeContainer,
+  // });
 
-  const actualWrapper = createElement({
-    tag: 'div',
-    classes: ['container', 'mx-auto', 'px-4'],
-    parent: actualSection,
-  });
+  // const actualWrapper = createElement({
+  //   tag: 'div',
+  //   classes: ['container', 'mx-auto', 'px-4'],
+  //   parent: actualSection,
+  // });
 
-  createElement({
-    tag: 'h2',
-    text: 'All Our Products',
-    classes: [
-      'text-3xl',
-      'font-nexa-bold',
-      'text-center',
-      'mb-12',
-      'text-gray-800',
-    ],
-    parent: actualWrapper,
-  });
+  // createElement({
+  //   tag: 'h2',
+  //   text: 'All Our Products',
+  //   classes: [
+  //     'text-3xl',
+  //     'font-nexa-bold',
+  //     'text-center',
+  //     'mb-12',
+  //     'text-gray-800',
+  //   ],
+  //   parent: actualWrapper,
+  // });
 
-  const actualGrid = createElement({
-    tag: 'div',
-    classes: [
-      'grid',
-      'grid-cols-1',
-      'sm:grid-cols-2',
-      'md:grid-cols-3',
-      'lg:grid-cols-4',
-      'gap-8',
-    ],
-    parent: actualWrapper,
-  });
+  // const actualGrid = createElement({
+  //   tag: 'div',
+  //   classes: [
+  //     'grid',
+  //     'grid-cols-1',
+  //     'sm:grid-cols-2',
+  //     'md:grid-cols-3',
+  //     'lg:grid-cols-4',
+  //     'gap-8',
+  //   ],
+  //   parent: actualWrapper,
+  // });
 
-  if (
-    allProducts.length === 0 &&
-    !document.querySelector('#actual-products .text-red-500')
-  ) {
-    if (!actualGrid.querySelector('p')) {
-      createElement({
-        tag: 'p',
-        text: 'No products found.',
-        classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
-        parent: actualGrid,
-      });
-    }
-  } else if (allProducts.length > 0) {
-    for (const [index, product] of allProducts.entries()) {
-      const card = createProductCardElement(product);
-      actualGrid.append(card);
+  // if (
+  //   allProducts.length === 0 &&
+  //   !document.querySelector('#actual-products .text-red-500')
+  // ) {
+  //   if (!actualGrid.querySelector('p')) {
+  //     createElement({
+  //       tag: 'p',
+  //       text: 'No products found.',
+  //       classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
+  //       parent: actualGrid,
+  //     });
+  //   }
+  // } else if (allProducts.length > 0) {
+  //   for (const [index, product] of allProducts.entries()) {
+  //     const card = createProductCardElement(product);
+  //     actualGrid.append(card);
 
-      gsap.from(card, {
-        duration: 0.5,
-        opacity: 0,
-        y: 50,
-        scale: 0.95,
-        ease: 'power1.out',
-        scrollTrigger: {
-          trigger: card,
-          start: 'top 90%',
-          toggleActions: 'play none none none',
-        },
-        delay: index * 0.05,
-      });
-    }
-    ScrollTrigger.refresh();
-  } else if (!actualGrid.querySelector('p')) {
-    createElement({
-      tag: 'p',
-      text: 'Loading products or no products available.',
-      classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
-      parent: actualGrid,
-    });
-  }
+  //     gsap.from(card, {
+  //       duration: 0.5,
+  //       opacity: 0,
+  //       y: 50,
+  //       scale: 0.95,
+  //       ease: 'power1.out',
+  //       scrollTrigger: {
+  //         trigger: card,
+  //         start: 'top 90%',
+  //         toggleActions: 'play none none none',
+  //       },
+  //       delay: index * 0.05,
+  //     });
+  //   }
+  //   ScrollTrigger.refresh();
+  // } else if (!actualGrid.querySelector('p')) {
+  //   createElement({
+  //     tag: 'p',
+  //     text: 'Loading products or no products available.',
+  //     classes: ['text-center', 'text-gray-500', 'my-4', 'col-span-full'],
+  //     parent: actualGrid,
+  //   });
+  // }
 
   // Featured Products/Categories Section
-  const featuredSection = createElement({
-    tag: 'section',
-    attributes: { id: 'featured-products-section' },
-    classes: [
-      'mt-16',
-      'py-12',
-      'backdrop-blur-sm',
-      'bg-white/30',
-      'overflow-hidden',
-    ],
-    parent: homeContainer,
-  });
-  const featuredWrapper = createElement({
-    tag: 'div',
-    classes: ['relative', 'overflow-hidden', 'w-full'],
-    parent: featuredSection,
-  });
-  createElement({
-    tag: 'h2',
-    text: 'Our Special Blends',
-    classes: [
-      'text-3xl',
-      'font-nexa-bold',
-      'text-center',
-      'mb-4',
-      'text-gray-800',
-    ],
-    parent: featuredWrapper,
-  });
+  // const featuredSection = createElement({
+  //   tag: 'section',
+  //   attributes: { id: 'featured-products-section' },
+  //   classes: [
+  //     'mt-16',
+  //     'py-12',
+  //     'backdrop-blur-sm',
+  //     'bg-white/30',
+  //     'overflow-hidden',
+  //   ],
+  //   parent: homeContainer,
+  // });
+  // const featuredWrapper = createElement({
+  //   tag: 'div',
+  //   classes: ['relative', 'overflow-hidden', 'w-full'],
+  //   parent: featuredSection,
+  // });
+  // createElement({
+  //   tag: 'h2',
+  //   text: 'Our Special Blends',
+  //   classes: [
+  //     'text-3xl',
+  //     'font-nexa-bold',
+  //     'text-center',
+  //     'mb-4',
+  //     'text-gray-800',
+  //   ],
+  //   parent: featuredWrapper,
+  // });
 
-  const horizontalTrack = createElement({
-    tag: 'div',
-    attributes: { id: 'horizontal-track' },
-    classes: ['flex', 'w-max', 'gap-0', 'transform-gpu'],
-    parent: featuredWrapper,
-  });
+  // const horizontalTrack = createElement({
+  //   tag: 'div',
+  //   attributes: { id: 'horizontal-track' },
+  //   classes: ['flex', 'w-max', 'gap-0', 'transform-gpu'],
+  //   parent: featuredWrapper,
+  // });
 
-  const featuredImages = [
-    './src/assets/images/21-bumble.webp',
-    './src/assets/images/urZC1GHMf9ve.webp',
-    './src/assets/images/21-bumble.webp',
-  ];
+  // const featuredImages = [
+  //   './src/assets/images/21-bumble.webp',
+  //   './src/assets/images/urZC1GHMf9ve.webp',
+  //   './src/assets/images/21-bumble.webp',
+  // ];
 
-  for (const [index, imgPath] of featuredImages.entries()) {
-    const panel = createElement({
-      tag: 'div',
-      classes: [
-        'w-[100vw]',
-        'h-[50vh]',
-        'flex-shrink-0',
-        'flex',
-        'items-center',
-        'justify-center',
-      ],
-      parent: horizontalTrack,
-    });
-    createElement({
-      tag: 'img',
-      attributes: { src: imgPath, alt: `Featured Blend ${index + 1}` },
-      classes: [
-        'max-h-full',
-        'max-w-full',
-        'object-contain',
-        'rounded-lg',
-        'shadow-md',
-      ],
-      parent: panel,
-    });
-  }
+  // for (const [index, imgPath] of featuredImages.entries()) {
+  //   const panel = createElement({
+  //     tag: 'div',
+  //     classes: [
+  //       'w-[100vw]',
+  //       'h-[50vh]',
+  //       'flex-shrink-0',
+  //       'flex',
+  //       'items-center',
+  //       'justify-center',
+  //     ],
+  //     parent: horizontalTrack,
+  //   });
+  //   createElement({
+  //     tag: 'img',
+  //     attributes: { src: imgPath, alt: `Featured Blend ${index + 1}` },
+  //     classes: [
+  //       'max-h-full',
+  //       'max-w-full',
+  //       'object-contain',
+  //       'rounded-lg',
+  //       'shadow-md',
+  //     ],
+  //     parent: panel,
+  //   });
+  // }
 
-  const scrollDistance = () =>
-    horizontalTrack.scrollWidth - featuredWrapper.clientWidth;
+  // const scrollDistance = () =>
+  //   horizontalTrack.scrollWidth - featuredWrapper.clientWidth;
 
-  if (featuredImages.length > 0) {
-    gsap.to(horizontalTrack, {
-      x: () => -scrollDistance(),
-      ease: 'none',
-      scrollTrigger: {
-        trigger: featuredSection,
-        pin: true,
-        scrub: 1,
-        start: 'top top',
-        end: () => `+=${scrollDistance()}`,
-        invalidateOnRefresh: true,
-      },
-    });
-  }
+  // if (featuredImages.length > 0) {
+  //   gsap.to(horizontalTrack, {
+  //     x: () => -scrollDistance(),
+  //     ease: 'none',
+  //     scrollTrigger: {
+  //       trigger: featuredSection,
+  //       pin: true,
+  //       scrub: 1,
+  //       start: 'top top',
+  //       end: () => `+=${scrollDistance()}`,
+  //       invalidateOnRefresh: true,
+  //     },
+  //   });
+  // }
 
   window.addEventListener('load', () => ScrollTrigger.refresh());
 

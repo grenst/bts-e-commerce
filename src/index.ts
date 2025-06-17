@@ -129,7 +129,7 @@ createFooter(body);
 createNotificationsContainer(body);
 createLoadingIndicator(body);
 
-addNotification('info', 'Welcome to the E-commerce App!');
+// addNotification('info', 'Welcome to the E-commerce App!');
 
 globalThis.addEventListener('scroll', () => {
   if (globalThis.scrollY > 118) {

@@ -40,6 +40,7 @@ export function createHeaderElements(
       'duration-300',
       'z-10',
       'header-color',
+      'max-[580px]:px-2',
     ],
     // parent,
     parent: body,

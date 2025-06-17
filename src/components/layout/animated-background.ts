@@ -1,5 +1,4 @@
 import { gsap } from 'gsap';
-import { setupBackgroundAnimations } from '../../animations/gsap-init';
 import { body, createEl as createElement } from '../../utils/element-utilities';
 
 export function createAnimatedBackground(): void {
@@ -165,13 +164,23 @@ export function createAnimatedBackground(): void {
   startAddingBubbles();
   animate();
 
-  window.addEventListener('resize', () => {
-    canvasElement.width = window.innerWidth;
-    canvasElement.height = window.innerHeight;
-    for (const bubble of bubbles) {
-      bubble.reset();
-    }
-  });
+  let resizeTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  setupBackgroundAnimations();
+  window.addEventListener('resize', () => {
+    if (resizeTimeout !== undefined) {
+      clearTimeout(resizeTimeout);
+    }
+
+    resizeTimeout = setTimeout(() => {
+      // DEBOUNCING IS HERE!!
+      canvasElement.width = window.innerWidth;
+      canvasElement.height = window.innerHeight;
+
+      for (const bubble of bubbles) {
+        bubble.reset();
+      }
+
+      resizeTimeout = undefined;
+    }, 300);
+  });
 }

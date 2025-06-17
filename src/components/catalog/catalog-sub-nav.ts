@@ -1,6 +1,6 @@
 import './catalog-sub-nav.scss';
 // Use SVG mock for Jest
-import arrowsIconPath from '../../__mocks__/svgMock';
+import arrowsIconPath from '../../assets/images/arrows.svg';
 import { createEl as createElement } from '../../utils/element-utilities';
 import { getAllCategories } from '../../api/products/product-service';
 
@@ -245,37 +245,44 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
     currentMode = mode;
     element.classList.add('open');
     contentElement.innerHTML = '';
-    if (mode === 'filters') {
-      if (categories) {
-        renderFilterPills();
-      } else {
-        contentElement.append(
-          createElement({
-            tag: 'p',
-            classes: ['text-gray-600', 'text-center'],
-            text: 'Loading filters...',
-          })
-        );
-        getAllCategories()
-          .then((cats) => {
-            categories = cats;
-            renderFilterPills();
-          })
-          .catch(() => {
-            contentElement.innerHTML = '';
-            contentElement.append(
-              createElement({
-                tag: 'p',
-                classes: ['text-red-500', 'text-center'],
-                text: 'Failed to load filters',
-              })
-            );
-          });
+    switch (mode) {
+      case 'filters': {
+        if (categories) {
+          renderFilterPills();
+        } else {
+          contentElement.append(
+            createElement({
+              tag: 'p',
+              classes: ['text-gray-600', 'text-center'],
+              text: 'Loading filters...',
+            })
+          );
+          getAllCategories()
+            .then((cats) => {
+              categories = cats;
+              renderFilterPills();
+            })
+            .catch(() => {
+              contentElement.innerHTML = '';
+              contentElement.append(
+                createElement({
+                  tag: 'p',
+                  classes: ['text-red-500', 'text-center'],
+                  text: 'Failed to load filters',
+                })
+              );
+            });
+        }
+        break;
       }
-    } else if (mode === 'sort') {
-      renderSortOptions();
-    } else if (mode === 'promo') {
-      renderPromoCodes();
+      case 'sort': {
+        renderSortOptions();
+        break;
+      }
+      case 'promo': {
+        renderPromoCodes();
+        break;
+      }
     }
   };
 
