@@ -150,6 +150,12 @@ export function createProductCardElement(product: Product): HTMLElement {
     ],
   });
 
+  // createElement({
+  //   tag: 'div',
+  //   parent: descriptionContainer,
+  //   classes: ['text-xl', 'mb-2', 'text-gray-800', 'z-10'],
+  // });
+
   createElement({
     tag: 'h3',
     parent: descriptionContainer,
