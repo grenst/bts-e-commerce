@@ -2,6 +2,10 @@ import {
   createEl as createElement,
   createSvgUse,
 } from '../../utils/element-utilities';
+import andrImage from '../../assets/images/andr.webp';
+import vitImage from '../../assets/images/vit.webp';
+import sergImage from '../../assets/images/serg.webp';
+import rsImage from '../../assets/images/rs.webp';
 import './about-style.scss';
 import { gsap } from 'gsap';
 
@@ -149,6 +153,42 @@ export default function createAboutUsPage(container: HTMLElement): void {
     return container;
   }
 
+  function createMemberInfo(
+    parent: HTMLElement,
+    src: string,
+    alt: string,
+    key: TextKeys
+  ): void {
+    const ul = createElement({
+      tag: 'ul',
+      parent,
+      classes: ['container-meseg-user-2', 'hidden1'],
+      attributes: { style: 'will-change: transform, opacity;' },
+    });
+
+    const li = createElement({
+      tag: 'li',
+      parent: ul,
+      classes: ['point-us1'],
+    });
+
+    createElement({
+      tag: 'img',
+      parent: li,
+      attributes: {
+        src,
+        alt,
+        style: 'max-width: 200px; max-height: 200px; margin-bottom: 10px; border-radius: 20px;',
+      },
+    });
+
+    createElement({
+      tag: 'p',
+      parent: li,
+      text: getTextByKey(key),
+    });
+  }
+
   const profileContainer = createElement({
     tag: 'div',
     classes: [
@@ -287,6 +327,16 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   containerInfoUsAndriiUser22.append(titleMasegeAndriiUser3);
 
+  const andriiImg = createElement({
+    tag: 'img',
+    attributes: {
+      src: andrImage,
+      alt: 'Andrii',
+      style: 'max-width: 200px; max-height: 200px; margin-bottom: 10px; border-radius: 30px;',
+    },
+  });
+  titleMasegeAndriiUser3.append(andriiImg);
+
   const technologiesTitleP3 = createElement({
     tag: 'p',
     text: getTextByKey(TextKeys.ANDRII),
@@ -340,7 +390,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
   containerVitaliTitle.append(containerUlVitali);
 
   createMessageBlock(containerUlVitali, 'admin', 'Second team member:');
-  createMessageBlock(containerUlVitali, 'admin', TextKeys.VITALI);
+  createMemberInfo(containerUlVitali, vitImage, 'Vitali', TextKeys.VITALI);
 
   const containerTechnologiesTextVit11 = createElement({
     tag: 'ul',
@@ -382,12 +432,8 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   containerAboutSer.append(containerUlser);
 
-  createMessageBlock(
-    containerUlser,
-    'admin',
-    'And the third of the developers:'
-  );
-  createMessageBlock(containerUlser, 'admin', TextKeys.SERGEY);
+  createMessageBlock(containerUlser, 'admin', 'And the third of the developers:');
+  createMemberInfo(containerUlser, sergImage, 'Sergey', TextKeys.SERGEY);
 
   const containerTechnologiesTextSer11 = createElement({
     tag: 'ul',
@@ -480,6 +526,16 @@ export default function createAboutUsPage(container: HTMLElement): void {
     classes: ['point-us1'],
   });
   userRssUl.append(userRssli);
+
+  const rssImg = createElement({
+    tag: 'img',
+    attributes: {
+      src: rsImage,
+      alt: 'RSS',
+      style: 'max-width: 200px; max-height: 200px; margin-bottom: 10px;',
+    },
+  });
+  userRssli.append(rssImg);
 
   const textPRss2 = createElement({
     tag: 'p',
