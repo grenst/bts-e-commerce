@@ -221,9 +221,9 @@ export function createCatalogSubNavElement(): CatalogSubNavControl {
     });
 
     const promoButton = createElement({
-      tag: 'button',
+      tag: 'span',
       attributes: {
-        class: 'px-4 py-2 bg-yellow-300 text-black rounded-full font-medium',
+        class: 'px-4 py-2 bg-yellow-300 text-black rounded-full font-medium probo_button',
       },
       text: 'SUMMER15',
     });
