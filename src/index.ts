@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import { DropdownManager } from './components/layout/dropdown-manager';
 
 declare global {
   interface GlobalThis {
@@ -116,6 +117,11 @@ const routes: Route[] = [
 for (const route of routes) router.addRoute(route);
 
 updateUserNavOnHeader(userNav, router);
+
+// Close any open dropdown when clicking anywhere inside #user_nav
+document.getElementById('user_nav')?.addEventListener('click', () => {
+  DropdownManager.closeCurrent();
+});
 
 export function triggerHeaderUpdate(): void {
   updateUserNavOnHeader(userNav, router);

@@ -10,7 +10,7 @@ import {
 import { useTokenStore } from '../../../store/token-store';
 import { useCustomerStore } from '../../../store/customer-store';
 import { Router } from '../../../router/router';
-import { createUserDropdown } from '../user-menu';
+import { createUserDropdown, createAboutDropdown } from '../user-menu';
 
 interface HeaderElements {
   header: HTMLElement;
@@ -138,15 +138,19 @@ export function updateUserNavOnHeader(
     );
 
     const cartLink = createSvgUse('#cart', 'header-link');
-    const aboutLink = createSvgUse('#about', 'header-link');
-
     userActionsContainer.append(cartLink);
-    userActionsContainer.append(aboutLink);
-
-    aboutLink.classList.add('about-icon');
-    aboutLink.addEventListener('click', () => router.navigateTo('/aboutInfo'));
-
     cartLink.addEventListener('click', () => router.navigateTo('/cart'));
+
+    const aboutLink = createSvgUse('#about', 'header-link');
+    userActionsContainer.append(aboutLink);
+    aboutLink.classList.add('about-icon');
+
+    const aboutDropdownContainer = createElement({
+      classes: ['relative'],
+      parent: userActionsContainer,
+    });
+    aboutDropdownContainer.append(aboutLink);
+    createAboutDropdown(aboutLink, aboutDropdownContainer, router);
   } else {
     const loginLink = createElement({
       tag: 'a',

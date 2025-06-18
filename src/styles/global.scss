@@ -108,6 +108,12 @@ input:focus {
   transform: translateX(-110px) scaleX(2);
 }
 
+.about_dropdown {
+  padding-top: 16px;
+  font-family: $font-family-nexa-light;
+  font-size: 1.5rem;
+}
+
 /* .login-name::before styles moved to src/components/layout/title/title.scss */
 
 .object-cover {
