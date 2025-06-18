@@ -68,6 +68,7 @@ export default function createConfirmationModal(
 
   function close() {
     modalContainer.remove();
+    document.dispatchEvent(new CustomEvent('cartUpdated'));
   }
 
   return {

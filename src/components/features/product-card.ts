@@ -1,7 +1,7 @@
 import { createEl as createElement } from '../../utils/element-utilities';
 import { Product } from '../../types/catalog-types';
 import { ModalManager } from '../../components/layout/modal/product-modal';
-import { isProductInCart } from '../../api/cart/cart-service';
+import { isProductInCart, addToCart } from '../../api/cart/cart-service';
 import './product-card.scss';
 import priceHitImg from '@assets/images/price-hit.webp';
 
@@ -208,28 +208,68 @@ export function createProductCardElement(product: Product): HTMLElement {
     ],
   }) as HTMLButtonElement;
 
-  // Check if product is in cart and update button
-  isProductInCart(product.id).then(({ isInCart }) => {
+  // Function to update cart status
+  const updateCartStatus = async () => {
+    const { isInCart } = await isProductInCart(product.id);
     if (isInCart) {
-      // const priceStatus = document.querySelector('.price-status');
-      // if (priceStatus) {
-      //   priceStatus.textContent = "IT’S IN CART";
-      // }
-      button.textContent = 'ALREADY IN CART';
+      button.textContent = 'ADD MORE';
       button.classList.remove('bg-gray-100');
       button.classList.add('bg-gray-400');
+    } else {
+      button.textContent = 'ADD TO CART';
+      button.classList.add('bg-gray-100');
+      button.classList.remove('bg-gray-400');
     }
-  });
+  };
 
-  button.addEventListener('click', (event_) => {
+  // Initial cart status check
+  updateCartStatus();
+
+  // Listen for cart updates
+  document.addEventListener('cartUpdated', updateCartStatus);
+
+  button.addEventListener('click', async (event_) => {
     event_.stopPropagation();
-    if (!button.disabled) {
+    if (button.disabled) return;
+
+    // Open modal if product is already in cart
+    const { isInCart } = await isProductInCart(product.id);
+    if (isInCart) {
       productModal.showModal(product.id, { x: event_.pageX, y: event_.pageY });
+    } else {
+      button.disabled = true;
+      button.textContent = 'ADD MORE';
+      button.classList.remove('bg-gray-100');
+      button.classList.add('bg-gray-400');
+
+      try {
+        await addToCart(product.id, 1, 1);
+      } catch (error) {
+        console.error('Failed to add product to cart:', error);
+        button.textContent = 'ADD TO CART';
+        button.classList.add('bg-gray-100');
+        button.classList.remove('bg-gray-400');
+      } finally {
+        button.disabled = false;
+      }
     }
   });
 
-  card.addEventListener('click', (event_: MouseEvent) => {
-    productModal.showModal(product.id, { x: event_.pageX, y: event_.pageY });
+  // Add click event to the card to open modal when clicking anywhere except the add to cart button
+  card.addEventListener('click', (event) => {
+    // Check if the click was on the button or inside the button
+    const buttonElement = event.target instanceof Element &&
+                         (event.target.closest('.add-to-cart-btn') ||
+                          event.target.classList.contains('add-to-cart-btn'));
+    
+    if (!buttonElement) {
+      productModal.showModal(product.id, { x: event.pageX, y: event.pageY });
+    }
+  });
+
+  // Clean up event listener when card is removed
+  card.addEventListener('remove', () => {
+    document.removeEventListener('cartUpdated', updateCartStatus);
   });
 
   return card;

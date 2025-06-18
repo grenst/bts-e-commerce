@@ -942,6 +942,8 @@ export function createProductModal(): ProductModal {
         body.classList.remove('lock');
         originalURL = undefined;
         basePath = undefined;
+        // Dispatch cartUpdated event to notify that the cart may have changed
+        document.dispatchEvent(new CustomEvent('cartUpdated'));
       }
       // overlay.style.display = 'none';
       // overlay.removeEventListener('transitionend', onEnd);
