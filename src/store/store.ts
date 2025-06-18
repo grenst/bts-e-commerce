@@ -103,7 +103,7 @@ export function subscribeToStore(
 export function createNotificationsContainer(parent: HTMLElement): HTMLElement {
   const container = document.createElement('div');
   container.className =
-    'notifications-container fixed top-4 right-4 z-50 flex flex-col gap-2';
+    'notifications-container fixed animate-pulse top-10 right-1 z-200 flex flex-col gap-2';
   parent.append(container);
 
   uiStore.subscribe((state) => {
