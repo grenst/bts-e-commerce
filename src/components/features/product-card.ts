@@ -7,17 +7,82 @@ import priceHitImg from '@assets/images/price-hit.webp';
 
 export function createProductCardElement(product: Product): HTMLElement {
   const productModal = ModalManager.getModal();
-
-  const price = product.masterVariant.prices?.[0];
+  let isLoaded = false;
 
   const card = createElement({
     tag: 'div',
-    classes: ['product-card', 'bg-white', 'cursor-pointer', 'flex', 'flex-col'],
+    classes: ['product-card', 'bg-white', 'cursor-pointer', 'flex', 'flex-col', 'relative'],
   });
+
+  // Skeleton placeholder
+  const skeleton = createElement({
+    tag: 'div',
+    classes: ['skeleton', 'absolute', 'inset-0', 'z-10', 'animate-pulse'],
+  });
+
+  // Image skeleton
+  createElement({
+    tag: 'div',
+    parent: skeleton,
+    classes: ['w-full', 'h-48', 'bg-gray-200'],
+  });
+
+  // Content skeleton
+  const contentSkeleton = createElement({
+    tag: 'div',
+    parent: skeleton,
+    classes: ['p-2', 'pt-8', 'flex-grow'],
+  });
+  
+  createElement({
+    tag: 'div',
+    parent: contentSkeleton,
+    classes: ['h-6', 'bg-gray-200', 'mb-2', 'w-3/4'],
+  });
+  
+  createElement({
+    tag: 'div',
+    parent: contentSkeleton,
+    classes: ['h-4', 'bg-gray-200', 'mb-1', 'w-1/2'],
+  });
+  
+  createElement({
+    tag: 'div',
+    parent: contentSkeleton,
+    classes: ['h-4', 'bg-gray-200', 'mb-1', 'w-2/3'],
+  });
+  
+  createElement({
+    tag: 'div',
+    parent: contentSkeleton,
+    classes: ['h-4', 'bg-gray-200', 'mb-3', 'w-1/3'],
+  });
+  
+  createElement({
+    tag: 'div',
+    parent: contentSkeleton,
+    classes: ['h-6', 'bg-gray-200', 'w-1/2'],
+  });
+  
+  createElement({
+    tag: 'div',
+    parent: contentSkeleton,
+    classes: ['h-8', 'bg-gray-200', 'mt-3'],
+  });
+
+  // Content container
+  const contentContainer = createElement({
+    tag: 'div',
+    classes: ['content', 'opacity-0', 'transition-opacity', 'duration-500'],
+  });
+
+  card.append(skeleton, contentContainer);
+
+  const price = product.masterVariant.prices?.[0];
 
   const imageContainer = createElement({
     tag: 'div',
-    parent: card,
+    parent: contentContainer,
     classes: ['w-full', 'h-48', 'bg-white', 'relative'],
   });
 
@@ -39,11 +104,11 @@ export function createProductCardElement(product: Product): HTMLElement {
     ],
   });
 
-  createElement({
+  const productImage = createElement({
     tag: 'img',
     parent: imageLimiter,
     attributes: {
-      src: product.masterVariant.images?.[1]?.url ?? '',
+      src: '',
       alt: product.name['en-US'] || 'Product Image',
       loading: 'lazy',
     },
@@ -51,11 +116,11 @@ export function createProductCardElement(product: Product): HTMLElement {
   });
 
   if (price && price.discounted) {
-    createElement({
+    const discountImg = createElement({
       tag: 'img',
       parent: imageContainer,
       attributes: {
-        src: priceHitImg,
+        src: '',
         alt: 'Discount',
         loading: 'lazy',
       },
@@ -63,9 +128,10 @@ export function createProductCardElement(product: Product): HTMLElement {
     });
   }
 
-  const contentContainer = createElement({
+  // Content section remains the same but parent is now contentContainer
+  const descriptionContainer = createElement({
     tag: 'div',
-    parent: card,
+    parent: contentContainer,
     classes: [
       'p-2',
       'pt-8',
@@ -86,15 +152,15 @@ export function createProductCardElement(product: Product): HTMLElement {
 
   createElement({
     tag: 'h3',
-    parent: contentContainer,
+    parent: descriptionContainer,
     text: product.name['en-US'] || 'N/A',
-    classes: ['text-xl', 'mb-2', 'text-gray-800'],
+    classes: ['text-xl', 'mb-2', 'text-gray-800', 'z-10'],
   });
 
   if (product.description && product.description['en-US']) {
     createElement({
       tag: 'p',
-      parent: contentContainer,
+      parent: descriptionContainer,
       text: product.description['en-US'],
       classes: [
         'text-sm',
@@ -102,13 +168,14 @@ export function createProductCardElement(product: Product): HTMLElement {
         'mb-3',
         'line-clamp-3',
         'description_on_cards',
+        'z-10'
       ],
     });
   }
 
   const priceContainer = createElement({
     tag: 'div',
-    parent: contentContainer,
+    parent: descriptionContainer,
     classes: ['mt-auto', 'pt-3', 'relative', 'z-10'],
   });
 
@@ -186,7 +253,7 @@ export function createProductCardElement(product: Product): HTMLElement {
   // Create button container
   const buttonContainer = createElement({
     tag: 'div',
-    parent: contentContainer,
+    parent: descriptionContainer,
     classes: ['px-2', 'mt-auto', 'z-1'],
   });
 
@@ -271,6 +338,43 @@ export function createProductCardElement(product: Product): HTMLElement {
   card.addEventListener('remove', () => {
     document.removeEventListener('cartUpdated', updateCartStatus);
   });
+
+  // Intersection Observer for lazy loading
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !isLoaded) {
+        isLoaded = true;
+        
+        // Load images
+        if (product.masterVariant.images?.[1]?.url) {
+          productImage.setAttribute('src', product.masterVariant.images[1].url);
+        }
+        
+        if (price && price.discounted) {
+          const discountImg = imageContainer.querySelector('.price_hit') as HTMLImageElement;
+          if (discountImg) {
+            discountImg.setAttribute('src', priceHitImg);
+          }
+        }
+        
+        // Show content with fade-in effect
+        setTimeout(() => {
+          contentContainer.classList.remove('opacity-0');
+          skeleton.style.opacity = '0';
+          setTimeout(() => {
+            skeleton.remove();
+          }, 500);
+        }, 300);
+        
+        observer.unobserve(card);
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px 200px 0px'
+  });
+
+  observer.observe(card);
 
   return card;
 }

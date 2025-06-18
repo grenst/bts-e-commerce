@@ -5,6 +5,7 @@ import { createProductListElement } from '../../components/catalog/product-list'
 import { getAllPublishedProducts as getAllProducts } from '../../api/products/product-service';
 import { getAllCategories } from '../../api/products/product-service';
 import { Product, Category, ActiveSortMode } from '../../types/catalog-types';
+import { createProductCardSkeletonElement } from '../../components/features/product-card-skeleton';
 import {
   // createProductModal,
   // ProductModal,
@@ -107,6 +108,9 @@ export function createCatalogPage(container: HTMLElement): void {
 
   async function fetchProducts() {
     try {
+      // Show loading state
+      renderProductList(true);
+
       const filterClauses: string[] = [];
 
       if (selectedCategoryId) {
@@ -141,12 +145,41 @@ export function createCatalogPage(container: HTMLElement): void {
         'Error fetching products:',
         error instanceof Error ? error.message : String(error)
       );
+      // Render empty state on error
+      renderProductList();
     }
   }
 
-  function renderProductList() {
-    displayedProducts = allProducts;
+  function renderProductList(isLoading = false) {
     productListContainer.innerHTML = '';
+
+    if (isLoading) {
+      // Show skeleton placeholders while loading
+      const skeletonGrid = createElement({
+        tag: 'div',
+        classes: ['grid', 'grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4', 'gap-4']
+      });
+      
+      for (let i = 0; i < 8; i++) {
+        skeletonGrid.append(createProductCardSkeletonElement());
+      }
+      
+      productListContainer.append(skeletonGrid);
+      return;
+    }
+
+    if (allProducts.length === 0) {
+      // Show empty state
+      const emptyState = createElement({
+        tag: 'div',
+        classes: ['text-center', 'py-12'],
+        text: 'No products found. Try changing your filters.'
+      });
+      productListContainer.append(emptyState);
+      return;
+    }
+
+    displayedProducts = allProducts;
     productListContainer.append(
       createProductListElement(displayedProducts, allCategoriesMap)
     );
