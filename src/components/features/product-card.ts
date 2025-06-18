@@ -116,7 +116,7 @@ export function createProductCardElement(product: Product): HTMLElement {
   });
 
   if (price && price.discounted) {
-    const discountImg = createElement({
+    createElement({
       tag: 'img',
       parent: imageContainer,
       attributes: {
