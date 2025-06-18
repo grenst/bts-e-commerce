@@ -37,6 +37,13 @@ interface Cart {
 
 let activeCart: Cart | undefined;
 
+function dispatchCartUpdated() {
+  if (typeof window !== 'undefined') {
+    const totalQty = activeCart?.lineItems.reduce((sum, item) => sum + item.quantity, 0) || 0;
+    window.dispatchEvent(new CustomEvent('cartUpdated', { detail: { totalQty } }));
+  }
+}
+
 /* ────────── helpers ────────── */
 
 // getAccessToken function removed
@@ -158,11 +165,13 @@ export async function addToCart(
 
   try {
     activeCart = await postUpdate(cart);
+    dispatchCartUpdated();
     return activeCart;
   } catch (error: unknown) {
     if (isAxiosError(error) && error.response?.status === 409) {
       const fresh = await getOrCreateCart(); // обновляем версию
       activeCart = await postUpdate(fresh);
+      dispatchCartUpdated();
       return activeCart;
     }
     throw error;
@@ -182,6 +191,7 @@ export async function clearCart(): Promise<Cart> {
     { params: { expand: 'discountCodes[*].discountCode' } }
   );
   activeCart = data;
+  dispatchCartUpdated();
   return data;
 }
 
@@ -213,6 +223,7 @@ export async function removeLineItem(lineItemId: string): Promise<void> {
     { params: { expand: 'discountCodes[*].discountCode' } }
   );
   activeCart = data;
+  dispatchCartUpdated();
 }
 
 export async function changeLineItemQuantity(
@@ -236,6 +247,7 @@ export async function changeLineItemQuantity(
   );
 
   activeCart = data;
+  dispatchCartUpdated();
 }
 
 export async function applyDiscount(code: string): Promise<Cart> {

@@ -141,6 +141,58 @@ export function updateUserNavOnHeader(
     userActionsContainer.append(cartLink);
     cartLink.addEventListener('click', () => router.navigateTo('/cart'));
 
+    const cartContainer = createElement({
+      classes: ['relative'],
+      parent: userActionsContainer,
+    });
+    cartContainer.append(cartLink);
+    
+    const cartQty = createElement({
+      tag: 'p',
+      text: '0',
+      classes: [
+        'in_cart_number',
+        'absolute',
+        'top-0',
+        'right-0',
+        'transform',
+        'translate-x-1/2',
+        '-translate-y-1/2',
+        'text-md',
+        'text-white',
+        'bg-gray-900',
+        'rounded-full',
+        'min-w-[20px]',
+        'text-center',
+        'hidden'
+      ],
+      parent: cartContainer,
+    });
+    
+    // Function to update cart quantity display
+    const updateCartQty = (quantity: number) => {
+      cartQty.textContent = quantity.toString();
+      if (quantity === 0) {
+        cartQty.classList.add('hidden');
+      } else {
+        cartQty.classList.remove('hidden');
+      }
+    };
+    
+    // Get initial cart quantity
+    import('../../../api/cart/cart-service').then((cartModule) => {
+      cartModule.getOrCreateCart().then(cart => {
+        const totalQty = cart.lineItems.reduce((sum, item) => sum + item.quantity, 0);
+        updateCartQty(totalQty);
+      });
+    });
+    
+    // Subscribe to cart updates
+    window.addEventListener('cartUpdated', (event: Event) => {
+      const customEvent = event as CustomEvent<{totalQty: number}>;
+      updateCartQty(customEvent.detail.totalQty);
+    });
+
     const aboutLink = createSvgUse('#about', 'header-link');
     userActionsContainer.append(aboutLink);
     aboutLink.classList.add('about-icon');
