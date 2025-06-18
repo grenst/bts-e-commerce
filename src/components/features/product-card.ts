@@ -272,12 +272,16 @@ export function createProductCardElement(product: Product): HTMLElement {
       'w-full',
       'pt-1',
       'rounded-b-lg',
+      'border',
+      'border-gray-400',
       // 'px-4',
       'bg-gray-100',
       'hover:bg-gray-400',
       'transition',
       'duration-200',
       'add-to-cart-btn',
+      'hover:animate-wiggle',
+      'hover:animate-once',
     ],
   }) as HTMLButtonElement;
 

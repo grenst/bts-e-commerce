@@ -83,6 +83,8 @@ export function createHeaderElements(
       'text-start',
       'text-justify',
       'pt-3',
+      'min-[780px]:w-[320px]',
+      'min-[780px]:text-lg',
     ],
     parent: header,
   });
@@ -101,6 +103,42 @@ export function createHeaderElements(
     x: -30,
     ease: 'power3.out',
     delay: 0.5,
+  });
+
+  // Create navigation links
+  const navContainer = createElement({
+    tag: 'nav',
+    classes: ['header-nav', 'flex-grow', 'flex', 'justify-start'],
+    parent: header,
+  });
+
+  const ul = createElement({
+    tag: 'ul',
+    classes: ['flex', 'gap-4'],
+    parent: navContainer,
+  });
+
+  const links = [
+    { text: 'Home', href: '/main' },
+    { text: 'Catalog', href: '/catalog' },
+    { text: 'About Us', href: '/aboutUs' },
+    { text: 'Cart', href: '/cart' },
+  ];
+
+  links.forEach((link) => {
+    const li = createElement({ tag: 'li' });
+    const a = createElement({
+      tag: 'a',
+      text: link.text,
+      attributes: { href: link.href },
+      classes: ['text-gray-800', 'hover:text-gray-600', 'cursor-pointer'],
+    });
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      router.navigateTo(link.href);
+    });
+    li.append(a);
+    ul.append(li);
   });
 
   const userNav = createElement({
