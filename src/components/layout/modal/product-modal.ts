@@ -18,7 +18,7 @@ import {
   changeLineItemQuantity,
   getOrCreateCart,
 } from '../../../api/cart/cart-service';
-import { useCustomerStore } from '../../../store/customer-store';
+// import { useCustomerStore } from '../../../store/customer-store';
 import { addNotification } from '../../../store/store';
 
 const categoryCache = new Map<string, Product[]>();
@@ -859,14 +859,14 @@ export function createProductModal(): ProductModal {
     updateCartButton();
 
     addToCartButton.addEventListener('click', async () => {
-      const isLoggedIn = Boolean(useCustomerStore.getState().customer);
-      if (!isLoggedIn) {
-        addNotification(
-          'warning',
-          'Please log in or register to add items to the cart.'
-        );
-        return;
-      }
+      // const isLoggedIn = Boolean(useCustomerStore.getState().customer);
+      // if (!isLoggedIn) {
+      //   addNotification(
+      //     'warning',
+      //     'Please log in or register to add items to the cart.'
+      //   );
+      //   return;
+      // }
 
       if (selectedVariant.id === undefined) {
         addNotification('error', 'Cannot add to cart: variant has no ID.');

@@ -262,7 +262,7 @@ export function createRouter(container: HTMLElement): Router {
     routerInstance.addRoute({
       path: '/cart',
       component: createCartPage,
-      preserveState: true,
+      preserveState: false,
     });
   }
   return routerInstance;

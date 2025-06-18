@@ -84,34 +84,48 @@ apiInstance.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
-      try {
-        logger.log('Attempting to refresh token...');
-        const newAccessToken = await AuthService.refreshToken();
+      const { isAnonymous } = useTokenStore.getState();
 
-        if (newAccessToken) {
-          logger.log('Token refreshed successfully.');
-          if (originalRequest.headers) {
-            originalRequest.headers['Authorization'] =
-              `Bearer ${newAccessToken}`;
+      if (isAnonymous) {
+        // For anonymous sessions, get a new anonymous token
+        try {
+          logger.log('Anonymous session expired, getting new anonymous token...');
+          const newToken = await AuthService.getAnonymousToken();
+          if (newToken) {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            return apiInstance(originalRequest);
           } else {
-            originalRequest.headers = {
-              Authorization: `Bearer ${newAccessToken}`,
-            };
+            logger.error('Failed to get new anonymous token');
+            throw error;
           }
-          return apiInstance(originalRequest);
-        } else {
-          logger.log(
-            'Failed to refresh token, newAccessToken is null. Logging out.'
-          );
-          // AuthService.logout() or similar could be called here if needed
+        } catch (anonError) {
+          logger.error('Error getting new anonymous token:', anonError);
           throw error;
         }
-      } catch (refreshError) {
-        logger.error(
-          'Caught error during token refresh attempt or subsequent request retry:',
-          refreshError
-        );
-        throw refreshError;
+      } else {
+        // For authenticated sessions, attempt to refresh token
+        try {
+          logger.log('Attempting to refresh token...');
+          const newAccessToken = await AuthService.refreshToken();
+
+          if (newAccessToken) {
+            logger.log('Token refreshed successfully.');
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            return apiInstance(originalRequest);
+          } else {
+            logger.log(
+              'Failed to refresh token, newAccessToken is null. Logging out.'
+            );
+            await AuthService.logout();
+            throw error;
+          }
+        } catch (refreshError) {
+          logger.error(
+            'Caught error during token refresh attempt:',
+            refreshError
+          );
+          throw refreshError;
+        }
       }
     }
     throw error;

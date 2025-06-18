@@ -109,6 +109,14 @@ export default class CartUI {
     );
   }
 
+  private emitCartUpdated(): void {
+    const totalQty =
+      this.cart?.lineItems.reduce((sum, li) => sum + li.quantity, 0) ?? 0;
+    window.dispatchEvent(
+      new CustomEvent('cartUpdated', { detail: { totalQty } })
+    );
+  }
+
   private async fetchCart(): Promise<void> {
     const c = await getOrCreateCart();
     if (this.isCtCart(c)) {
@@ -380,10 +388,17 @@ export default class CartUI {
       checkout.addEventListener('click', () => {
         checkout.textContent = 'Processing...';
         checkout.setAttribute('disabled', 'true');
-        setTimeout(() => {
-          alert('Checkout functionality not implemented yet');
-          checkout.textContent = 'Proceed to Checkout';
-          checkout.removeAttribute('disabled');
+        setTimeout(async () => {
+          const { isAnonymous } = useTokenStore.getState();
+          
+          if (isAnonymous) {
+            // Redirect to login with return path to checkout
+            sessionStorage.setItem('returnPath', '/checkout');
+            globalThis.location.href = '/login';
+          } else {
+            // For authenticated users, proceed to checkout
+            globalThis.location.href = '/checkout';
+          }
         }, 1000);
       });
     }
@@ -523,6 +538,7 @@ export default class CartUI {
       this.cart = await patch(cart.version);
       this.updateDiscountStateFromCart();
       this.render();
+      this.emitCartUpdated();
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 409) {
         const fresh = await getOrCreateCart(); // Second call to getOrCreateCart
@@ -530,6 +546,7 @@ export default class CartUI {
           this.cart = await patch(fresh.version); // Retry the patch with fresh version
           this.updateDiscountStateFromCart();
           this.render();
+          this.emitCartUpdated();
           return; // Successfully handled 409 and retried
         }
         // If fresh is not a CtCart, or if the second patch fails, the original error is re-thrown
@@ -548,7 +565,8 @@ export default class CartUI {
       .setTokens(
         anon.access_token,
         anon.refresh_token ?? undefined,
-        anon.expires_in
+        anon.expires_in,
+        true
       );
     return anon.access_token;
   }
