@@ -7,6 +7,7 @@ import {
   createSvgUse,
   removeAllChild,
 } from '../../../utils/element-utilities';
+import { closeOpenModal } from '../../../utils/modal-utils'; // Import shared modal function
 import { useTokenStore } from '../../../store/token-store';
 import { useCustomerStore } from '../../../store/customer-store';
 import { Router } from '../../../router/router';
@@ -38,12 +39,20 @@ export function createHeaderElements(
       'w-full',
       'transition-colors',
       'duration-300',
-      'z-10',
+      'z-[101]', // Increased z-index to appear above modals
       'header-color',
       'max-[580px]:px-2',
     ],
     // parent,
     parent: body,
+  });
+
+  // Add event listener to handle modal state on header background clicks
+  header.addEventListener('click', (event) => {
+    // Only close modal if clicking directly on header background
+    if (event.target === header) {
+      closeOpenModal();
+    }
   });
 
   // const logoImg = createElement({
