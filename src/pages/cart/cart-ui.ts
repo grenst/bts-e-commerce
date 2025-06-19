@@ -83,9 +83,6 @@ interface Labeled {
   label: Record<string, string>;
 }
 
-
-
-
 const isLabeled = (v: unknown): v is Labeled =>
   typeof v === 'object' && v !== null && 'label' in v;
 
@@ -137,8 +134,8 @@ export default class CartUI {
   private emitCartUpdated(): void {
     const totalQty =
       this.cart?.lineItems.reduce((s, li) => s + li.quantity, 0) ?? 0;
-    window.dispatchEvent(
-      new CustomEvent('cartUpdated', { detail: { totalQty, cart: this.cart } }),
+    globalThis.dispatchEvent(
+      new CustomEvent('cartUpdated', { detail: { totalQty, cart: this.cart } })
     );
   }
 
@@ -202,7 +199,7 @@ export default class CartUI {
     }
 
     this.container.append(
-      createElement({ 
+      createElement({
         tag: 'h1',
         classes: [
           'cart-title',
@@ -220,7 +217,7 @@ export default class CartUI {
           'before:-z-1',
           'login-name',
         ],
-        text: 'Your Cart'
+        text: 'Your Cart',
       })
     );
 
@@ -271,7 +268,10 @@ export default class CartUI {
       );
 
       modal.onConfirm(() => {
-        const actions: CartAction[] = this.cart!.lineItems.map((li) => ({
+        if (!this.cart) {
+          return;
+        }
+        const actions: CartAction[] = this.cart.lineItems.map((li) => ({
           action: 'removeLineItem' as const,
           lineItemId: li.id,
         }));
@@ -426,7 +426,7 @@ export default class CartUI {
         checkout.setAttribute('disabled', 'true');
         setTimeout(async () => {
           const { isAnonymous } = useTokenStore.getState();
-          
+
           if (isAnonymous) {
             // Redirect to login with return path to checkout
             sessionStorage.setItem('returnPath', '/checkout');
@@ -563,7 +563,7 @@ export default class CartUI {
         {
           headers: { Authorization: `Bearer ${token}` },
           params: { expand: 'discountCodes[*].discountCode' },
-        },
+        }
       );
       return data;
     };
@@ -574,8 +574,8 @@ export default class CartUI {
       this.updateDiscountStateFromCart();
       this.render();
       this.emitCartUpdated();
-    } catch (err) {
-      if (isAxiosError(err) && err.response?.status === 409) {
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 409) {
         const fresh = await getOrCreateCart();
         if (this.isCtCart(fresh)) {
           this.cart = await patch(fresh.version);
@@ -586,7 +586,7 @@ export default class CartUI {
           return;
         }
       }
-      throw err;
+      throw error;
     }
   }
 

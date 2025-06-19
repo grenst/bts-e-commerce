@@ -11,7 +11,14 @@ export function createProductCardElement(product: Product): HTMLElement {
 
   const card = createElement({
     tag: 'div',
-    classes: ['product-card', 'bg-white', 'cursor-pointer', 'flex', 'flex-col', 'relative'],
+    classes: [
+      'product-card',
+      'bg-white',
+      'cursor-pointer',
+      'flex',
+      'flex-col',
+      'relative',
+    ],
   });
 
   // Skeleton placeholder
@@ -33,37 +40,37 @@ export function createProductCardElement(product: Product): HTMLElement {
     parent: skeleton,
     classes: ['p-2', 'pt-8', 'flex-grow'],
   });
-  
+
   createElement({
     tag: 'div',
     parent: contentSkeleton,
     classes: ['h-6', 'bg-gray-200', 'mb-2', 'w-3/4'],
   });
-  
+
   createElement({
     tag: 'div',
     parent: contentSkeleton,
     classes: ['h-4', 'bg-gray-200', 'mb-1', 'w-1/2'],
   });
-  
+
   createElement({
     tag: 'div',
     parent: contentSkeleton,
     classes: ['h-4', 'bg-gray-200', 'mb-1', 'w-2/3'],
   });
-  
+
   createElement({
     tag: 'div',
     parent: contentSkeleton,
     classes: ['h-4', 'bg-gray-200', 'mb-3', 'w-1/3'],
   });
-  
+
   createElement({
     tag: 'div',
     parent: contentSkeleton,
     classes: ['h-6', 'bg-gray-200', 'w-1/2'],
   });
-  
+
   createElement({
     tag: 'div',
     parent: contentSkeleton,
@@ -174,7 +181,7 @@ export function createProductCardElement(product: Product): HTMLElement {
         'mb-3',
         'line-clamp-3',
         'description_on_cards',
-        'z-10'
+        'z-10',
       ],
     });
   }
@@ -287,12 +294,14 @@ export function createProductCardElement(product: Product): HTMLElement {
 
   // Function to update cart status
   const updateCartStatus = (event: Event) => {
-    const customEvent = event as CustomEvent<{ cart: { lineItems: Array<{ productId: string }> } }>;
+    const customEvent = event as CustomEvent<{
+      cart: { lineItems: Array<{ productId: string }> };
+    }>;
     const cart = customEvent.detail?.cart;
     if (!cart) return;
-    
-    const isInCart = cart.lineItems.some((item: { productId: string }) =>
-      item.productId === product.id
+
+    const isInCart = cart.lineItems.some(
+      (item: { productId: string }) => item.productId === product.id
     );
     if (isInCart) {
       button.textContent = 'ADD MORE';
@@ -353,10 +362,11 @@ export function createProductCardElement(product: Product): HTMLElement {
   // Add click event to the card to open modal when clicking anywhere except the add to cart button
   card.addEventListener('click', (event) => {
     // Check if the click was on the button or inside the button
-    const buttonElement = event.target instanceof Element &&
-                         (event.target.closest('.add-to-cart-btn') ||
-                          event.target.classList.contains('add-to-cart-btn'));
-    
+    const buttonElement =
+      event.target instanceof Element &&
+      (event.target.closest('.add-to-cart-btn') ||
+        event.target.classList.contains('add-to-cart-btn'));
+
     if (!buttonElement) {
       productModal.showModal(product.id, { x: event.pageX, y: event.pageY });
     }
@@ -368,39 +378,47 @@ export function createProductCardElement(product: Product): HTMLElement {
   });
 
   // Intersection Observer for lazy loading
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting && !isLoaded) {
-        isLoaded = true;
-        
-        // Load images
-        if (product.masterVariant.images?.[1]?.url) {
-          productImage.setAttribute('src', product.masterVariant.images[0].url);
-        }
-        
-        if (price && price.discounted) {
-          const discountImg = imageContainer.querySelector('.price_hit') as HTMLImageElement;
-          if (discountImg) {
-            discountImg.setAttribute('src', priceHitImg);
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !isLoaded) {
+          isLoaded = true;
+
+          // Load images
+          if (product.masterVariant.images?.[1]?.url) {
+            productImage.setAttribute(
+              'src',
+              product.masterVariant.images[0].url
+            );
           }
-        }
-        
-        // Show content with fade-in effect
-        setTimeout(() => {
-          contentContainer.classList.remove('opacity-0');
-          skeleton.style.opacity = '0';
+
+          if (price && price.discounted) {
+            const discountImg = imageContainer.querySelector(
+              '.price_hit'
+            ) as HTMLImageElement;
+            if (discountImg) {
+              discountImg.setAttribute('src', priceHitImg);
+            }
+          }
+
+          // Show content with fade-in effect
           setTimeout(() => {
-            skeleton.remove();
-          }, 500);
-        }, 300);
-        
-        observer.unobserve(card);
-      }
-    });
-  }, {
-    threshold: 0.1,
-    rootMargin: '0px 0px 200px 0px'
-  });
+            contentContainer.classList.remove('opacity-0');
+            skeleton.style.opacity = '0';
+            setTimeout(() => {
+              skeleton.remove();
+            }, 500);
+          }, 300);
+
+          observer.unobserve(card);
+        }
+      });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '0px 0px 200px 0px',
+    }
+  );
 
   observer.observe(card);
 

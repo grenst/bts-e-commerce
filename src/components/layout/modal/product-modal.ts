@@ -169,7 +169,7 @@ export function createProductModal(): ProductModal {
       'absolute',
       'w-full',
       'h-full',
-      'hidden' // Initially hidden
+      'hidden', // Initially hidden
     ],
   });
 

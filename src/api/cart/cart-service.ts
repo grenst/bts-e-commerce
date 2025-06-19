@@ -30,29 +30,30 @@ export function setActiveCart(cart: Cart | undefined): void {
 }
 
 function dispatchCartUpdated(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof globalThis.window === 'undefined') return;
   const totalQty =
-    activeCart?.lineItems.reduce((sum, i) => sum + i.quantity, 0) ?? 0;
-  window.dispatchEvent(
+    activeCart?.lineItems.reduce((sum, index) => sum + index.quantity, 0) ?? 0;
+  globalThis.window.dispatchEvent(
     new CustomEvent('cartUpdated', {
       detail: { totalQty, cart: activeCart },
-    }),
+    })
   );
 }
 
 const logger = {
-  log: (...args: unknown[]) =>
-    import.meta.env.MODE !== 'production' && console.log(...args),
-  error: (...args: unknown[]) =>
-    import.meta.env.MODE !== 'production' && console.error(...args),
+  log: (...arguments_: unknown[]) =>
+    import.meta.env.MODE !== 'production' && console.log(...arguments_),
+  error: (...arguments_: unknown[]) =>
+    import.meta.env.MODE !== 'production' && console.error(...arguments_),
 };
 
-async function withLog<T>(fn: () => Promise<T>): Promise<T> {
+async function withLog<T>(function_: () => Promise<T>): Promise<T> {
   try {
-    return await fn();
-  } catch (err) {
-    if (isAxiosError(err)) logger.error('Commercetools error →', err.response?.data, err);
-    throw err;
+    return await function_();
+  } catch (error) {
+    if (isAxiosError(error))
+      logger.error('Commercetools error →', error.response?.data, error);
+    throw error;
   }
 }
 
@@ -66,8 +67,8 @@ async function createExternalCart(): Promise<Cart> {
         taxMode: 'External',
         shippingAddress: { country: 'DE' },
       },
-      { params: { expand: 'discountCodes[*].discountCode' } },
-    ),
+      { params: { expand: 'discountCodes[*].discountCode' } }
+    )
   );
   return data;
 }
@@ -79,7 +80,7 @@ export async function getOrCreateCart(): Promise<Cart> {
     const { data } = await withLog(() =>
       apiInstance.get<Cart>('/me/active-cart', {
         params: { expand: 'discountCodes[*].discountCode' },
-      }),
+      })
     );
 
     if (
@@ -103,14 +104,14 @@ export async function getOrCreateCart(): Promise<Cart> {
               { action: 'setShippingAddress', address: { country: 'DE' } },
             ],
           },
-          { params: { expand: 'discountCodes[*].discountCode' } },
-        ),
+          { params: { expand: 'discountCodes[*].discountCode' } }
+        )
       );
       activeCart = patched;
       return patched;
     }
-  } catch (err) {
-    if (!isAxiosError(err) || err.response?.status !== 404) throw err;
+  } catch (error) {
+    if (!isAxiosError(error) || error.response?.status !== 404) throw error;
   }
 
   activeCart = await createExternalCart();
@@ -120,7 +121,7 @@ export async function getOrCreateCart(): Promise<Cart> {
 export async function addToCart(
   productId: string,
   variantId: number,
-  quantity: number,
+  quantity: number
 ): Promise<Cart> {
   const cart = await getOrCreateCart();
   const actions = [
@@ -142,7 +143,7 @@ export async function addToCart(
     const { data } = await apiInstance.post<Cart>(
       `/me/carts/${c.id}`,
       { version: c.version, actions },
-      { params: { expand: 'discountCodes[*].discountCode' } },
+      { params: { expand: 'discountCodes[*].discountCode' } }
     );
     return data;
   };
@@ -151,14 +152,14 @@ export async function addToCart(
     activeCart = await postUpdate(cart);
     dispatchCartUpdated();
     return activeCart;
-  } catch (err) {
-    if (isAxiosError(err) && err.response?.status === 409) {
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 409) {
       const fresh = await getOrCreateCart();
       activeCart = await postUpdate(fresh);
       dispatchCartUpdated();
       return activeCart;
     }
-    throw err;
+    throw error;
   }
 }
 
@@ -171,7 +172,7 @@ export async function clearCart(): Promise<Cart> {
   const { data } = await apiInstance.post<Cart>(
     `/me/carts/${cart.id}`,
     { version: cart.version, actions },
-    { params: { expand: 'discountCodes[*].discountCode' } },
+    { params: { expand: 'discountCodes[*].discountCode' } }
   );
   activeCart = data;
   dispatchCartUpdated();
@@ -180,13 +181,13 @@ export async function clearCart(): Promise<Cart> {
 
 export async function isProductInCart(
   productId: string,
-  variantId?: number,
+  variantId?: number
 ): Promise<{ isInCart: boolean; lineItemId?: string }> {
   const cart = await getOrCreateCart();
-  const lineItem = cart.lineItems.find((i) =>
+  const lineItem = cart.lineItems.find((index) =>
     typeof variantId === 'number'
-      ? i.productId === productId && i.variant?.id === variantId
-      : i.productId === productId,
+      ? index.productId === productId && index.variant?.id === variantId
+      : index.productId === productId
   );
   return { isInCart: !!lineItem, lineItemId: lineItem?.id };
 }
@@ -195,8 +196,11 @@ export async function removeLineItem(lineItemId: string): Promise<void> {
   const cart = await getOrCreateCart();
   const { data } = await apiInstance.post<Cart>(
     `/me/carts/${cart.id}`,
-    { version: cart.version, actions: [{ action: 'removeLineItem', lineItemId }] },
-    { params: { expand: 'discountCodes[*].discountCode' } },
+    {
+      version: cart.version,
+      actions: [{ action: 'removeLineItem', lineItemId }],
+    },
+    { params: { expand: 'discountCodes[*].discountCode' } }
   );
   activeCart = data;
   dispatchCartUpdated();
@@ -204,7 +208,7 @@ export async function removeLineItem(lineItemId: string): Promise<void> {
 
 export async function changeLineItemQuantity(
   lineItemId: string,
-  quantity: number,
+  quantity: number
 ): Promise<void> {
   const cart = await getOrCreateCart();
   const { data } = await apiInstance.post<Cart>(
@@ -213,7 +217,7 @@ export async function changeLineItemQuantity(
       version: cart.version,
       actions: [{ action: 'changeLineItemQuantity', lineItemId, quantity }],
     },
-    { params: { expand: 'discountCodes[*].discountCode' } },
+    { params: { expand: 'discountCodes[*].discountCode' } }
   );
   activeCart = data;
   dispatchCartUpdated();
@@ -224,7 +228,7 @@ export async function applyDiscount(code: string): Promise<Cart> {
   const { data } = await apiInstance.post<Cart>(
     `/me/carts/${cart.id}`,
     { version: cart.version, actions: [{ action: 'addDiscountCode', code }] },
-    { params: { expand: 'discountCodes[*].discountCode' } },
+    { params: { expand: 'discountCodes[*].discountCode' } }
   );
   activeCart = data;
   return data;

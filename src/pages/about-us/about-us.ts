@@ -72,7 +72,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
   }
 
   function isTextKey(value: string | TextKeys): value is TextKeys {
-    return Object.values(TextKeys).includes(value as TextKeys);
+    return Object.values(TextKeys).some((v) => v === value);
   }
 
   function createMessageBlock(
@@ -155,7 +155,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   function createMemberInfo(
     parent: HTMLElement,
-    src: string,
+    source: string,
     alt: string,
     key: TextKeys
   ): void {
@@ -176,9 +176,10 @@ export default function createAboutUsPage(container: HTMLElement): void {
       tag: 'img',
       parent: li,
       attributes: {
-        src,
+        src: source,
         alt,
-        style: 'max-width: 200px; max-height: 200px; margin-bottom: 10px; border-radius: 20px;',
+        style:
+          'max-width: 200px; max-height: 200px; margin-bottom: 10px; border-radius: 20px;',
       },
     });
 
@@ -332,7 +333,8 @@ export default function createAboutUsPage(container: HTMLElement): void {
     attributes: {
       src: andrImage,
       alt: 'Andrii',
-      style: 'max-width: 200px; max-height: 200px; margin-bottom: 10px; border-radius: 30px;',
+      style:
+        'max-width: 200px; max-height: 200px; margin-bottom: 10px; border-radius: 30px;',
     },
   });
   titleMasegeAndriiUser3.append(andriiImg);
@@ -432,7 +434,11 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   containerAboutSer.append(containerUlser);
 
-  createMessageBlock(containerUlser, 'admin', 'And the third of the developers:');
+  createMessageBlock(
+    containerUlser,
+    'admin',
+    'And the third of the developers:'
+  );
   createMemberInfo(containerUlser, sergImage, 'Sergey', TextKeys.SERGEY);
 
   const containerTechnologiesTextSer11 = createElement({

@@ -4,7 +4,14 @@ import './product-card.scss';
 export function createProductCardSkeletonElement(): HTMLElement {
   const skeleton = createElement({
     tag: 'div',
-    classes: ['product-card', 'skeleton', 'bg-white', 'flex', 'flex-col', 'animate-pulse'],
+    classes: [
+      'product-card',
+      'skeleton',
+      'bg-white',
+      'flex',
+      'flex-col',
+      'animate-pulse',
+    ],
   });
 
   // Image placeholder

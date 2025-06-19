@@ -265,7 +265,10 @@ export function createUserDropdown(
         }
       };
       setTimeout(
-        () => document.addEventListener('click', handleOutsideClick, { once: true }),
+        () =>
+          document.addEventListener('click', handleOutsideClick, {
+            once: true,
+          }),
         0
       );
     } else {
@@ -427,16 +430,16 @@ export function createAboutDropdown(
             .getElementById('user_nav')
             ?.contains(target);
 
-          if (
-            !isClickInDropdown ||
-            (isClickInUserNav && !isClickOnToggle)
-          ) {
+          if (!isClickInDropdown || (isClickInUserNav && !isClickOnToggle)) {
             hideMenu();
           }
         }
       };
       setTimeout(
-        () => document.addEventListener('click', handleOutsideClick, { once: true }),
+        () =>
+          document.addEventListener('click', handleOutsideClick, {
+            once: true,
+          }),
         0
       );
     } else {

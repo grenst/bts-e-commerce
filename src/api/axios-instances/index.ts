@@ -89,7 +89,9 @@ apiInstance.interceptors.response.use(
       if (isAnonymous) {
         // For anonymous sessions, get a new anonymous token
         try {
-          logger.log('Anonymous session expired, getting new anonymous token...');
+          logger.log(
+            'Anonymous session expired, getting new anonymous token...'
+          );
           const newToken = await AuthService.getAnonymousToken();
           if (newToken) {
             originalRequest.headers.Authorization = `Bearer ${newToken}`;

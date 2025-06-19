@@ -119,7 +119,7 @@ for (const route of routes) router.addRoute(route);
 updateUserNavOnHeader(userNav, router);
 
 // Close any open dropdown when clicking anywhere inside #user_nav
-document.getElementById('user_nav')?.addEventListener('click', () => {
+document.querySelector('#user_nav')?.addEventListener('click', () => {
   DropdownManager.closeCurrent();
 });
 

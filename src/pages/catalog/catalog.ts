@@ -50,7 +50,7 @@ export function createCatalogPage(container: HTMLElement): void {
   //   text: 'Grab your drink',
   // });
 
-    const title = createElement({
+  const title = createElement({
     tag: 'h1',
     text: 'Grab your drink',
     classes: [
@@ -67,7 +67,7 @@ export function createCatalogPage(container: HTMLElement): void {
       'before:bg-yellow-400',
       'before:-z-1',
       'h1-titel',
-      'login-name'
+      'login-name',
     ],
     parent: section,
   });
@@ -179,13 +179,19 @@ export function createCatalogPage(container: HTMLElement): void {
       // Show skeleton placeholders while loading
       const skeletonGrid = createElement({
         tag: 'div',
-        classes: ['grid', 'grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4', 'gap-4']
+        classes: [
+          'grid',
+          'grid-cols-2',
+          'md:grid-cols-3',
+          'lg:grid-cols-4',
+          'gap-4',
+        ],
       });
-      
-      for (let i = 0; i < 8; i++) {
+
+      for (let index = 0; index < 8; index++) {
         skeletonGrid.append(createProductCardSkeletonElement());
       }
-      
+
       productListContainer.append(skeletonGrid);
       return;
     }
@@ -195,7 +201,7 @@ export function createCatalogPage(container: HTMLElement): void {
       const emptyState = createElement({
         tag: 'div',
         classes: ['text-center', 'py-12'],
-        text: 'No products found. Try changing your filters.'
+        text: 'No products found. Try changing your filters.',
       });
       productListContainer.append(emptyState);
       return;

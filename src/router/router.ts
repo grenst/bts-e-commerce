@@ -103,7 +103,7 @@ export class Router {
     this.currentPath = path;
 
     // Dispatch routechange event to update UI components
-    window.dispatchEvent(new CustomEvent('routechange'));
+    globalThis.dispatchEvent(new CustomEvent('routechange'));
 
     /************************************************* */
 
@@ -181,9 +181,9 @@ export class Router {
     //   this.restoreScrollPosition(path);
     //   console.log(`Восстановили сохранённое состояние для ${path}`);
     // } else {
-      route.component(this.mainContainer, this);
-      window.scrollTo(0, 0);
-      console.log(`Первая отрисовка ${path}`);
+    route.component(this.mainContainer, this);
+    window.scrollTo(0, 0);
+    console.log(`Первая отрисовка ${path}`);
     // }
   }
 

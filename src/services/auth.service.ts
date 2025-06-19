@@ -18,11 +18,19 @@ import { useCustomerStore } from '../store/customer-store';
 import { uiStore as useUIStore } from '../store/store';
 import { debug } from '../components/auth-services/logger';
 
-function persistTokens(token: OAuthTokenResponse, isAnonymous: boolean = false) {
+function persistTokens(
+  token: OAuthTokenResponse,
+  isAnonymous: boolean = false
+) {
   const { access_token, refresh_token, expires_in } = token;
   useTokenStore
     .getState()
-    .setTokens(access_token, refresh_token ?? undefined, expires_in, isAnonymous);
+    .setTokens(
+      access_token,
+      refresh_token ?? undefined,
+      expires_in,
+      isAnonymous
+    );
 }
 
 type CustomerAction = { action: string; [k: string]: unknown };

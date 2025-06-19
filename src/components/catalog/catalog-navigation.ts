@@ -194,8 +194,7 @@ export function createCatalogNavigationElement(): HTMLElement {
   const promoCodesButton = createElement({
     tag: 'a',
     attributes: {
-      class:
-        'w-full promo-codes-button',
+      class: 'w-full promo-codes-button',
     },
     text: '',
   });
@@ -205,8 +204,7 @@ export function createCatalogNavigationElement(): HTMLElement {
   const promoTitleButton = createElement({
     tag: 'span',
     attributes: {
-      class:
-        'text-gray-700 hover:text-gray-900 cursor-pointer',
+      class: 'text-gray-700 hover:text-gray-900 cursor-pointer',
     },
     text: 'PROMO CODES',
   });

@@ -120,25 +120,25 @@ export function createHeaderElements(
   ];
 
   function updateActivePill() {
-    const currentPath = window.location.pathname.replace(/\/$/, '');
-    links.forEach((link) => {
-      const inputId = `pill-${link.text.toLowerCase().replace(/\s/g, '-')}`;
-      const radioInput = document.getElementById(inputId) as HTMLInputElement;
-      if (radioInput) {
+    const currentPath = globalThis.location.pathname.replace(/\/$/, '');
+    for (const link of links) {
+      const inputId = `pill-${link.text.toLowerCase().replaceAll(/\s/g, '-')}`;
+      const radioInput = document.querySelector(`#${inputId}`);
+      if (radioInput instanceof HTMLInputElement) {
         radioInput.checked = currentPath === link.href;
       }
-    });
+    }
   }
 
   // Initial update
   updateActivePill();
 
   // Add route change listener
-  window.addEventListener('routechange', updateActivePill);
+  globalThis.addEventListener('routechange', updateActivePill);
 
-  links.forEach((link) => {
-    const inputId = `pill-${link.text.toLowerCase().replace(/\s/g, '-')}`;
-    
+  for (const link of links) {
+    const inputId = `pill-${link.text.toLowerCase().replaceAll(/\s/g, '-')}`;
+
     // Create radio input
     const radioInput = createElement({
       tag: 'input',
@@ -148,8 +148,8 @@ export function createHeaderElements(
         id: inputId,
       },
       parent: navContainer,
-    }) as HTMLInputElement;
-    
+    });
+
     // Create label
     createElement({
       tag: 'label',
@@ -160,13 +160,15 @@ export function createHeaderElements(
       classes: ['text-gray-800', 'hover:text-gray-600', 'cursor-pointer'],
       parent: navContainer,
     });
-    
+
     // Add navigation event
-    radioInput.addEventListener('change', () => {
-      router.navigateTo(link.href);
-    });
-  });
-  
+    if (radioInput instanceof HTMLInputElement) {
+      radioInput.addEventListener('change', () => {
+        router.navigateTo(link.href);
+      });
+    }
+  }
+
   // Create indicator element
   createElement({
     tag: 'div',
@@ -263,11 +265,11 @@ export function updateUserNavOnHeader(
       'rounded-full',
       'min-w-[20px]',
       'text-center',
-      'hidden'
+      'hidden',
     ],
     parent: cartContainer,
   });
-  
+
   // Function to update cart quantity display
   const updateCartQty = (quantity: number) => {
     cartQty.textContent = quantity.toString();
@@ -277,18 +279,21 @@ export function updateUserNavOnHeader(
       cartQty.classList.remove('hidden');
     }
   };
-  
+
   // Get initial cart quantity
   import('../../../api/cart/cart-service').then((cartModule) => {
-    cartModule.getOrCreateCart().then(cart => {
-      const totalQty = cart.lineItems.reduce((sum, item) => sum + item.quantity, 0);
+    cartModule.getOrCreateCart().then((cart) => {
+      const totalQty = cart.lineItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
       updateCartQty(totalQty);
     });
   });
-  
+
   // Subscribe to cart updates
-  window.addEventListener('cartUpdated', (event: Event) => {
-    const customEvent = event as CustomEvent<{totalQty: number}>;
+  globalThis.addEventListener('cartUpdated', (event: Event) => {
+    const customEvent = event as CustomEvent<{ totalQty: number }>;
     updateCartQty(customEvent.detail.totalQty);
   });
 
