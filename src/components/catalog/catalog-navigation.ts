@@ -192,15 +192,26 @@ export function createCatalogNavigationElement(): HTMLElement {
   buttonsContainer.append(resetButton);
 
   const promoCodesButton = createElement({
+    tag: 'a',
+    attributes: {
+      class:
+        'w-full promo-codes-button',
+    },
+    text: '',
+  });
+
+  buttonsContainer.append(promoCodesButton);
+
+  const promoTitleButton = createElement({
     tag: 'span',
     attributes: {
       class:
-        'text-gray-700 hover:text-gray-900 cursor-pointer promo-codes-button',
+        'text-gray-700 hover:text-gray-900 cursor-pointer',
     },
     text: 'PROMO CODES',
   });
 
-  buttonsContainer.append(promoCodesButton);
+  promoCodesButton.append(promoTitleButton);
 
   nav.append(searchContainer);
   nav.append(buttonsContainer);

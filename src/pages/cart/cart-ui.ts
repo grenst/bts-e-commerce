@@ -1,5 +1,3 @@
-import { createEl as createElement } from '../../utils/element-utilities';
-import { getOrCreateCart } from '../../api/cart/cart-service';
 import { apiInstance } from '../../api/axios-instances';
 import { useTokenStore } from '../../store/token-store';
 import { getAnonymousToken } from '../../components/auth-services/token.service';
@@ -7,6 +5,9 @@ import { isAxiosError } from 'axios';
 import { LineItem, createCartItem } from './cart-item';
 import { validatePromo } from './promo-validation';
 import { addNotification } from '../../store/store';
+import { createEl as createElement } from '../../utils/element-utilities';
+import { getOrCreateCart, setActiveCart } from '../../api/cart/cart-service';
+import { Cart, LineItem as CtLineItemBase } from '../../api/cart/cart-service';
 
 interface DiscountCodeReference {
   id: string;
@@ -62,6 +63,17 @@ interface CtCart {
   discountCodes?: CtDiscountCodeInfo[];
 }
 
+interface CtLineItem extends CtLineItemBase {
+  price: { value: CtMoney };
+  quantity: number;
+}
+
+interface CtCart extends Cart {
+  totalPrice: CtMoney;
+  discountCodes?: CtDiscountCodeInfo[];
+  lineItems: CtLineItem[];
+}
+
 const formatPrice = (c: number): string =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
     c / 100
@@ -70,6 +82,10 @@ const formatPrice = (c: number): string =>
 interface Labeled {
   label: Record<string, string>;
 }
+
+
+
+
 const isLabeled = (v: unknown): v is Labeled =>
   typeof v === 'object' && v !== null && 'label' in v;
 
@@ -109,20 +125,21 @@ export default class CartUI {
     );
   }
 
-  private emitCartUpdated(): void {
-    const totalQty =
-      this.cart?.lineItems.reduce((sum, li) => sum + li.quantity, 0) ?? 0;
-    window.dispatchEvent(
-      new CustomEvent('cartUpdated', { detail: { totalQty } })
-    );
-  }
-
   private async fetchCart(): Promise<void> {
     const c = await getOrCreateCart();
     if (this.isCtCart(c)) {
       this.cart = c;
+      setActiveCart(c);
       this.updateDiscountStateFromCart();
     }
+  }
+
+  private emitCartUpdated(): void {
+    const totalQty =
+      this.cart?.lineItems.reduce((s, li) => s + li.quantity, 0) ?? 0;
+    window.dispatchEvent(
+      new CustomEvent('cartUpdated', { detail: { totalQty, cart: this.cart } }),
+    );
   }
 
   private updateDiscountStateFromCart(): void {
@@ -185,7 +202,26 @@ export default class CartUI {
     }
 
     this.container.append(
-      createElement({ tag: 'h1', classes: ['cart-title'], text: 'Your Cart' })
+      createElement({ 
+        tag: 'h1',
+        classes: [
+          'cart-title',
+          'text-3xl',
+          'font-bold',
+          'mb-6',
+          'z-30',
+          'text-center',
+          'text-gray-800',
+          "before:content-['']",
+          'before:absolute',
+          'before:h-7',
+          'before:w-36',
+          'before:bg-yellow-400',
+          'before:-z-1',
+          'login-name',
+        ],
+        text: 'Your Cart'
+      })
     );
 
     // Add clear cart button
@@ -516,10 +552,8 @@ export default class CartUI {
   }
 
   private async applyUpdate(actions: CartAction[]): Promise<void> {
-    const cart = this.cart;
-    if (!cart) return;
-
-    const cartId = cart.id;
+    if (!this.cart) return;
+    const cartId = this.cart.id;
     const token = await this.getAccessToken();
 
     const patch = async (version: number): Promise<CtCart> => {
@@ -529,30 +563,30 @@ export default class CartUI {
         {
           headers: { Authorization: `Bearer ${token}` },
           params: { expand: 'discountCodes[*].discountCode' },
-        }
+        },
       );
       return data;
     };
 
     try {
-      this.cart = await patch(cart.version);
+      this.cart = await patch(this.cart.version);
+      setActiveCart(this.cart);
       this.updateDiscountStateFromCart();
       this.render();
       this.emitCartUpdated();
-    } catch (error) {
-      if (isAxiosError(error) && error.response?.status === 409) {
-        const fresh = await getOrCreateCart(); // Second call to getOrCreateCart
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.status === 409) {
+        const fresh = await getOrCreateCart();
         if (this.isCtCart(fresh)) {
-          this.cart = await patch(fresh.version); // Retry the patch with fresh version
+          this.cart = await patch(fresh.version);
+          setActiveCart(this.cart);
           this.updateDiscountStateFromCart();
           this.render();
           this.emitCartUpdated();
-          return; // Successfully handled 409 and retried
+          return;
         }
-        // If fresh is not a CtCart, or if the second patch fails, the original error is re-thrown
-        throw error; // Re-throw the original 409 error if fresh cart is invalid
       }
-      throw error; // Re-throw any other errors
+      throw err;
     }
   }
 

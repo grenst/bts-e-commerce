@@ -169,7 +169,7 @@ export function createProductModal(): ProductModal {
       'absolute',
       'w-full',
       'h-full',
-      // 'z-1' // That will be help
+      'hidden' // Initially hidden
     ],
   });
 
@@ -229,6 +229,16 @@ export function createProductModal(): ProductModal {
     // console.log('2. showLoader() создал спиннер', loader);
   }
 
+  function showLockerContainer(): void {
+    lockerContainer.classList.remove('hidden');
+    lockerContainer.classList.add('block', 'z-1');
+  }
+
+  function hideLockerContainer(): void {
+    lockerContainer.classList.remove('block', 'z-1');
+    lockerContainer.classList.add('hidden');
+  }
+
   function hideLoader(): void {
     if (loader) {
       details.classList.remove('loading');
@@ -267,8 +277,7 @@ export function createProductModal(): ProductModal {
 
   async function showModal(productId: string, origin?: Point): Promise<void> {
     const firstOpen = overlay.style.display !== 'flex';
-    lockerContainer.classList.remove('z-0');
-    lockerContainer.classList.add('z-1');
+    showLockerContainer();
 
     if (firstOpen) {
       originalURL = globalThis.location.href;
@@ -400,8 +409,7 @@ export function createProductModal(): ProductModal {
     }
 
     hideLoader();
-    lockerContainer.classList.remove('z-1');
-    lockerContainer.classList.add('z-0');
+    hideLockerContainer();
 
     const hero = createElement({
       tag: 'section',
@@ -918,7 +926,6 @@ export function createProductModal(): ProductModal {
   }
 
   function hideModal(): void {
-    console.trace('hideModal called');
     if (popStateHandler) {
       globalThis.removeEventListener('popstate', popStateHandler);
       popStateHandler = undefined;

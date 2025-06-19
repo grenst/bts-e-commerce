@@ -39,15 +39,37 @@ export function createCatalogPage(container: HTMLElement): void {
 
   const section = createElement({
     tag: 'section',
-    classes: ['catalog', 'px-2', 'bg-white', 'pb-8'],
+    classes: ['catalog', 'px-2', 'bg-white', 'pb-16'],
   });
 
-  const title = createElement({
+  // const title = createElement({
+  //   tag: 'h1',
+  //   attributes: {
+  //     class: 'text-4xl font-impact text-center my-1 pt-8 min-[680px]:my-6 h1-titel',
+  //   },
+  //   text: 'Grab your drink',
+  // });
+
+    const title = createElement({
     tag: 'h1',
-    attributes: {
-      class: 'text-4xl font-impact text-center my-1 pt-8 min-[680px]:my-6',
-    },
     text: 'Grab your drink',
+    classes: [
+      'text-3xl',
+      'font-bold',
+      'my-6',
+      'z-30',
+      'text-center',
+      'text-gray-800',
+      "before:content-['']",
+      'before:absolute',
+      'before:h-8',
+      'before:w-58',
+      'before:bg-yellow-400',
+      'before:-z-1',
+      'h1-titel',
+      'login-name'
+    ],
+    parent: section,
   });
 
   const navigation = createCatalogNavigationElement();

@@ -1,7 +1,7 @@
 import { gsap } from '../../animations/gsap-init';
 import menuArrowImagePath from '../../assets/images/menu-arrow.svg';
-import burgerImagePath from '../../assets/images/burger.svg';
-import closeDelImagePath from '../../assets/images/close-del.svg';
+// import burgerImagePath from '../../assets/images/burger.svg';
+// import closeDelImagePath from '../../assets/images/close-del.svg';
 import { createEl as createElement } from '../../utils/element-utilities';
 import { Router } from '../../router/router';
 import { AuthService } from '../../services/auth.service';
@@ -32,7 +32,7 @@ export function createUserDropdown(
       'bg-white',
       'shadow-lg',
       'py-1',
-      'z-10',
+      'z-105',
       'hidden', // Initially hidden
       'overflow-hidden',
       '-translate-x-19',
@@ -265,7 +265,7 @@ export function createUserDropdown(
         }
       };
       setTimeout(
-        () => document.addEventListener('click', handleOutsideClick),
+        () => document.addEventListener('click', handleOutsideClick, { once: true }),
         0
       );
     } else {
@@ -284,7 +284,11 @@ export function createAboutDropdown(
   dropdownContainer: HTMLElement,
   router: Router
 ): void {
-  aboutIcon.setAttribute('src', burgerImagePath);
+  const useElement = aboutIcon.querySelector('use');
+  if (useElement) {
+    useElement.setAttribute('href', '#burger');
+    aboutIcon.dataset.state = 'closed';
+  }
 
   const dropdownMenu = createElement({
     tag: 'div',
@@ -382,10 +386,16 @@ export function createAboutDropdown(
   let handleOutsideClick: (event: MouseEvent) => void;
 
   const hideMenu = () => {
-    aboutIcon.setAttribute('src', burgerImagePath);
+    const useElement = aboutIcon.querySelector('use');
+    if (useElement) {
+      useElement.setAttribute('href', '#burger');
+      aboutIcon.dataset.state = 'closed';
+    }
+
     if (!dropdownMenu.classList.contains('hidden')) {
       dropdownMenu.classList.add('hidden');
     }
+
     if (handleOutsideClick) {
       document.removeEventListener('click', handleOutsideClick);
     }
@@ -398,7 +408,11 @@ export function createAboutDropdown(
     if (isHidden) {
       DropdownManager.closeCurrent();
       dropdownMenu.classList.remove('hidden');
-      aboutIcon.setAttribute('src', closeDelImagePath);
+      const useElement = aboutIcon.querySelector('use');
+      if (useElement) {
+        useElement.setAttribute('href', '#close-del');
+        aboutIcon.dataset.state = 'open';
+      }
 
       DropdownManager.register(dropdownMenu, hideMenu);
 
@@ -414,18 +428,15 @@ export function createAboutDropdown(
             ?.contains(target);
 
           if (
-            // Close if clicked outside dropdown container OR
             !isClickInDropdown ||
-            // Clicked in user_nav but not on the toggle button
             (isClickInUserNav && !isClickOnToggle)
           ) {
-            dropdownMenu.classList.add('hidden');
-            document.removeEventListener('click', handleOutsideClick);
+            hideMenu();
           }
         }
       };
       setTimeout(
-        () => document.addEventListener('click', handleOutsideClick),
+        () => document.addEventListener('click', handleOutsideClick, { once: true }),
         0
       );
     } else {

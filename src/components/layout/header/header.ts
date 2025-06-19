@@ -83,8 +83,8 @@ export function createHeaderElements(
       'text-start',
       'text-justify',
       'pt-3',
-      'min-[780px]:w-[320px]',
-      'min-[780px]:text-lg',
+      'min-[780px]:w-[200px]',
+      'min-[780px]:text-2xl',
     ],
     parent: header,
   });
@@ -105,17 +105,11 @@ export function createHeaderElements(
     delay: 0.5,
   });
 
-  // Create navigation links
+  // Create radio button navigation
   const navContainer = createElement({
-    tag: 'nav',
-    classes: ['header-nav', 'flex-grow', 'flex', 'justify-start'],
+    tag: 'div',
+    classes: ['pill-radio-container'],
     parent: header,
-  });
-
-  const ul = createElement({
-    tag: 'ul',
-    classes: ['flex', 'gap-4'],
-    parent: navContainer,
   });
 
   const links = [
@@ -125,20 +119,59 @@ export function createHeaderElements(
     { text: 'Cart', href: '/cart' },
   ];
 
-  links.forEach((link) => {
-    const li = createElement({ tag: 'li' });
-    const a = createElement({
-      tag: 'a',
-      text: link.text,
-      attributes: { href: link.href },
-      classes: ['text-gray-800', 'hover:text-gray-600', 'cursor-pointer'],
+  function updateActivePill() {
+    const currentPath = window.location.pathname.replace(/\/$/, '');
+    links.forEach((link) => {
+      const inputId = `pill-${link.text.toLowerCase().replace(/\s/g, '-')}`;
+      const radioInput = document.getElementById(inputId) as HTMLInputElement;
+      if (radioInput) {
+        radioInput.checked = currentPath === link.href;
+      }
     });
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
+  }
+
+  // Initial update
+  updateActivePill();
+
+  // Add route change listener
+  window.addEventListener('routechange', updateActivePill);
+
+  links.forEach((link) => {
+    const inputId = `pill-${link.text.toLowerCase().replace(/\s/g, '-')}`;
+    
+    // Create radio input
+    const radioInput = createElement({
+      tag: 'input',
+      attributes: {
+        type: 'radio',
+        name: 'header-nav-link',
+        id: inputId,
+      },
+      parent: navContainer,
+    }) as HTMLInputElement;
+    
+    // Create label
+    createElement({
+      tag: 'label',
+      text: link.text,
+      attributes: {
+        for: inputId,
+      },
+      classes: ['text-gray-800', 'hover:text-gray-600', 'cursor-pointer'],
+      parent: navContainer,
+    });
+    
+    // Add navigation event
+    radioInput.addEventListener('change', () => {
       router.navigateTo(link.href);
     });
-    li.append(a);
-    ul.append(li);
+  });
+  
+  // Create indicator element
+  createElement({
+    tag: 'div',
+    classes: ['pill-indicator'],
+    parent: navContainer,
   });
 
   const userNav = createElement({
@@ -266,19 +299,25 @@ export function updateUserNavOnHeader(
 
   const aboutLink = createSvgUse('#burger', 'header-link');
   aboutLink.classList.add('about-icon');
+  aboutLink.dataset.state = 'closed';
   aboutDropdownContainer.append(aboutLink);
 
-  // Add event listeners to toggle the about icon
-  aboutLink.addEventListener('click', () => {
-    const useElement = aboutLink.querySelector('use');
-    if (useElement) {
-      const currentIcon = useElement.getAttribute('xlink:href');
-      useElement.setAttribute(
-        'xlink:href',
-        currentIcon === '#burger' ? '#close-del' : '#burger'
-      );
-    }
-  });
+  // aboutLink.addEventListener('click', () => {
+  //   const useElement = aboutLink.querySelector('use');
+  //   if (useElement) {
+  //     const isOpen = useElement.getAttribute('href') === '#close-del';
+  //     const nextHref = isOpen ? '#burger' : '#close-del';
+  //     const nextState = isOpen ? 'closed' : 'open';
+
+  //     aboutLink.classList.add('icon-transition');
+  //     useElement.setAttribute('href', nextHref);
+  //     aboutLink.dataset.state = nextState;
+
+  //     setTimeout(() => {
+  //       aboutLink.classList.remove('icon-transition');
+  //     }, 300); // match CSS transition duration
+  //   }
+  // });
 
   createAboutDropdown(aboutLink, aboutDropdownContainer, router);
 }

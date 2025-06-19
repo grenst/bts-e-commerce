@@ -286,8 +286,14 @@ export function createProductCardElement(product: Product): HTMLElement {
   }) as HTMLButtonElement;
 
   // Function to update cart status
-  const updateCartStatus = async () => {
-    const { isInCart } = await isProductInCart(product.id);
+  const updateCartStatus = (event: Event) => {
+    const customEvent = event as CustomEvent<{ cart: { lineItems: Array<{ productId: string }> } }>;
+    const cart = customEvent.detail?.cart;
+    if (!cart) return;
+    
+    const isInCart = cart.lineItems.some((item: { productId: string }) =>
+      item.productId === product.id
+    );
     if (isInCart) {
       button.textContent = 'ADD MORE';
       button.classList.remove('bg-gray-100');
@@ -300,10 +306,22 @@ export function createProductCardElement(product: Product): HTMLElement {
   };
 
   // Initial cart status check
-  updateCartStatus();
+  const initialCartCheck = async () => {
+    const { isInCart } = await isProductInCart(product.id);
+    if (isInCart) {
+      button.textContent = 'ADD MORE';
+      button.classList.remove('bg-gray-100');
+      button.classList.add('bg-gray-400');
+    } else {
+      button.textContent = 'ADD TO CART';
+      button.classList.add('bg-gray-100');
+      button.classList.remove('bg-gray-400');
+    }
+  };
+  initialCartCheck();
 
   // Listen for cart updates
-  document.addEventListener('cartUpdated', updateCartStatus);
+  document.addEventListener('cartUpdated', updateCartStatus as EventListener);
 
   button.addEventListener('click', async (event_) => {
     event_.stopPropagation();
@@ -357,7 +375,7 @@ export function createProductCardElement(product: Product): HTMLElement {
         
         // Load images
         if (product.masterVariant.images?.[1]?.url) {
-          productImage.setAttribute('src', product.masterVariant.images[1].url);
+          productImage.setAttribute('src', product.masterVariant.images[0].url);
         }
         
         if (price && price.discounted) {

@@ -9,10 +9,14 @@ const svgSprite = `
 
       <symbol id="burger" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
         <g>
-          <rect fill="#1D1D1B" height="1" width="11" x="0.5" y="5.5"/>
-          <rect fill="#1D1D1B" height="1" width="11" x="0.5" y="2.5"/>
-          <rect fill="#1D1D1B" height="1" width="11" x="0.5" y="8.5"/>
+          <rect fill="currentColor" height="1" width="11" x="0.5" y="5.5"/>
+          <rect fill="currentColor" height="1" width="11" x="0.5" y="2.5"/>
+          <rect fill="currentColor" height="1" width="11" x="0.5" y="8.5"/>
         </g>
+      </symbol>
+
+      <symbol viewBox="0 0 12 12" fill="currentColor" id="close-del" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <polygon fill="currentColor" points="12,0.7070313 11.2929688,0 6,5.2929688 0.7070313,0 0,0.7070313 5.2929688,6 0,11.2929688   0.7070313,12 6,6.7070313 11.2929688,12 12,11.2929688 6.7070313,6 "/>
       </symbol>
 
       <symbol id="rss" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 552.8 205.3">

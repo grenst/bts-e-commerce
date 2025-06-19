@@ -19,7 +19,7 @@ export class Router {
   private mainContainer: HTMLElement;
   private pageContainers: Map<string, HTMLElement> = new Map();
   private currentPath = '';
-  private scrollPositions: Map<string, number> = new Map();
+  // private scrollPositions: Map<string, number> = new Map();
 
   constructor(container: HTMLElement) {
     this.mainContainer = container;
@@ -28,9 +28,10 @@ export class Router {
 
   private setupEventListeners(): void {
     globalThis.addEventListener('popstate', () => this.handleRouteChange());
-    globalThis.addEventListener('beforeunload', () =>
-      this.saveCurrentScrollPosition()
-    );
+    // Commented out state saving
+    // globalThis.addEventListener('beforeunload', () =>
+    //   this.saveCurrentScrollPosition()
+    // );
   }
 
   addRoute(route: Route): void {
@@ -65,7 +66,8 @@ export class Router {
     const path = globalThis.location.pathname;
     if (this.currentPath === path) return;
 
-    this.saveCurrentScrollPosition();
+    // Commented out state saving
+    // this.saveCurrentScrollPosition();
     // this.currentPath = path;
 
     /************************************************* */
@@ -81,7 +83,6 @@ export class Router {
     // );
 
     const modal = ModalManager.getModal();
-    console.log(modal);
     if (modal && !isProductPath && !isOpeningModal) {
       modal.hideModal();
     }
@@ -100,6 +101,9 @@ export class Router {
     // }
 
     this.currentPath = path;
+
+    // Dispatch routechange event to update UI components
+    window.dispatchEvent(new CustomEvent('routechange'));
 
     /************************************************* */
 
@@ -158,8 +162,9 @@ export class Router {
   }
 
   private processRoute(route: Route, path: string): void {
-    const hasSavedContainer =
-      this.pageContainers.has(path) && route.preserveState;
+    // Commented out state preservation logic
+    // const hasSavedContainer =
+    //   this.pageContainers.has(path) && route.preserveState;
 
     let pageContainer = this.pageContainers.get(path);
 
@@ -171,15 +176,15 @@ export class Router {
 
     removeAllChild(this.mainContainer);
 
-    if (hasSavedContainer) {
-      this.mainContainer.append(pageContainer);
-      this.restoreScrollPosition(path);
-      console.log(`Восстановили сохранённое состояние для ${path}`);
-    } else {
+    // if (hasSavedContainer) {
+    //   this.mainContainer.append(pageContainer);
+    //   this.restoreScrollPosition(path);
+    //   console.log(`Восстановили сохранённое состояние для ${path}`);
+    // } else {
       route.component(this.mainContainer, this);
       window.scrollTo(0, 0);
       console.log(`Первая отрисовка ${path}`);
-    }
+    // }
   }
 
   private createPageContainer(route: Route): HTMLElement {
@@ -191,17 +196,17 @@ export class Router {
     return pageContainer;
   }
 
-  private saveCurrentScrollPosition(): void {
-    if (this.currentPath)
-      this.scrollPositions.set(this.currentPath, window.scrollY);
-  }
+  // private saveCurrentScrollPosition(): void {
+  //   if (this.currentPath)
+  //     this.scrollPositions.set(this.currentPath, window.scrollY);
+  // }
 
-  private restoreScrollPosition(path: string): void {
-    requestAnimationFrame(() => {
-      const savedPosition = this.scrollPositions.get(path) ?? 0;
-      window.scrollTo(0, savedPosition);
-    });
-  }
+  // private restoreScrollPosition(path: string): void {
+  //   requestAnimationFrame(() => {
+  //     const savedPosition = this.scrollPositions.get(path) ?? 0;
+  //     window.scrollTo(0, savedPosition);
+  //   });
+  // }
 
   init(): void {
     if (globalThis.location.pathname === '/') {
@@ -211,15 +216,15 @@ export class Router {
     }
   }
 
-  clearCache(): void {
-    this.pageContainers.clear();
-    this.scrollPositions.clear();
-  }
+  // clearCache(): void {
+  //   this.pageContainers.clear();
+  //   this.scrollPositions.clear();
+  // }
 
-  clearPageCache(path: string): void {
-    this.pageContainers.delete(path);
-    this.scrollPositions.delete(path);
-  }
+  // clearPageCache(path: string): void {
+  //   this.pageContainers.delete(path);
+  //   this.scrollPositions.delete(path);
+  // }
 }
 
 export function createRouterLink(
@@ -257,12 +262,13 @@ export function createRouter(container: HTMLElement): Router {
     routerInstance.addRoute({
       path: '/catalog',
       component: createCatalogPage,
-      preserveState: true,
+      // preserveState: true,
+      // preserveState: false,
     });
     routerInstance.addRoute({
       path: '/cart',
       component: createCartPage,
-      preserveState: false,
+      // preserveState: false,
     });
   }
   return routerInstance;

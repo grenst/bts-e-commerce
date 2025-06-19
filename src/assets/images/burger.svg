@@ -7,3 +7,6 @@
 <rect fill="#1D1D1B" height="1" width="11" x="0.5" y="8.5"/>
 </g>
 </svg>
+
+
+before:content-[''] before:absolute before:h-6 before:w-36 before:bg-yellow-400
