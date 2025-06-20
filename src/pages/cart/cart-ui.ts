@@ -167,13 +167,15 @@ export default class CartUI {
 
     // Calculate discounted price if discount exists
     let discountedPrice: number | undefined;
-    if (discountAmount > 0 && subtotal > 0) {
+    if (this.discountCode && discountAmount > 0 && subtotal > 0) {
       const itemSubtotal = li.price.value.centAmount * li.quantity;
       const discountRatio = itemSubtotal / subtotal;
       const itemDiscount = discountAmount * discountRatio;
       discountedPrice = Math.round(
         li.price.value.centAmount - itemDiscount / li.quantity
       );
+    } else {
+      discountedPrice = undefined;
     }
 
     return {

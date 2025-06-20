@@ -71,8 +71,10 @@ export default function createAboutUsPage(container: HTMLElement): void {
     return item?.val ?? '';
   }
 
+  const textKeySet = new Set<string>(Object.values(TextKeys));
+
   function isTextKey(value: string | TextKeys): value is TextKeys {
-    return Object.values(TextKeys).some((v) => v === value);
+    return textKeySet.has(value);
   }
 
   function createMessageBlock(
@@ -116,6 +118,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
       parent: container,
     });
 
+    // автоматическое сужение типа без каких-либо `as`
     const text = isTextKey(content) ? getTextByKey(content) : content;
     createElement({ tag: 'p', text, parent: contentElement });
 

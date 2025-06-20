@@ -1,10 +1,10 @@
-type DropdownRef = {
+type DropdownReference = {
   menu: HTMLElement;
   hide: () => void;
 };
 
 class DropdownManager {
-  private static currentDropdown: DropdownRef | null = null;
+  private static currentDropdown: DropdownReference | undefined = undefined;
 
   static register(menu: HTMLElement, hideCallback: () => void): void {
     this.currentDropdown = { menu, hide: hideCallback };
@@ -13,7 +13,7 @@ class DropdownManager {
   static closeCurrent(): void {
     if (this.currentDropdown) {
       this.currentDropdown.hide();
-      this.currentDropdown = null;
+      this.currentDropdown = undefined;
     }
   }
 

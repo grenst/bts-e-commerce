@@ -25,6 +25,19 @@ const categoryCache = new Map<string, Product[]>();
 
 type Point = { x: number; y: number };
 
+type VolumeAttributeValue = {
+  key?: string;
+  label?: Record<string, string>;
+};
+
+function isVolumeAttributeValue(value: unknown): value is VolumeAttributeValue {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    ('key' in value || 'label' in value)
+  );
+}
+
 function getScrollbarWidth(): number {
   return window.innerWidth - document.documentElement.clientWidth;
 }
@@ -44,12 +57,17 @@ function createQtyButton(
   label: string,
   parent: HTMLElement
 ): HTMLButtonElement {
-  return createElement({
+  const element = createElement({
     tag: 'button',
     parent,
     text: label,
     classes: ['order-btn', 'm-[1px]', 'text-xl', 'px-2', 'm-2', 'bg-gray-200'],
-  }) as HTMLButtonElement;
+  });
+
+  if (!(element instanceof HTMLButtonElement)) {
+    throw new TypeError('createQtyButton expected HTMLButtonElement');
+  }
+  return element; // здесь уже гарантирован HTMLButtonElement
 }
 
 export interface ProductModal {
@@ -82,21 +100,14 @@ const getVolumeLabel = (variant: ProductVariant, locale = 'en'): string => {
   const volumeAttribute = variant.attributes?.find(
     (attribute) => attribute.name === 'volume'
   );
-  if (
-    volumeAttribute &&
-    typeof volumeAttribute.value === 'object' &&
-    volumeAttribute.value !== null
-  ) {
-    const { key, label } = volumeAttribute.value as {
-      key?: string;
-      label?: Record<string, string>;
-    };
-    // trying to get a label
-    if (label && typeof label[locale] === 'string') return label[locale];
-    // then a key
-    if (typeof key === 'string') return key;
+
+  if (volumeAttribute && isVolumeAttributeValue(volumeAttribute.value)) {
+    const { key, label } = volumeAttribute.value;
+
+    if (label?.[locale]) return label[locale];
+    if (key) return key;
   }
-  return ''; // nothing got
+  return '';
 };
 
 const getUnitPrice = (variant: ProductVariant): number => {
@@ -365,8 +376,9 @@ export function createProductModal(): ProductModal {
         }
 
         let categoryProducts: Product[];
-        if (categoryCache.has(category.id)) {
-          categoryProducts = categoryCache.get(category.id)!;
+        const cachedProducts = categoryCache.get(category.id);
+        if (cachedProducts) {
+          categoryProducts = cachedProducts;
         } else {
           categoryProducts = await getProductsByCategory(category.id).catch(
             () => []
@@ -397,11 +409,8 @@ export function createProductModal(): ProductModal {
                 loading: 'lazy',
               },
             });
-            imgElement.addEventListener('click', (event_) =>
-              showModal(p.id, {
-                x: (event_ as MouseEvent).clientX,
-                y: (event_ as MouseEvent).clientY,
-              })
+            imgElement.addEventListener('click', (event_: MouseEvent) =>
+              showModal(p.id, { x: event_.clientX, y: event_.clientY })
             );
           }
         }
@@ -656,11 +665,22 @@ export function createProductModal(): ProductModal {
     });
 
     if (allVariants.length === 1) {
-      createElement({
+      const onlyIn = createElement({
         tag: 'span',
         parent: volumeSelector,
-        text: 'no variants',
-        classes: ['text-gray-500'],
+        classes: ['text-gray-500', 'flex', 'items-center', 'gap-1'],
+      });
+
+      createElement({
+        tag: 'span',
+        parent: onlyIn,
+        text: 'Only in ',
+      });
+
+      createElement({
+        tag: 'strong',
+        parent: onlyIn,
+        text: getVolumeLabel(allVariants[0]) || `ID ${allVariants[0].id ?? ''}`, // запасной вариант
       });
     } else {
       createElement({
@@ -733,12 +753,17 @@ export function createProductModal(): ProductModal {
     });
     const plus = createQtyButton('+', quantity);
 
-    const addToCartButton = createElement({
+    const rawButton = createElement({
       tag: 'button',
       parent: submitOrder,
       text: 'ADD TO CART',
       classes: ['order-cart', 'w-28'],
-    }) as HTMLButtonElement;
+    });
+
+    if (!(rawButton instanceof HTMLButtonElement)) {
+      throw new TypeError('Expected HTMLButtonElement for add-to-cart button');
+    }
+    const addToCartButton = rawButton;
 
     const price = createElement({
       tag: 'span',

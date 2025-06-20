@@ -270,7 +270,7 @@ export function createProductCardElement(product: Product): HTMLElement {
     classes: ['px-2', 'mt-auto', 'z-1'],
   });
 
-  const button = createElement({
+  const button: HTMLButtonElement = createElement({
     tag: 'button',
     parent: buttonContainer,
     text: 'ADD TO CART',
@@ -293,10 +293,12 @@ export function createProductCardElement(product: Product): HTMLElement {
   }) as HTMLButtonElement;
 
   // Function to update cart status
+  type CartUpdatedEvent = CustomEvent<{
+    cart: { lineItems: Array<{ productId: string }> };
+  }>;
+
   const updateCartStatus = (event: Event) => {
-    const customEvent = event as CustomEvent<{
-      cart: { lineItems: Array<{ productId: string }> };
-    }>;
+    const customEvent = event as CartUpdatedEvent;
     const cart = customEvent.detail?.cart;
     if (!cart) return;
 
@@ -330,7 +332,7 @@ export function createProductCardElement(product: Product): HTMLElement {
   initialCartCheck();
 
   // Listen for cart updates
-  document.addEventListener('cartUpdated', updateCartStatus as EventListener);
+  document.addEventListener('cartUpdated', updateCartStatus);
 
   button.addEventListener('click', async (event_) => {
     event_.stopPropagation();
@@ -380,23 +382,22 @@ export function createProductCardElement(product: Product): HTMLElement {
   // Intersection Observer for lazy loading
   const observer = new IntersectionObserver(
     (entries) => {
-      entries.forEach((entry) => {
+      for (const entry of entries) {
         if (entry.isIntersecting && !isLoaded) {
           isLoaded = true;
 
           // Load images
-          if (product.masterVariant.images?.[1]?.url) {
-            productImage.setAttribute(
-              'src',
-              product.masterVariant.images[0].url
-            );
+          if (product.masterVariant.images?.[0]?.url) {
+            const originalUrl = product.masterVariant.images[0].url;
+            const webpUrl =
+              originalUrl +
+              (originalUrl.includes('?') ? '&fm=webp' : '?fm=webp');
+            productImage.setAttribute('src', webpUrl);
           }
 
           if (price && price.discounted) {
-            const discountImg = imageContainer.querySelector(
-              '.price_hit'
-            ) as HTMLImageElement;
-            if (discountImg) {
+            const discountImg = imageContainer.querySelector('.price_hit');
+            if (discountImg instanceof HTMLImageElement) {
               discountImg.setAttribute('src', priceHitImg);
             }
           }
@@ -412,7 +413,7 @@ export function createProductCardElement(product: Product): HTMLElement {
 
           observer.unobserve(card);
         }
-      });
+      }
     },
     {
       threshold: 0.1,

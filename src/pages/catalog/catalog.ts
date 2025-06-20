@@ -39,7 +39,7 @@ export function createCatalogPage(container: HTMLElement): void {
 
   const section = createElement({
     tag: 'section',
-    classes: ['catalog', 'px-2', 'bg-white', 'pb-16'],
+    classes: ['catalog', 'px-2', 'pb-16'],
   });
 
   // const title = createElement({
@@ -52,7 +52,7 @@ export function createCatalogPage(container: HTMLElement): void {
 
   const title = createElement({
     tag: 'h1',
-    text: 'Grab your drink',
+    text: 'All drinks here are unique',
     classes: [
       'text-3xl',
       'font-bold',
@@ -63,7 +63,9 @@ export function createCatalogPage(container: HTMLElement): void {
       "before:content-['']",
       'before:absolute',
       'before:h-8',
-      'before:w-58',
+      'before:w-92',
+      'max-[392px]:before:w-71',
+      'max-[392px]:before:h-16',
       'before:bg-yellow-400',
       'before:-z-1',
       'h1-titel',

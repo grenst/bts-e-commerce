@@ -246,11 +246,13 @@ export function createUserDropdown(
 
       handleOutsideClick = (event_: MouseEvent) => {
         if (!dropdownMenu.classList.contains('hidden')) {
-          const target = event_.target as Node;
+          const target = event_.target;
+          if (!(target instanceof Node)) return;
+
           const isClickOnToggle = userIcon.contains(target);
           const isClickInDropdown = dropdownContainer.contains(target);
           const isClickInUserNav = document
-            .getElementById('user_nav')
+            .querySelector('#user_nav')
             ?.contains(target);
 
           if (
@@ -423,11 +425,13 @@ export function createAboutDropdown(
 
       handleOutsideClick = (event_: MouseEvent) => {
         if (!dropdownMenu.classList.contains('hidden')) {
-          const target = event_.target as Node;
+          const target = event_.target;
+          if (!(target instanceof Node)) return;
+
           const isClickOnToggle = aboutIcon.contains(target);
           const isClickInDropdown = dropdownContainer.contains(target);
           const isClickInUserNav = document
-            .getElementById('user_nav')
+            .querySelector('#user_nav')
             ?.contains(target);
 
           if (!isClickInDropdown || (isClickInUserNav && !isClickOnToggle)) {

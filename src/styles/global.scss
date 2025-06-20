@@ -303,3 +303,20 @@ body.lock {
   display: flex;
   flex-direction: column;
 }
+
+.h1-titel {
+  &::after {
+    content: '0';
+    position: absolute;
+    right: calc(50% - 30vw);
+    width: 60vw;
+    background: #9183b67c;
+    z-index: -10;
+  }
+  // @media screen and (max-width: 390px)  {
+  //   &::before {
+  //     content: '';
+  //     width: 71vw;
+  //   } 
+  // }
+}

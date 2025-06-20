@@ -7,7 +7,7 @@ import {
   createSvgUse,
   removeAllChild,
 } from '../../../utils/element-utilities';
-import { closeOpenModal } from '../../../utils/modal-utils'; // Import shared modal function
+import { closeOpenModal } from '../../../utils/modal-utilities'; // Import shared modal function
 import { useTokenStore } from '../../../store/token-store';
 import { useCustomerStore } from '../../../store/customer-store';
 import { Router } from '../../../router/router';
