@@ -5,10 +5,12 @@ interface TokenState {
   accessToken: string | undefined;
   refreshToken: string | undefined;
   expiresAt: number | undefined;
+  isAnonymous: boolean;
   setTokens: (
     accessToken: string,
     refreshToken: string | undefined,
-    expiresIn: number
+    expiresIn: number,
+    isAnonymous: boolean
   ) => void;
   clearTokens: () => void;
 }
@@ -19,17 +21,20 @@ export const useTokenStore = createStore<TokenState>()(
       accessToken: undefined,
       refreshToken: undefined,
       expiresAt: undefined,
-      setTokens: (accessToken, refreshToken, expiresIn) =>
+      isAnonymous: false,
+      setTokens: (accessToken, refreshToken, expiresIn, isAnonymous) =>
         set({
           accessToken,
           refreshToken,
           expiresAt: Date.now() + expiresIn * 1000, // expiresIn is expected in seconds
+          isAnonymous,
         }),
       clearTokens: () =>
         set({
           accessToken: undefined,
           refreshToken: undefined,
           expiresAt: undefined,
+          isAnonymous: false,
         }),
     }),
     {

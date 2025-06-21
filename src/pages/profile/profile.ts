@@ -432,6 +432,15 @@ export default async function createProfilePage(
       return;
     }
 
+    if (
+      !(actualPassInput instanceof HTMLInputElement) ||
+      !(newPassInput instanceof HTMLInputElement) ||
+      !(replayNewPassInput instanceof HTMLInputElement)
+    ) {
+      addNotification('error', 'Password input elements not found');
+      return;
+    }
+
     const currentPassword = actualPassInput.value;
     const newPassword = newPassInput.value;
     const replayPassword = replayNewPassInput.value;

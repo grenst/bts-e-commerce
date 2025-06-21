@@ -4,15 +4,18 @@
 }
 
 .cart-title {
-  font-size: clamp(1.875rem, 4vw, 2.5rem);
+  // font-size: clamp(1.875rem, 4vw, 2.5rem);
   font-weight: 700;
   margin-bottom: 2rem;
   color: #1f2937;
-  letter-spacing: -0.025em;
+  // letter-spacing: -0.025em;
   text-align: center;
   
   @media (min-width: 768px) {
-    text-align: left;
+    text-align: center;
+  }
+  @media (min-width: 451px) {
+    padding-top: 16px;
   }
 }
 
@@ -320,13 +323,58 @@
   }
 }
 
+.clear-cart-button {
+  display: block;
+  margin-left: auto;
+  margin-bottom: 20px;
+  padding: 3px 4px;
+  background-color: #f8f9fa;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #dc3545;
+    color: white;
+  }
+}
+
+.modal-container {
+  justify-content: center;
+  align-items: center;
+}
+.confirmation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  & button {
+    padding: 2px 12px;
+    background-color: #2f2f2f;
+    color: white;
+  }
+}
+.confirmation-modal {
+  width: 90%;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background-color: rgb(255, 255, 255);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  & p {
+    text-align: center;
+  }
+}
 .go-shopping {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #081935 0%, #1d4ed8 100%);
   color: white;
-  padding: 1rem 2rem;
+  padding: .4rem 2rem;
   border-radius: 12px;
   font-weight: 600;
   font-size: 1rem;
@@ -338,7 +386,7 @@
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    background: linear-gradient(135deg, #0900ae 0%, #000000 100%);
   }
   
   &:active {
@@ -480,5 +528,18 @@ button.cancel {
   border: none;
   &:focus {
     border: 1px solid rgb(70, 70, 70);
+  }
+}
+.cart-item .subtotal {
+  position: relative;
+  
+  &.has-discount::before {
+    content: attr(data-original-price);
+    position: absolute;
+    top: -15px;
+    left: 0;
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.8em;
   }
 }

@@ -5,6 +5,7 @@ import { createProductListElement } from '../../components/catalog/product-list'
 import { getAllPublishedProducts as getAllProducts } from '../../api/products/product-service';
 import { getAllCategories } from '../../api/products/product-service';
 import { Product, Category, ActiveSortMode } from '../../types/catalog-types';
+import { createProductCardSkeletonElement } from '../../components/features/product-card-skeleton';
 import {
   // createProductModal,
   // ProductModal,
@@ -38,15 +39,39 @@ export function createCatalogPage(container: HTMLElement): void {
 
   const section = createElement({
     tag: 'section',
-    classes: ['catalog', 'px-2', 'bg-white', 'pb-8'],
+    classes: ['catalog', 'px-2', 'pb-16'],
   });
+
+  // const title = createElement({
+  //   tag: 'h1',
+  //   attributes: {
+  //     class: 'text-4xl font-impact text-center my-1 pt-8 min-[680px]:my-6 h1-titel',
+  //   },
+  //   text: 'Grab your drink',
+  // });
 
   const title = createElement({
     tag: 'h1',
-    attributes: {
-      class: 'text-4xl font-impact text-center my-1 pt-8 min-[680px]:my-6',
-    },
-    text: 'Grab your drink',
+    text: 'All drinks here are unique',
+    classes: [
+      'text-3xl',
+      'font-bold',
+      'my-6',
+      'z-30',
+      'text-center',
+      'text-gray-800',
+      "before:content-['']",
+      'before:absolute',
+      'before:h-8',
+      'before:w-92',
+      'max-[392px]:before:w-71',
+      'max-[392px]:before:h-16',
+      'before:bg-yellow-400',
+      'before:-z-1',
+      'h1-titel',
+      'login-name',
+    ],
+    parent: section,
   });
 
   const navigation = createCatalogNavigationElement();
@@ -107,6 +132,9 @@ export function createCatalogPage(container: HTMLElement): void {
 
   async function fetchProducts() {
     try {
+      // Show loading state
+      renderProductList(true);
+
       const filterClauses: string[] = [];
 
       if (selectedCategoryId) {
@@ -141,12 +169,47 @@ export function createCatalogPage(container: HTMLElement): void {
         'Error fetching products:',
         error instanceof Error ? error.message : String(error)
       );
+      // Render empty state on error
+      renderProductList();
     }
   }
 
-  function renderProductList() {
-    displayedProducts = allProducts;
+  function renderProductList(isLoading = false) {
     productListContainer.innerHTML = '';
+
+    if (isLoading) {
+      // Show skeleton placeholders while loading
+      const skeletonGrid = createElement({
+        tag: 'div',
+        classes: [
+          'grid',
+          'grid-cols-2',
+          'md:grid-cols-3',
+          'lg:grid-cols-4',
+          'gap-4',
+        ],
+      });
+
+      for (let index = 0; index < 8; index++) {
+        skeletonGrid.append(createProductCardSkeletonElement());
+      }
+
+      productListContainer.append(skeletonGrid);
+      return;
+    }
+
+    if (allProducts.length === 0) {
+      // Show empty state
+      const emptyState = createElement({
+        tag: 'div',
+        classes: ['text-center', 'py-12'],
+        text: 'No products found. Try changing your filters.',
+      });
+      productListContainer.append(emptyState);
+      return;
+    }
+
+    displayedProducts = allProducts;
     productListContainer.append(
       createProductListElement(displayedProducts, allCategoriesMap)
     );
@@ -211,6 +274,14 @@ export function createCatalogPage(container: HTMLElement): void {
     }
     fetchProducts();
   });
+
+  // Add event listener for PROMO CODES button
+  const promoButton = navigation.querySelector('.promo-codes-button');
+  if (promoButton) {
+    promoButton.addEventListener('click', () => {
+      subNavControl.toggle('promo');
+    });
+  }
 
   initializePage();
 }

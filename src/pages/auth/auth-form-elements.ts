@@ -1,5 +1,6 @@
 import {
   createEl as createElement,
+  createHtmlElement,
   createSvgUse,
 } from '../../utils/element-utilities';
 
@@ -53,7 +54,7 @@ export function createInputField({
     attributes: { for: id },
   });
 
-  const input = createElement<HTMLInputElement>({
+  const input = createHtmlElement({
     tag: 'input',
     parent: fieldContainer,
     classes: [
@@ -113,7 +114,7 @@ export function createPasswordField({
     classes: ['relative'],
   });
 
-  const input = createElement<HTMLInputElement>({
+  const input = createHtmlElement({
     tag: 'input',
     parent: inputContainer,
     classes: [

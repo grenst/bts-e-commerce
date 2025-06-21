@@ -6,7 +6,7 @@ interface CreateElementOptions {
   classes?: string[];
   attributes?: Record<string, string>;
   styles?: Record<string, string>;
-  parent?: HTMLElement | null;
+  parent?: HTMLElement | undefined;
   children?: HTMLElement[];
 }
 
@@ -16,9 +16,7 @@ function createElement(options: CreateElementOptions): HTMLElement {
     text = '',
     classes = [],
     attributes = {},
-    // styles = {},
     parent = undefined,
-    // parent = body,
     children = [],
   } = options;
 
@@ -36,6 +34,35 @@ function createElement(options: CreateElementOptions): HTMLElement {
 
   element.append(...children);
 
+  return element;
+}
+
+interface CreateHtmlElementOptions<K extends keyof HTMLElementTagNameMap>
+  extends CreateElementOptions {
+  tag: K;
+}
+
+function createHtmlElement<K extends keyof HTMLElementTagNameMap>(
+  options: CreateHtmlElementOptions<K>
+): HTMLElementTagNameMap[K] {
+  const element = document.createElement(options.tag);
+  if (options.text) {
+    element.textContent = options.text;
+  }
+  if (options.classes) {
+    element.classList.add(...options.classes);
+  }
+  if (options.attributes) {
+    for (const [key, value] of Object.entries(options.attributes)) {
+      element.setAttribute(key, String(value));
+    }
+  }
+  if (options.parent) {
+    options.parent.append(element);
+  }
+  if (options.children) {
+    element.append(...options.children);
+  }
   return element;
 }
 
@@ -104,30 +131,11 @@ const getUUID = (): string => globalThis.crypto.randomUUID();
 
 /* *************************************** */
 
-// function hexaDecimal() {
-//   return Math.floor(Math.random() * 256)
-//     .toString(16)
-//     .padStart(2, '0');
-// }
-// function getRandomColor() {
-//   return `#${hexaDecimal()}${hexaDecimal()}${hexaDecimal()}`;
-// }
-
-// function rgbToHex(rgbStr: string) {
-//   const decimalArr = rgbStr.slice(4, -1).split(',');
-
-//   const hexArr = decimalArr.map((item) => {
-//     const num = Number(item.trim());
-//     return num.toString(16).padStart(2, '0');
-//   });
-
-//   return `#${hexArr.join('')}`;
-// }
-
 /* *************************************** */
 
 export {
   createElement as createEl,
+  createHtmlElement,
   createSvgUse,
   removeAllChild,
   shuffleArray,

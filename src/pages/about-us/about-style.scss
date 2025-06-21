@@ -67,8 +67,12 @@
 .title-description-about {
   font-size: 0.8rem;
   color: #2d3748;
-  border: solid 0.1rem black;
-  border-radius: 1.3rem 1.3rem 1.3rem 0.0rem;
+  background-color: #e8e8e8;
+  // border: solid 0.1rem black;
+  -webkit-box-shadow: 8px 8px 24px 0px rgb(142, 142, 142, 1);
+  -moz-box-shadow: 8px 8px 24px 0px rgba(142, 142, 142, 1);
+  box-shadow: 8px 8px 24px 0px rgba(142, 142, 142, 1);
+  border-radius: 0rem 1.3rem 1.3rem 1.3rem;
   padding: 0.4rem;
   width: fit-content;
   margin-bottom: 0.5rem;
@@ -79,25 +83,31 @@
 .point-us1 {
   font-size: 0.8rem;
   color: #2d3748;
-  padding: 0.4rem;
-  border: solid 0.1rem black;
-  border-radius: 1.3rem 1.3rem 0rem 1.3rem;
-  width: 70%;
+  padding: 0.4rem 0.8rem;
+  // border: solid 0.1rem black;
+  overflow: hidden;
+  background-color: #ffffff;
+  -webkit-box-shadow: 8px 8px 24px 0px rgba(197, 197, 197, 1);
+  -moz-box-shadow: 8px 8px 24px 0px rgba(197, 197, 197, 1);
+  box-shadow: 8px 8px 24px 0px rgba(197, 197, 197, 1);
+  border-radius: 1.3rem 0rem 1.3rem 1.3rem;
+  max-width: 70%;
   margin-left: auto;
   margin-bottom: 0.5rem;
-  text-align: center;
+  text-align: right;
 }
 
 .point-us2 {
   font-size: 0.8rem;
-  color: #2d3748;
+  color: #002240;
   padding: 0.4rem;
-  border: solid 0.1rem black;
+  width: 15rem;
+  // border: solid 0.1rem black;
   border-radius: 1.3rem 1.3rem 0rem 1.3rem;
   margin-left: auto;
   margin-bottom: 0.5rem;
-  text-align: center;
-  width: 15rem;
+  text-align: right;
+  max-width: 15rem;
 }
 
 .point-us {
@@ -167,9 +177,9 @@
   text-align: start;
 }
 
-.container-img-technologies-andrei {
+.container-img-andrii {
   display: flex;
-  align-items: center;
+  align-items: end;
   flex-direction: column;
 }
 
@@ -216,7 +226,7 @@
 
 .container-img-technologies-vitali {
   display: flex;
-  align-items: center;
+  align-items: end;
   flex-direction: column;
 }
 
@@ -282,7 +292,7 @@
 
 .container-img-technologies-sergei {
   display: flex;
-  align-items: center;
+  align-items: end;
   flex-direction: column;
 }
 
@@ -371,7 +381,8 @@
 
 .container-img-footer{
   display: flex;
-  justify-content: center;
+  justify-content: end;
+  align-items: end;
 }
 
 .img-Footer {
@@ -386,7 +397,8 @@
 
 .about-svg_rss:hover {
   color: gold;
-  transition: 2s;
+  transition: 0.2s;
+  background: #00000076;
 }
 
 .container-rss-about {
@@ -399,4 +411,19 @@
 .container-ul-rss {
   display: flex;
   flex-direction: column;
+}
+
+.link-container {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: right;
+  & svg {
+    width: 2rem;
+    height: 2rem;
+  }
+  & :hover {
+    color: #002240;
+    text-decoration: underline;
+  }
 }

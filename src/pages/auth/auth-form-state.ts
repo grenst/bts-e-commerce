@@ -2,11 +2,10 @@ import { createEl as createElement } from '../../utils/element-utilities';
 import { FilterableDropdown } from '../../components/filterable-dropdown/filterable-dropdown';
 import {
   createPageContainer,
-  // createTitleLogin, // Removed
   createInputField,
   createPasswordField,
 } from './auth-form-elements';
-import createTitle from '../../components/layout/title/title'; // Import new createTitle
+import createTitle from '../../components/layout/title/title';
 
 export interface AuthFormState {
   isLoginForm: boolean;
@@ -77,7 +76,7 @@ export interface AuthFormState {
 export const initialAuthFormState: AuthFormState = {
   isLoginForm: true,
   title: {
-    element: undefined, // Будет инициализировано
+    element: undefined,
     loginText: 'Login',
     registerText: 'Register',
   },
@@ -85,7 +84,7 @@ export const initialAuthFormState: AuthFormState = {
     pageContainer: undefined,
     formContainer: undefined,
     emailContainer: undefined,
-    emailInput: undefined, // Будет инициализировано при создании формы
+    emailInput: undefined,
     passwordInput: undefined,
     emailError: undefined,
     passwordError: undefined,
@@ -134,14 +133,12 @@ export const initialAuthFormState: AuthFormState = {
   },
 };
 
-// --- отслеживаем, какие поля уже тронуты ---
 export const dirty: Record<string, boolean> = {};
 
 export function initializeAuthForm(
   parentContainer: HTMLElement
 ): AuthFormState {
   const pageContainer = createPageContainer(parentContainer);
-  // const titleElement = createTitleLogin(pageContainer); // Old call
   const titleElement = createTitle('Login', pageContainer, [], {
     textSize: 'text-2xl',
     marginBottom: 'mb-6',
@@ -156,10 +153,9 @@ export function initializeAuthForm(
     classes: ['space-y-4'],
   });
 
-  // Создаем основные поля (email/password)
   const {
     fieldContainer: emailContainer,
-    input: emailInput,
+    input: emailInputElement,
     error: emailError,
   } = createInputField({
     container: formContainer,
@@ -169,12 +165,23 @@ export function initializeAuthForm(
     placeholder: 'Enter your email',
   });
 
-  const { input: passwordInput, error: passwordError } = createPasswordField({
-    container: formContainer,
-    id: 'password',
-    placeholder: 'Use A-Z a-z 0-9',
-    label: 'Password',
-  });
+  if (!(emailInputElement instanceof HTMLInputElement)) {
+    throw new TypeError('Email input is not an HTMLInputElement');
+  }
+  const emailInput: HTMLInputElement = emailInputElement;
+
+  const { input: passwordInputElement, error: passwordError } =
+    createPasswordField({
+      container: formContainer,
+      id: 'password',
+      placeholder: 'Use A-Z a-z 0-9',
+      label: 'Password',
+    });
+
+  if (!(passwordInputElement instanceof HTMLInputElement)) {
+    throw new TypeError('Password input is not an HTMLInputElement');
+  }
+  const passwordInput: HTMLInputElement = passwordInputElement;
 
   const errorContainer = createElement({
     tag: 'div',
@@ -192,8 +199,8 @@ export function initializeAuthForm(
       pageContainer,
       formContainer,
       emailContainer,
-      emailInput: emailInput,
-      passwordInput: passwordInput,
+      emailInput,
+      passwordInput,
       emailError,
       passwordError,
       errorContainer,

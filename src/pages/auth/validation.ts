@@ -26,21 +26,24 @@ const POSTAL_CODE_PATTERNS: Record<string, RegExp> = {
   BY: /^\d{6}$/,
 };
 
-function isPostalCodeValid(code: string, country: string): boolean {
+export function isPostalCodeValid(code: string, country: string): boolean {
   const cc = country.toUpperCase();
   const pattern = POSTAL_CODE_PATTERNS[cc];
-  if (!pattern) return /^[A-Za-z0-9-]+(?: [A-Za-z0-9-]+)?$/.test(code);
+  if (!pattern) return /^[A-Za-z0-9]+(?:[ -]?[A-Za-z0-9]+)*$/.test(code);
   return pattern.test(code);
 }
 
-const emailSchema = z
+export const emailSchema = z
   .string()
   .min(1, 'Please enter your email')
-  .email('Please enter a valid email (e.g., user@example.com)')
   .refine((v) => v === v.trim(), 'Email must not start or end with spaces')
-  .refine((v) => !/\s/.test(v), 'Email must not contain spaces');
+  .refine((v) => !/\s/.test(v), 'Email must not contain spaces')
+  .refine(
+    (v) => z.string().email().safeParse(v).success,
+    'Please enter a valid email (e.g., user@example.com)'
+  );
 
-const passwordSchema = z
+export const passwordSchema = z
   .string()
   .min(8, 'Use at least 8 characters')
   .regex(/[A-Z]/, 'Add at least one uppercase letter (A-Z)')
@@ -48,13 +51,13 @@ const passwordSchema = z
   .regex(/[0-9]/, 'Include a number (0-9)')
   .refine((v) => v === v.trim(), 'Password must not start or end with a space');
 
-const nameSchema = z
+export const nameSchema = z
   .string()
   .min(3, 'Name is required')
   .regex(NAME_CITY_REGEX, 'Only letters and spaces allowed')
   .max(50, 'Max 50 characters');
 
-const dateOfBirthSchema = z
+export const dateOfBirthSchema = z
   .string()
   .min(1, 'Date of birth is required')
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date of birth must be in YYYY-MM-DD format')
@@ -67,53 +70,58 @@ const dateOfBirthSchema = z
     return year >= 1900;
   }, 'Date of birth year seems incorrect');
 
-const streetNameSchema = z
+export const streetNameSchema = z
   .string()
   .min(1, 'Street name is required')
   .regex(NAME_CITY_REGEX, 'Only letters and single spaces allowed')
   .max(100, 'Street name must be less than 100 characters');
 
-const citySchema = z
+export const citySchema = z
   .string()
   .min(1, 'City is required')
   .regex(NAME_CITY_REGEX, 'Only letters and spaces allowed')
   .max(50, 'Max 50 characters');
 
-const postalCodeSchema = z
+export const basePostalCodeSchema = z
   .string()
   .min(1, 'Postal code is required')
-  .regex(
-    /^[A-Za-z0-9-]+(?: [A-Za-z0-9-]+)?$/,
-    'Use digits, Latin letters and "-". Only one internal space allowed'
-  )
   .refine(
     (v) => v.trim() === v,
     'Postal code must not start or end with a space'
   );
 
-const countrySchema = z
+export const postalCodeSchema = basePostalCodeSchema.refine(
+  (v) =>
+    z
+      .string()
+      .regex(/^\d{5}$/)
+      .safeParse(v).success,
+  'Postal code must be 5 digits'
+);
+
+export const countrySchema = z
   .string()
   .min(1, 'Country is required')
   .regex(/^[A-Z]{2}$/, 'Country must be a 2-letter ISO code (e.g., US, DE)');
 
-const houseNumberSchema = z
+export const houseNumberSchema = z
   .string()
   .min(1, 'House number is required')
   .max(10, 'House number must be ≤ 10 chars')
   .refine((v) => v.trim() === v, 'No leading or trailing spaces');
 
-const apartmentSchema = z
+export const apartmentSchema = z
   .string()
   .max(10, 'Apartment must be ≤ 10 chars')
   .refine((v) => v.trim() === v, 'No leading or trailing spaces')
   .optional();
 
-const loginFormSchema = z.object({
+export const loginFormSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
 });
 
-const registerFormSchema = z
+export const registerFormSchema = z
   .object({
     email: emailSchema,
     password: passwordSchema,
@@ -124,17 +132,21 @@ const registerFormSchema = z
     houseNumber: houseNumberSchema,
     apartment: apartmentSchema,
     city: citySchema,
-    postalCode: postalCodeSchema,
+    postalCode: basePostalCodeSchema,
     country: countrySchema,
     billingStreetName: streetNameSchema.optional(),
     billingHouseNumber: houseNumberSchema.optional(),
     billingApartment: apartmentSchema.optional(),
     billingCity: citySchema.optional(),
-    billingPostalCode: postalCodeSchema.optional(),
+    billingPostalCode: basePostalCodeSchema.optional(),
     billingCountry: countrySchema.optional(),
   })
   .superRefine((data, context) => {
-    if (!isPostalCodeValid(data.postalCode, data.country)) {
+    if (
+      typeof data.postalCode === 'string' &&
+      typeof data.country === 'string' &&
+      !isPostalCodeValid(data.postalCode, data.country)
+    ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['postalCode'],
@@ -143,8 +155,20 @@ const registerFormSchema = z
     }
 
     if (data.billingPostalCode) {
-      const country = data.billingCountry || data.country;
-      if (!isPostalCodeValid(data.billingPostalCode, country)) {
+      const effectiveCountry = data.billingCountry || data.country;
+
+      if (!effectiveCountry) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['billingCountry'],
+          message:
+            'Billing country is required when billing postal code is provided',
+        });
+      } else if (
+        typeof data.billingPostalCode === 'string' &&
+        typeof effectiveCountry === 'string' &&
+        !isPostalCodeValid(data.billingPostalCode, effectiveCountry)
+      ) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['billingPostalCode'],
@@ -162,7 +186,7 @@ export function validateLogin(data: LoginFormData): ValidationResult {
     const errors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
       for (const error_ of error.errors) {
-        if (error_.path.length > 0) {
+        if (error_.path.length > 0 && !errors[error_.path[0]]) {
           errors[error_.path[0]] = error_.message;
         }
       }
@@ -179,7 +203,7 @@ export function validateRegister(data: RegisterFormData): ValidationResult {
     const errors: Record<string, string> = {};
     if (error instanceof z.ZodError) {
       for (const error_ of error.errors) {
-        if (error_.path.length > 0) {
+        if (error_.path.length > 0 && !errors[error_.path[0]]) {
           errors[error_.path[0]] = error_.message;
         }
       }

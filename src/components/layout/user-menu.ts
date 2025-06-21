@@ -1,9 +1,12 @@
 import { gsap } from '../../animations/gsap-init';
 import menuArrowImagePath from '../../assets/images/menu-arrow.svg';
+// import burgerImagePath from '../../assets/images/burger.svg';
+// import closeDelImagePath from '../../assets/images/close-del.svg';
 import { createEl as createElement } from '../../utils/element-utilities';
 import { Router } from '../../router/router';
 import { AuthService } from '../../services/auth.service';
 import { Customer } from '../../store/customer-store';
+import { DropdownManager } from '../../components/layout/dropdown-manager';
 
 interface UserMenuElements {
   dropdownMenu: HTMLElement;
@@ -29,7 +32,7 @@ export function createUserDropdown(
       'bg-white',
       'shadow-lg',
       'py-1',
-      'z-10',
+      'z-105',
       'hidden', // Initially hidden
       'overflow-hidden',
       '-translate-x-19',
@@ -136,26 +139,6 @@ export function createUserDropdown(
     return { wrapper: itemWrapper, link: itemLink }; // link is still used for GSAP animation target
   };
 
-  const homeMenuItem = createAnimatedMenuItem('Home page', () => {
-    router.navigateTo('/main');
-    hideMenuAndRemoveListener();
-  });
-  const catalogMenuItem = createAnimatedMenuItem('Catalog', () => {
-    router.navigateTo('/catalog');
-    hideMenuAndRemoveListener();
-  });
-  const aboutMenuItem = createAnimatedMenuItem('About us', () => {
-    router.navigateTo('/aboutUs');
-    hideMenuAndRemoveListener();
-    location.reload();
-  });
-
-  createElement({
-    tag: 'hr',
-    classes: ['my-1', 'border-gray-400'],
-    parent: dropdownMenu,
-  });
-
   const profileMenuItem = createAnimatedMenuItem('My profile', () => {
     router.navigateTo('/profile');
     hideMenuAndRemoveListener();
@@ -230,14 +213,7 @@ export function createUserDropdown(
   });
 
   const animateDropdownItems = () => {
-    const itemsToAnimate = [
-      homeMenuItem.link,
-      catalogMenuItem.link,
-      aboutMenuItem.link,
-      profileLink,
-      ordersLink,
-      logoutButton,
-    ];
+    const itemsToAnimate = [profileLink, ordersLink, logoutButton];
     gsap.fromTo(
       itemsToAnimate,
       { opacity: 0, x: '-100%' },
@@ -261,20 +237,40 @@ export function createUserDropdown(
     const isHidden = dropdownMenu.classList.contains('hidden');
 
     if (isHidden) {
+      DropdownManager.closeCurrent();
       dropdownMenu.classList.remove('hidden');
+
+      DropdownManager.register(dropdownMenu, hideMenuAndRemoveListener);
+
       animateDropdownItems();
 
       handleOutsideClick = (event_: MouseEvent) => {
-        if (
-          !dropdownContainer.contains(event_.target as Node) &&
-          !dropdownMenu.classList.contains('hidden')
-        ) {
-          dropdownMenu.classList.add('hidden');
-          document.removeEventListener('click', handleOutsideClick);
+        if (!dropdownMenu.classList.contains('hidden')) {
+          const target = event_.target;
+          if (!(target instanceof Node)) return;
+
+          const isClickOnToggle = userIcon.contains(target);
+          const isClickInDropdown = dropdownContainer.contains(target);
+          const isClickInUserNav = document
+            .querySelector('#user_nav')
+            ?.contains(target);
+
+          if (
+            // Close if clicked outside dropdown container OR
+            !isClickInDropdown ||
+            // Clicked in user_nav but not on the toggle button
+            (isClickInUserNav && !isClickOnToggle)
+          ) {
+            dropdownMenu.classList.add('hidden');
+            document.removeEventListener('click', handleOutsideClick);
+          }
         }
       };
       setTimeout(
-        () => document.addEventListener('click', handleOutsideClick),
+        () =>
+          document.addEventListener('click', handleOutsideClick, {
+            once: true,
+          }),
         0
       );
     } else {
@@ -286,4 +282,181 @@ export function createUserDropdown(
   });
 
   return { dropdownMenu, profileLink, ordersLink, logoutButton };
+}
+
+export function createAboutDropdown(
+  aboutIcon: SVGElement,
+  dropdownContainer: HTMLElement,
+  router: Router
+): void {
+  const useElement = aboutIcon.querySelector('use');
+  if (useElement) {
+    useElement.setAttribute('href', '#burger');
+    aboutIcon.dataset.state = 'closed';
+  }
+
+  const dropdownMenu = createElement({
+    tag: 'div',
+    classes: [
+      'absolute',
+      'w-60',
+      'bg-white',
+      'shadow-lg',
+      'pt-2',
+      'z-10',
+      'hidden',
+      'overflow-hidden',
+      '-translate-x-42',
+      'about_dropdown',
+    ],
+    parent: dropdownContainer,
+  });
+
+  const createAnimatedMenuItem = (
+    text: string,
+    onClick: () => void
+  ): { wrapper: HTMLElement; link: HTMLElement } => {
+    const itemWrapper = createElement({
+      tag: 'div',
+      classes: [
+        'relative',
+        'group',
+        'overflow-hidden',
+        'mx-2',
+        // 'mb-1',
+        'cursor-pointer',
+      ],
+      parent: dropdownMenu,
+    });
+    itemWrapper.addEventListener('click', onClick);
+
+    const contentContainer = createElement({
+      tag: 'div',
+      classes: [
+        'relative',
+        'flex',
+        'items-center',
+        '-translate-x-8',
+        'transition-transform',
+        'duration-300',
+        'ease-in-out',
+        'group-hover:translate-x-0',
+      ],
+      parent: itemWrapper,
+    });
+
+    createElement({
+      tag: 'img',
+      attributes: { src: menuArrowImagePath, alt: 'arrow' },
+      classes: ['w-8', 'h-8', '-translate-y-1', 'mr-2', 'flex-shrink-0'],
+      parent: contentContainer,
+    });
+
+    const itemLink = createElement({
+      tag: 'a',
+      text,
+      classes: [
+        'block',
+        'py-1',
+        'pr-4',
+        'text-2xl',
+        'text-gray-700',
+        'opacity-0',
+      ],
+      parent: contentContainer,
+    });
+    return { wrapper: itemWrapper, link: itemLink };
+  };
+
+  createAnimatedMenuItem('Home page', () => {
+    router.navigateTo('/');
+    hideMenu();
+  });
+
+  createAnimatedMenuItem('Catalog', () => {
+    router.navigateTo('/catalog');
+    hideMenu();
+  });
+
+  createAnimatedMenuItem('About shop', () => {
+    router.navigateTo('/aboutInfo');
+    hideMenu();
+  });
+
+  createAnimatedMenuItem('About us', () => {
+    router.navigateTo('/aboutUs');
+    hideMenu();
+  });
+
+  let handleOutsideClick: (event: MouseEvent) => void;
+
+  const hideMenu = () => {
+    const useElement = aboutIcon.querySelector('use');
+    if (useElement) {
+      useElement.setAttribute('href', '#burger');
+      aboutIcon.dataset.state = 'closed';
+    }
+
+    if (!dropdownMenu.classList.contains('hidden')) {
+      dropdownMenu.classList.add('hidden');
+    }
+
+    if (handleOutsideClick) {
+      document.removeEventListener('click', handleOutsideClick);
+    }
+  };
+
+  aboutIcon.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const isHidden = dropdownMenu.classList.contains('hidden');
+
+    if (isHidden) {
+      DropdownManager.closeCurrent();
+      dropdownMenu.classList.remove('hidden');
+      const useElement = aboutIcon.querySelector('use');
+      if (useElement) {
+        useElement.setAttribute('href', '#close-del');
+        aboutIcon.dataset.state = 'open';
+      }
+
+      DropdownManager.register(dropdownMenu, hideMenu);
+
+      animateDropdownItems(dropdownMenu);
+
+      handleOutsideClick = (event_: MouseEvent) => {
+        if (!dropdownMenu.classList.contains('hidden')) {
+          const target = event_.target;
+          if (!(target instanceof Node)) return;
+
+          const isClickOnToggle = aboutIcon.contains(target);
+          const isClickInDropdown = dropdownContainer.contains(target);
+          const isClickInUserNav = document
+            .querySelector('#user_nav')
+            ?.contains(target);
+
+          if (!isClickInDropdown || (isClickInUserNav && !isClickOnToggle)) {
+            hideMenu();
+          }
+        }
+      };
+      setTimeout(
+        () =>
+          document.addEventListener('click', handleOutsideClick, {
+            once: true,
+          }),
+        0
+      );
+    } else {
+      hideMenu();
+    }
+  });
+
+  const animateDropdownItems = (menu: HTMLElement) => {
+    const items = menu.querySelectorAll('a');
+    gsap.fromTo(
+      items,
+      { opacity: 0, x: '-100%' },
+      { opacity: 1, x: '0%', duration: 0.3, stagger: 0.1, ease: 'power2.out' }
+    );
+  };
 }

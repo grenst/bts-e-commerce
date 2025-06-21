@@ -18,11 +18,19 @@ import { useCustomerStore } from '../store/customer-store';
 import { uiStore as useUIStore } from '../store/store';
 import { debug } from '../components/auth-services/logger';
 
-function persistTokens(token: OAuthTokenResponse) {
+function persistTokens(
+  token: OAuthTokenResponse,
+  isAnonymous: boolean = false
+) {
   const { access_token, refresh_token, expires_in } = token;
   useTokenStore
     .getState()
-    .setTokens(access_token, refresh_token ?? undefined, expires_in);
+    .setTokens(
+      access_token,
+      refresh_token ?? undefined,
+      expires_in,
+      isAnonymous
+    );
 }
 
 type CustomerAction = { action: string; [k: string]: unknown };
@@ -68,7 +76,7 @@ export const AuthService = {
   async login(email: string, password: string): Promise<boolean> {
     try {
       const token = await getPasswordToken(email, password);
-      persistTokens(token);
+      persistTokens(token, false); // authenticated token
 
       const customer = await fetchMyCustomer(token.access_token);
       useCustomerStore.getState().setCustomer(customer);
@@ -100,14 +108,14 @@ export const AuthService = {
 
   //  Refresh
   async refreshToken(): Promise<string | undefined> {
-    const { refreshToken } = useTokenStore.getState();
+    const { refreshToken, isAnonymous } = useTokenStore.getState();
     if (!refreshToken) {
       debug('No refreshToken, skip refresh');
       return undefined;
     }
     try {
       const token = await refreshAccessToken(refreshToken);
-      persistTokens(token);
+      persistTokens(token, isAnonymous); // preserve anonymous status
       return token.access_token;
     } catch (error) {
       debug('Refresh error', error);
@@ -119,7 +127,7 @@ export const AuthService = {
   async getAnonymousToken(): Promise<string | undefined> {
     try {
       const token = await getAnonymousToken();
-      persistTokens(token);
+      persistTokens(token, true); // anonymous token
       return token.access_token;
     } catch (error) {
       debug('Get anonymous token error', error);
@@ -131,8 +139,11 @@ export const AuthService = {
     const { customer } = useCustomerStore.getState();
     if (customer) return;
 
-    const { accessToken } = useTokenStore.getState();
+    const { accessToken, isAnonymous } = useTokenStore.getState();
     if (!accessToken) return;
+
+    // Skip fetching customer data for anonymous sessions
+    if (isAnonymous) return;
 
     try {
       const me = await fetchMyCustomer(accessToken);

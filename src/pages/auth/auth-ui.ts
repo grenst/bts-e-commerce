@@ -17,6 +17,12 @@ import {
 import { validateLogin, validateRegister } from './validation';
 import { RegisterFormData } from '../../types/auth';
 
+function getInputValue(element: HTMLElement): string {
+  if (element instanceof HTMLInputElement) {
+    return element.value;
+  }
+  return '';
+}
 export function renderAuthPage(
   state: AuthState,
   container: HTMLElement
@@ -49,8 +55,8 @@ export function renderAuthPage(
 
     const validateLoginField = () => {
       const { errors } = validateLogin({
-        email: emailField.input.value,
-        password: passwordField.input.value,
+        email: getInputValue(emailField.input),
+        password: getInputValue(passwordField.input),
       });
 
       // email validation
@@ -78,8 +84,8 @@ export function renderAuthPage(
     const loginHandler = () => {
       const loginEvent = new CustomEvent('login', {
         detail: {
-          email: emailField.input.value,
-          password: passwordField.input.value,
+          email: getInputValue(emailField.input),
+          password: getInputValue(passwordField.input),
         },
         bubbles: true,
       });
@@ -197,11 +203,11 @@ export function renderAuthPage(
 
     let selectedCountryCode: string | undefined = 'US';
     let dropdown: FilterableDropdown | undefined = undefined;
-    let registerButton: HTMLButtonElement | undefined = undefined;
+    let registerButton: HTMLElement | undefined = undefined;
 
     // Define updateRegisterButton first to avoid hoisting issues
     const updateRegisterButton = () => {
-      if (registerButton) {
+      if (registerButton instanceof HTMLButtonElement) {
         registerButton.disabled = selectedCountryCode === undefined;
       }
       if (dropdown) {
@@ -222,7 +228,7 @@ export function renderAuthPage(
     dropdown.setSelectedValue('DE');
     dropdownContainer.append(dropdown.getElement());
 
-    registerButton = createElement<HTMLButtonElement>({
+    registerButton = createElement({
       tag: 'button',
       text: 'Register',
       parent: pageContainer,
@@ -271,16 +277,16 @@ export function renderAuthPage(
 
     const validateRegisterFields = () => {
       const currentValues: RegisterFormData = {
-        firstName: firstNameField.input.value,
-        lastName: lastNameField.input.value,
-        email: emailField.input.value,
-        password: passwordField.input.value,
-        dateOfBirth: dobField.input.value,
-        streetName: streetField.input.value,
-        houseNumber: houseField.input.value,
-        apartment: apartmentField.input.value,
-        city: cityField.input.value,
-        postalCode: postalField.input.value,
+        firstName: getInputValue(firstNameField.input),
+        lastName: getInputValue(lastNameField.input),
+        email: getInputValue(emailField.input),
+        password: getInputValue(passwordField.input),
+        dateOfBirth: getInputValue(dobField.input),
+        streetName: getInputValue(streetField.input),
+        houseNumber: getInputValue(houseField.input),
+        apartment: getInputValue(apartmentField.input),
+        city: getInputValue(cityField.input),
+        postalCode: getInputValue(postalField.input),
         country: selectedCountryCode ?? '',
       };
 
@@ -339,16 +345,16 @@ export function renderAuthPage(
 
       const registerEvent = new CustomEvent('register', {
         detail: {
-          firstName: firstNameField.input.value,
-          lastName: lastNameField.input.value,
-          email: emailField.input.value,
-          password: passwordField.input.value,
-          dateOfBirth: dobField.input.value,
-          streetName: streetField.input.value,
-          houseNumber: houseField.input.value,
-          apartment: apartmentField.input.value,
-          city: cityField.input.value,
-          postalCode: postalField.input.value,
+          firstName: getInputValue(firstNameField.input),
+          lastName: getInputValue(lastNameField.input),
+          email: getInputValue(emailField.input),
+          password: getInputValue(passwordField.input),
+          dateOfBirth: getInputValue(dobField.input),
+          streetName: getInputValue(streetField.input),
+          houseNumber: getInputValue(houseField.input),
+          apartment: getInputValue(apartmentField.input),
+          city: getInputValue(cityField.input),
+          postalCode: getInputValue(postalField.input),
           country: selectedCountryCode,
         },
         bubbles: true,

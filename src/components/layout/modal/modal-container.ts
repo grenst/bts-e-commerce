@@ -4,11 +4,17 @@ import {
   body,
 } from '../../../utils/element-utilities';
 
-function createModalContainer(addClasses: string[] = []): HTMLButtonElement {
-  return createElement({
+function createModalContainer(addClasses: string[] = []): HTMLDivElement {
+  const modalContainer = createElement({
     parent: body,
     classes: ['modal-container', ...addClasses],
-  }) as HTMLButtonElement;
+  });
+
+  if (!(modalContainer instanceof HTMLDivElement)) {
+    throw new TypeError('Created element is not an HTMLDivElement.');
+  }
+
+  return modalContainer;
 }
 
 export default createModalContainer;

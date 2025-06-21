@@ -3,12 +3,14 @@ import { environmentVariables } from '../../config/commerce-tools-api';
 import { useTokenStore } from '../../store/token-store';
 import { AuthService } from '../../services/auth.service';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const logger = {
-  log: (...arguments_: unknown[]) => {
-    if (import.meta.env.MODE !== 'production') console.log(...arguments_);
+  log: (...arguments_: unknown[]): void => {
+    if (!isProduction) console.log(...arguments_);
   },
-  error: (...arguments_: unknown[]) => {
-    if (import.meta.env.MODE !== 'production') console.error(...arguments_);
+  error: (...arguments_: unknown[]): void => {
+    if (!isProduction) console.error(...arguments_);
   },
 };
 
@@ -16,8 +18,8 @@ export const authInstance = axios.create({
   baseURL: environmentVariables.AUTH_URL,
   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   auth: {
-    username: environmentVariables.CLIENT_ID,
-    password: environmentVariables.CLIENT_SECRET,
+    username: environmentVariables.CLIENT_ID ?? '',
+    password: environmentVariables.CLIENT_SECRET ?? '',
   },
 });
 
@@ -82,34 +84,50 @@ apiInstance.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
-      try {
-        logger.log('Attempting to refresh token...');
-        const newAccessToken = await AuthService.refreshToken();
+      const { isAnonymous } = useTokenStore.getState();
 
-        if (newAccessToken) {
-          logger.log('Token refreshed successfully.');
-          if (originalRequest.headers) {
-            originalRequest.headers['Authorization'] =
-              `Bearer ${newAccessToken}`;
-          } else {
-            originalRequest.headers = {
-              Authorization: `Bearer ${newAccessToken}`,
-            };
-          }
-          return apiInstance(originalRequest);
-        } else {
+      if (isAnonymous) {
+        // For anonymous sessions, get a new anonymous token
+        try {
           logger.log(
-            'Failed to refresh token, newAccessToken is null. Logging out.'
+            'Anonymous session expired, getting new anonymous token...'
           );
-          // AuthService.logout() or similar could be called here if needed
+          const newToken = await AuthService.getAnonymousToken();
+          if (newToken) {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            return apiInstance(originalRequest);
+          } else {
+            logger.error('Failed to get new anonymous token');
+            throw error;
+          }
+        } catch (anonError) {
+          logger.error('Error getting new anonymous token:', anonError);
           throw error;
         }
-      } catch (refreshError) {
-        logger.error(
-          'Caught error during token refresh attempt or subsequent request retry:',
-          refreshError
-        );
-        throw refreshError;
+      } else {
+        // For authenticated sessions, attempt to refresh token
+        try {
+          logger.log('Attempting to refresh token...');
+          const newAccessToken = await AuthService.refreshToken();
+
+          if (newAccessToken) {
+            logger.log('Token refreshed successfully.');
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            return apiInstance(originalRequest);
+          } else {
+            logger.log(
+              'Failed to refresh token, newAccessToken is null. Logging out.'
+            );
+            await AuthService.logout();
+            throw error;
+          }
+        } catch (refreshError) {
+          logger.error(
+            'Caught error during token refresh attempt:',
+            refreshError
+          );
+          throw refreshError;
+        }
       }
     }
     throw error;

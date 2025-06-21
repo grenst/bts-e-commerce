@@ -32,3 +32,5 @@ netlify.toml
 draft*
 */draft*
 **/draft*
+TESTING_PLAN.md
+TESTS_FAIL.md

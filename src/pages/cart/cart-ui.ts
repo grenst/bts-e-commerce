@@ -1,5 +1,3 @@
-import { createEl as createElement } from '../../utils/element-utilities';
-import { getOrCreateCart } from '../../api/cart/cart-service';
 import { apiInstance } from '../../api/axios-instances';
 import { useTokenStore } from '../../store/token-store';
 import { getAnonymousToken } from '../../components/auth-services/token.service';
@@ -7,6 +5,9 @@ import { isAxiosError } from 'axios';
 import { LineItem, createCartItem } from './cart-item';
 import { validatePromo } from './promo-validation';
 import { addNotification } from '../../store/store';
+import { createEl as createElement } from '../../utils/element-utilities';
+import { getOrCreateCart, setActiveCart } from '../../api/cart/cart-service';
+import { Cart, LineItem as CtLineItemBase } from '../../api/cart/cart-service';
 
 interface DiscountCodeReference {
   id: string;
@@ -62,6 +63,17 @@ interface CtCart {
   discountCodes?: CtDiscountCodeInfo[];
 }
 
+interface CtLineItem extends CtLineItemBase {
+  price: { value: CtMoney };
+  quantity: number;
+}
+
+interface CtCart extends Cart {
+  totalPrice: CtMoney;
+  discountCodes?: CtDiscountCodeInfo[];
+  lineItems: CtLineItem[];
+}
+
 const formatPrice = (c: number): string =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
     c / 100
@@ -70,6 +82,7 @@ const formatPrice = (c: number): string =>
 interface Labeled {
   label: Record<string, string>;
 }
+
 const isLabeled = (v: unknown): v is Labeled =>
   typeof v === 'object' && v !== null && 'label' in v;
 
@@ -113,8 +126,17 @@ export default class CartUI {
     const c = await getOrCreateCart();
     if (this.isCtCart(c)) {
       this.cart = c;
+      setActiveCart(c);
       this.updateDiscountStateFromCart();
     }
+  }
+
+  private emitCartUpdated(): void {
+    const totalQty =
+      this.cart?.lineItems.reduce((s, li) => s + li.quantity, 0) ?? 0;
+    globalThis.dispatchEvent(
+      new CustomEvent('cartUpdated', { detail: { totalQty, cart: this.cart } })
+    );
   }
 
   private updateDiscountStateFromCart(): void {
@@ -129,7 +151,11 @@ export default class CartUI {
     }
   }
 
-  private mapLineItem(li: CtLineItem): LineItem {
+  private mapLineItem(
+    li: CtLineItem,
+    discountAmount: number,
+    subtotal: number
+  ): LineItem {
     const volAttribute = li.variant.attributes?.find(
       (a) => a.name === 'volume'
     );
@@ -138,6 +164,20 @@ export default class CartUI {
       volume =
         volAttribute.value.label['en-US'] ?? volAttribute.value.label.en ?? '';
     }
+
+    // Calculate discounted price if discount exists
+    let discountedPrice: number | undefined;
+    if (this.discountCode && discountAmount > 0 && subtotal > 0) {
+      const itemSubtotal = li.price.value.centAmount * li.quantity;
+      const discountRatio = itemSubtotal / subtotal;
+      const itemDiscount = discountAmount * discountRatio;
+      discountedPrice = Math.round(
+        li.price.value.centAmount - itemDiscount / li.quantity
+      );
+    } else {
+      discountedPrice = undefined;
+    }
+
     return {
       id: li.id,
       productId: li.productId,
@@ -145,6 +185,7 @@ export default class CartUI {
       variantId: li.variant.id,
       volume,
       price: li.price.value.centAmount,
+      discountedPrice,
       quantity: li.quantity,
       imageUrl: li.variant.images?.[0]?.url ?? '',
     };
@@ -160,8 +201,38 @@ export default class CartUI {
     }
 
     this.container.append(
-      createElement({ tag: 'h1', classes: ['cart-title'], text: 'Your Cart' })
+      createElement({
+        tag: 'h1',
+        classes: [
+          'cart-title',
+          'text-3xl',
+          'font-bold',
+          'mb-6',
+          'z-30',
+          'text-center',
+          'text-gray-800',
+          "before:content-['']",
+          'before:absolute',
+          'before:h-7',
+          'before:w-36',
+          'before:bg-yellow-400',
+          'before:-z-1',
+          'login-name',
+        ],
+        text: 'Your Cart',
+      })
     );
+
+    // Add clear cart button
+    const clearButton = createElement({
+      tag: 'button',
+      classes: ['clear-cart-button'],
+      text: 'Clear your cart',
+    });
+    clearButton.addEventListener('click', () =>
+      this.showClearCartConfirmation()
+    );
+    this.container.append(clearButton);
 
     this.itemsWrapper = createElement({
       tag: 'div',
@@ -169,8 +240,53 @@ export default class CartUI {
     });
     this.container.append(this.itemsWrapper);
 
-    for (const li of this.cart.lineItems) this.renderItem(li);
+    // Calculate discount amount for cart
+    const subtotal = this.cart.lineItems.reduce(
+      (s, li) => s + li.price.value.centAmount * li.quantity,
+      0
+    );
+    const discountAmount = Math.max(
+      0,
+      subtotal - this.cart.totalPrice.centAmount
+    );
+
+    for (const li of this.cart.lineItems)
+      this.renderItem(li, discountAmount, subtotal);
     this.renderSummary();
+  }
+
+  private async showClearCartConfirmation(): Promise<void> {
+    if (!this.cart || this.cart.lineItems.length === 0) return;
+
+    try {
+      const module = await import(
+        '../../components/layout/modal/confirmation-modal'
+      );
+      const createConfirmationModal = module.default;
+      const modal = createConfirmationModal(
+        'Are you sure you want to clear your entire cart?',
+        'Clear',
+        'Cancel'
+      );
+
+      modal.onConfirm(() => {
+        if (!this.cart) {
+          return;
+        }
+        const actions: CartAction[] = this.cart.lineItems.map((li) => ({
+          action: 'removeLineItem' as const,
+          lineItemId: li.id,
+        }));
+        this.enqueueUpdate(actions);
+      });
+
+      modal.onCancel(() => {
+        modal.close();
+      });
+    } catch (error) {
+      console.error('Failed to load confirmation modal:', error);
+      addNotification('error', 'Failed to load confirmation dialog', 5000);
+    }
   }
 
   private renderEmpty(): void {
@@ -195,7 +311,7 @@ export default class CartUI {
         });
         button.addEventListener(
           'click',
-          () => (globalThis.location.hash = '/catalog')
+          () => (globalThis.location.pathname = '/catalog')
         );
         return button;
       })()
@@ -203,9 +319,13 @@ export default class CartUI {
     this.container.append(wrap);
   }
 
-  private renderItem(ct: CtLineItem): void {
+  private renderItem(
+    ct: CtLineItem,
+    discountAmount: number,
+    subtotal: number
+  ): void {
     if (!this.itemsWrapper) return;
-    const item = this.mapLineItem(ct);
+    const item = this.mapLineItem(ct, discountAmount, subtotal);
     const element = createCartItem(item, {
       onQuantityChange: (q) =>
         this.enqueueUpdate([
@@ -215,11 +335,38 @@ export default class CartUI {
             quantity: q,
           },
         ]),
-      onRemove: () =>
-        this.enqueueUpdate([{ action: 'removeLineItem', lineItemId: item.id }]),
+      onRemove: () => this.showItemRemoveConfirmation(item),
     });
     element.dataset.lineItemId = item.id;
     this.itemsWrapper.append(element);
+  }
+
+  private showItemRemoveConfirmation(item: LineItem): void {
+    (async () => {
+      try {
+        const { default: createConfirmationModal } = await import(
+          '../../components/layout/modal/confirmation-modal'
+        );
+        const modal = createConfirmationModal(
+          `Are you sure you want to remove ${item.name} from your cart?`,
+          'Remove',
+          'Cancel'
+        );
+
+        modal.onConfirm(() => {
+          this.enqueueUpdate([
+            { action: 'removeLineItem', lineItemId: item.id },
+          ]);
+        });
+
+        modal.onCancel(() => {
+          modal.close();
+        });
+      } catch (error) {
+        console.error('Failed to load confirmation modal:', error);
+        addNotification('error', 'Failed to load confirmation dialog', 5000);
+      }
+    })();
   }
 
   private renderSummary(): void {
@@ -234,7 +381,8 @@ export default class CartUI {
       0,
       subtotal - this.cart.totalPrice.centAmount
     );
-    const tax = 0;
+    const taxRate = 0.19; // 19% tax rate
+    const tax = Math.round(subtotal * taxRate);
 
     const summary = createElement({ tag: 'div', classes: ['cart-summary'] });
 
@@ -260,7 +408,7 @@ export default class CartUI {
     );
     summary.append(this.createPromoSection(discountAmount));
     summary.append(
-      row('Total', formatPrice(this.cart.totalPrice.centAmount), ['total'])
+      row('Total', formatPrice(subtotal - discountAmount + tax), ['total'])
     );
 
     const checkoutAttributes: Record<string, string> = {};
@@ -278,10 +426,17 @@ export default class CartUI {
       checkout.addEventListener('click', () => {
         checkout.textContent = 'Processing...';
         checkout.setAttribute('disabled', 'true');
-        setTimeout(() => {
-          alert('Checkout functionality not implemented yet');
-          checkout.textContent = 'Proceed to Checkout';
-          checkout.removeAttribute('disabled');
+        setTimeout(async () => {
+          const { isAnonymous } = useTokenStore.getState();
+
+          if (isAnonymous) {
+            // Redirect to login with return path to checkout
+            sessionStorage.setItem('returnPath', '/checkout');
+            globalThis.location.href = '/login';
+          } else {
+            // For authenticated users, proceed to checkout
+            globalThis.location.href = '/checkout';
+          }
         }, 1000);
       });
     }
@@ -391,17 +546,16 @@ export default class CartUI {
   }
 
   private enqueueUpdate(actions: CartAction[]): Promise<void> {
-    this.updateQueue = this.updateQueue
-      .catch(() => {})
-      .then(() => this.applyUpdate(actions));
-    return this.updateQueue;
+    const newUpdatePromise = this.updateQueue.then(() =>
+      this.applyUpdate(actions)
+    );
+    this.updateQueue = newUpdatePromise;
+    return newUpdatePromise;
   }
 
   private async applyUpdate(actions: CartAction[]): Promise<void> {
-    const cart = this.cart;
-    if (!cart) return;
-
-    const cartId = cart.id;
+    if (!this.cart) return;
+    const cartId = this.cart.id;
     const token = await this.getAccessToken();
 
     const patch = async (version: number): Promise<CtCart> => {
@@ -417,16 +571,20 @@ export default class CartUI {
     };
 
     try {
-      this.cart = await patch(cart.version);
+      this.cart = await patch(this.cart.version);
+      setActiveCart(this.cart);
       this.updateDiscountStateFromCart();
       this.render();
+      this.emitCartUpdated();
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 409) {
         const fresh = await getOrCreateCart();
         if (this.isCtCart(fresh)) {
           this.cart = await patch(fresh.version);
+          setActiveCart(this.cart);
           this.updateDiscountStateFromCart();
           this.render();
+          this.emitCartUpdated();
           return;
         }
       }
@@ -443,7 +601,8 @@ export default class CartUI {
       .setTokens(
         anon.access_token,
         anon.refresh_token ?? undefined,
-        anon.expires_in
+        anon.expires_in,
+        true
       );
     return anon.access_token;
   }

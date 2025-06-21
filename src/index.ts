@@ -1,15 +1,16 @@
 import { Buffer } from 'buffer/';
+import { DropdownManager } from './components/layout/dropdown-manager';
 
 declare global {
-  interface Window {
+  interface GlobalThis {
     Buffer: typeof Buffer;
   }
 }
 
 // The Buffer polyfill doesn't implement all Node.js Buffer methods
 // but we only need basic functionality in the browser
-// @ts-ignore: Buffer polyfill doesn't implement full Node.js API
-window.Buffer = Buffer;
+// @ts-expect-error: Buffer polyfill doesn't implement full Node.js API
+globalThis.Buffer = Buffer;
 import '@styles/global.scss';
 import '@styles/tailwind.css';
 import './animations/gsap-init';
@@ -30,7 +31,6 @@ import createAboutUsPage from './pages/about-us/about-us';
 import {
   createNotificationsContainer,
   createLoadingIndicator,
-  addNotification,
 } from './store/store';
 import createErrorPage from './pages/error/error-page';
 import { createCatalogPage } from './pages/catalog/catalog';
@@ -118,6 +118,11 @@ for (const route of routes) router.addRoute(route);
 
 updateUserNavOnHeader(userNav, router);
 
+// Close any open dropdown when clicking anywhere inside #user_nav
+document.querySelector('#user_nav')?.addEventListener('click', () => {
+  DropdownManager.closeCurrent();
+});
+
 export function triggerHeaderUpdate(): void {
   updateUserNavOnHeader(userNav, router);
 }
@@ -129,10 +134,10 @@ createFooter(body);
 createNotificationsContainer(body);
 createLoadingIndicator(body);
 
-addNotification('info', 'Welcome to the E-commerce App!');
+// addNotification('info', 'Welcome to the E-commerce App!');
 
-window.addEventListener('scroll', () => {
-  if (window.scrollY > 118) {
+globalThis.addEventListener('scroll', () => {
+  if (globalThis.scrollY > 118) {
     header.classList.add('bg-white/50');
     header.classList.remove('bg-transparent');
     mainTitle.classList.add('text-xl');

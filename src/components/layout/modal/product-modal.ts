@@ -11,13 +11,32 @@ import { Product, ProductVariant } from '../../../types/catalog-types';
 import './product-modal.scss';
 import leftSvg from '@assets/images/left.svg';
 import rightSvg from '@assets/images/right.svg';
-import { addToCart } from '../../../api/cart/cart-service';
-import { useCustomerStore } from '../../../store/customer-store';
+import {
+  addToCart,
+  isProductInCart,
+  removeLineItem,
+  changeLineItemQuantity,
+  getOrCreateCart,
+} from '../../../api/cart/cart-service';
+// import { useCustomerStore } from '../../../store/customer-store';
 import { addNotification } from '../../../store/store';
 
 const categoryCache = new Map<string, Product[]>();
 
 type Point = { x: number; y: number };
+
+type VolumeAttributeValue = {
+  key?: string;
+  label?: Record<string, string>;
+};
+
+function isVolumeAttributeValue(value: unknown): value is VolumeAttributeValue {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    ('key' in value || 'label' in value)
+  );
+}
 
 function getScrollbarWidth(): number {
   return window.innerWidth - document.documentElement.clientWidth;
@@ -38,12 +57,17 @@ function createQtyButton(
   label: string,
   parent: HTMLElement
 ): HTMLButtonElement {
-  return createElement({
+  const element = createElement({
     tag: 'button',
     parent,
     text: label,
     classes: ['order-btn', 'm-[1px]', 'text-xl', 'px-2', 'm-2', 'bg-gray-200'],
-  }) as HTMLButtonElement;
+  });
+
+  if (!(element instanceof HTMLButtonElement)) {
+    throw new TypeError('createQtyButton expected HTMLButtonElement');
+  }
+  return element; // здесь уже гарантирован HTMLButtonElement
 }
 
 export interface ProductModal {
@@ -76,21 +100,14 @@ const getVolumeLabel = (variant: ProductVariant, locale = 'en'): string => {
   const volumeAttribute = variant.attributes?.find(
     (attribute) => attribute.name === 'volume'
   );
-  if (
-    volumeAttribute &&
-    typeof volumeAttribute.value === 'object' &&
-    volumeAttribute.value !== null
-  ) {
-    const { key, label } = volumeAttribute.value as {
-      key?: string;
-      label?: Record<string, string>;
-    };
-    // trying to get a label
-    if (label && typeof label[locale] === 'string') return label[locale];
-    // then a key
-    if (typeof key === 'string') return key;
+
+  if (volumeAttribute && isVolumeAttributeValue(volumeAttribute.value)) {
+    const { key, label } = volumeAttribute.value;
+
+    if (label?.[locale]) return label[locale];
+    if (key) return key;
   }
-  return ''; // nothing got
+  return '';
 };
 
 const getUnitPrice = (variant: ProductVariant): number => {
@@ -163,7 +180,7 @@ export function createProductModal(): ProductModal {
       'absolute',
       'w-full',
       'h-full',
-      // 'z-1' // That will be help
+      'hidden', // Initially hidden
     ],
   });
 
@@ -223,6 +240,16 @@ export function createProductModal(): ProductModal {
     // console.log('2. showLoader() создал спиннер', loader);
   }
 
+  function showLockerContainer(): void {
+    lockerContainer.classList.remove('hidden');
+    lockerContainer.classList.add('block', 'z-1');
+  }
+
+  function hideLockerContainer(): void {
+    lockerContainer.classList.remove('block', 'z-1');
+    lockerContainer.classList.add('hidden');
+  }
+
   function hideLoader(): void {
     if (loader) {
       details.classList.remove('loading');
@@ -261,8 +288,7 @@ export function createProductModal(): ProductModal {
 
   async function showModal(productId: string, origin?: Point): Promise<void> {
     const firstOpen = overlay.style.display !== 'flex';
-    lockerContainer.classList.remove('z-0');
-    lockerContainer.classList.add('z-1');
+    showLockerContainer();
 
     if (firstOpen) {
       originalURL = globalThis.location.href;
@@ -350,8 +376,9 @@ export function createProductModal(): ProductModal {
         }
 
         let categoryProducts: Product[];
-        if (categoryCache.has(category.id)) {
-          categoryProducts = categoryCache.get(category.id)!;
+        const cachedProducts = categoryCache.get(category.id);
+        if (cachedProducts) {
+          categoryProducts = cachedProducts;
         } else {
           categoryProducts = await getProductsByCategory(category.id).catch(
             () => []
@@ -382,11 +409,8 @@ export function createProductModal(): ProductModal {
                 loading: 'lazy',
               },
             });
-            imgElement.addEventListener('click', (event_) =>
-              showModal(p.id, {
-                x: (event_ as MouseEvent).clientX,
-                y: (event_ as MouseEvent).clientY,
-              })
+            imgElement.addEventListener('click', (event_: MouseEvent) =>
+              showModal(p.id, { x: event_.clientX, y: event_.clientY })
             );
           }
         }
@@ -394,8 +418,7 @@ export function createProductModal(): ProductModal {
     }
 
     hideLoader();
-    lockerContainer.classList.remove('z-1');
-    lockerContainer.classList.add('z-0');
+    hideLockerContainer();
 
     const hero = createElement({
       tag: 'section',
@@ -609,13 +632,13 @@ export function createProductModal(): ProductModal {
     const quantity = createElement({
       tag: 'div',
       parent: orderParameters,
-      classes: [
-        'order-quantity',
-        'flex',
-        'items-center',
-        'justify-between',
-        // 'm-2',
-      ],
+      classes: ['order-quantity', 'flex', 'items-center', 'justify-between'],
+    });
+
+    const lockerQuantity = createElement({
+      tag: 'div',
+      parent: quantity,
+      classes: ['locker-quantity', 'inherit', 'absolute', 'hidden'],
     });
 
     createElement({
@@ -642,11 +665,22 @@ export function createProductModal(): ProductModal {
     });
 
     if (allVariants.length === 1) {
-      createElement({
+      const onlyIn = createElement({
         tag: 'span',
         parent: volumeSelector,
-        text: 'no variants',
-        classes: ['text-gray-500'],
+        classes: ['text-gray-500', 'flex', 'items-center', 'gap-1'],
+      });
+
+      createElement({
+        tag: 'span',
+        parent: onlyIn,
+        text: 'Only in ',
+      });
+
+      createElement({
+        tag: 'strong',
+        parent: onlyIn,
+        text: getVolumeLabel(allVariants[0]) || `ID ${allVariants[0].id ?? ''}`, // запасной вариант
       });
     } else {
       createElement({
@@ -677,7 +711,7 @@ export function createProductModal(): ProductModal {
           ],
         });
 
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
           selectedVariant = variant;
           unitPrice = getUnitPrice(selectedVariant);
           updatePrice();
@@ -686,6 +720,9 @@ export function createProductModal(): ProductModal {
             button_.classList.remove('bg-gray-900', 'border', 'text-white');
           }
           button.classList.add('bg-gray-900', 'border', 'text-white');
+
+          // Update cart button state for new variant selection
+          await updateCartButton();
         });
       }
     }
@@ -716,12 +753,17 @@ export function createProductModal(): ProductModal {
     });
     const plus = createQtyButton('+', quantity);
 
-    const addToCartButton = createElement({
+    const rawButton = createElement({
       tag: 'button',
       parent: submitOrder,
       text: 'ADD TO CART',
-      classes: ['order-cart', 'w-25'],
-    }) as HTMLButtonElement;
+      classes: ['order-cart', 'w-28'],
+    });
+
+    if (!(rawButton instanceof HTMLButtonElement)) {
+      throw new TypeError('Expected HTMLButtonElement for add-to-cart button');
+    }
+    const addToCartButton = rawButton;
 
     const price = createElement({
       tag: 'span',
@@ -735,38 +777,151 @@ export function createProductModal(): ProductModal {
       minus.disabled = qty <= 1;
     };
 
-    plus.addEventListener('click', () => {
+    function showLocker() {
+      lockerQuantity.classList.remove('hidden');
+      lockerQuantity.classList.add('block');
+    }
+
+    function hideLocker() {
+      lockerQuantity.classList.remove('block');
+      lockerQuantity.classList.add('hidden');
+    }
+
+    plus.addEventListener('click', async () => {
+      // Show loader during API operation
+      showLocker();
+
       qty += 1;
       updatePrice();
+
+      if (isInCart && lineItemId) {
+        try {
+          await changeLineItemQuantity(lineItemId, qty);
+          await updateCartButton();
+          addNotification('success', 'Product was increased in cart.');
+        } catch {
+          addNotification('error', 'Failed to increase quantity.');
+        } finally {
+          // Hide loader after API response
+          hideLocker();
+        }
+      } else {
+        // Hide loader if no API call was made
+        hideLocker();
+      }
     });
-    minus.addEventListener('click', () => {
-      if (qty > 1) {
-        qty -= 1;
-        updatePrice();
+    minus.addEventListener('click', async () => {
+      // Show loader during API operation
+      showLocker();
+
+      if (qty <= 1) {
+        if (isInCart && lineItemId) {
+          try {
+            await removeLineItem(lineItemId);
+            qty = 1;
+            updatePrice();
+            await updateCartButton();
+            addNotification('success', 'Product removed from cart.');
+          } catch {
+            addNotification('error', 'Failed to remove product from cart.');
+          } finally {
+            // Hide loader after API response
+            hideLocker();
+          }
+        } else {
+          // Hide loader if no API call was made
+          hideLocker();
+        }
+        return;
+      }
+
+      qty -= 1;
+      updatePrice();
+
+      if (isInCart && lineItemId) {
+        try {
+          await changeLineItemQuantity(lineItemId, qty);
+          await updateCartButton();
+          addNotification('success', 'Product was decreased in cart.');
+        } catch {
+          addNotification('error', 'Failed to decrease quantity.');
+        } finally {
+          // Hide loader after API response
+          hideLocker();
+        }
+      } else {
+        // Hide loader if no API call was made
+        hideLocker();
       }
     });
     updatePrice();
 
-    addToCartButton.addEventListener('click', async () => {
-      const isLoggedIn = Boolean(useCustomerStore.getState().customer);
-      if (!isLoggedIn) {
-        addNotification(
-          'warning',
-          'Please log in or register to add items to the cart.'
+    let isInCart = false;
+    let lineItemId: string | undefined;
+
+    const updateCartButton = async () => {
+      const result = await isProductInCart(product.id, selectedVariant.id);
+      isInCart = result.isInCart;
+      lineItemId = result.lineItemId;
+
+      if (isInCart) {
+        addToCartButton.textContent = 'Remove from cart';
+        addToCartButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        addToCartButton.classList.add('bg-red-600', 'hover:bg-red-700');
+
+        const cart = await getOrCreateCart();
+        const currentItem = cart.lineItems.find(
+          (item) =>
+            item.productId === product.id &&
+            item.variant.id === selectedVariant.id
         );
-        return;
+        if (currentItem?.quantity) {
+          qty = currentItem.quantity;
+          updatePrice();
+        }
+      } else {
+        qty = 1;
+        updatePrice();
+        addToCartButton.textContent = 'ADD TO CART';
+        addToCartButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+        addToCartButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
       }
+    };
+
+    // Initial cart status check
+    updateCartButton();
+
+    addToCartButton.addEventListener('click', async () => {
+      // const isLoggedIn = Boolean(useCustomerStore.getState().customer);
+      // if (!isLoggedIn) {
+      //   addNotification(
+      //     'warning',
+      //     'Please log in or register to add items to the cart.'
+      //   );
+      //   return;
+      // }
 
       if (selectedVariant.id === undefined) {
         addNotification('error', 'Cannot add to cart: variant has no ID.');
         return;
       }
 
-      try {
-        await addToCart(product.id, selectedVariant.id, qty);
-        addNotification('success', 'Product added to cart!');
-      } catch {
-        addNotification('error', 'Failed to add product to cart.');
+      if (isInCart && lineItemId) {
+        try {
+          await removeLineItem(lineItemId);
+          addNotification('success', 'Product removed from cart!');
+          await updateCartButton();
+        } catch {
+          addNotification('error', 'Failed to remove product from cart.');
+        }
+      } else {
+        try {
+          await addToCart(product.id, selectedVariant.id, qty);
+          addNotification('success', 'Product added to cart!');
+          await updateCartButton();
+        } catch {
+          addNotification('error', 'Failed to add product to cart.');
+        }
       }
     });
 
@@ -796,7 +951,6 @@ export function createProductModal(): ProductModal {
   }
 
   function hideModal(): void {
-    console.trace('hideModal called');
     if (popStateHandler) {
       globalThis.removeEventListener('popstate', popStateHandler);
       popStateHandler = undefined;
@@ -820,6 +974,8 @@ export function createProductModal(): ProductModal {
         body.classList.remove('lock');
         originalURL = undefined;
         basePath = undefined;
+        // Dispatch cartUpdated event to notify that the cart may have changed
+        document.dispatchEvent(new CustomEvent('cartUpdated'));
       }
       // overlay.style.display = 'none';
       // overlay.removeEventListener('transitionend', onEnd);

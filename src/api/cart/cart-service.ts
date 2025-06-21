@@ -1,17 +1,5 @@
 import { apiInstance } from '../axios-instances';
-// import { useTokenStore } from '../../store/token-store'; // No longer needed here for getAccessToken
-// import { getAnonymousToken } from '../../components/auth-services/token.service'; // No longer needed here
 import { isAxiosError } from 'axios';
-
-// Conditional logger for this file
-const logger = {
-  log: (...arguments_: unknown[]) => {
-    if (import.meta.env.MODE !== 'production') console.log(...arguments_);
-  },
-  error: (...arguments_: unknown[]) => {
-    if (import.meta.env.MODE !== 'production') console.error(...arguments_);
-  },
-};
 
 type TaxMode = 'Platform' | 'External' | 'ExternalAmount' | 'Disabled';
 
@@ -19,41 +7,63 @@ interface Address {
   country: string;
 }
 
-interface Cart {
+export interface LineItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  variant: { id: number };
+}
+
+export interface Cart {
   id: string;
   version: number;
   taxMode: TaxMode;
   country?: string;
   shippingAddress?: Address;
-  lineItems: Array<{ id: string; productId: string }>;
+  lineItems: LineItem[];
 }
 
 let activeCart: Cart | undefined;
 
-/* ────────── helpers ────────── */
+export function setActiveCart(cart: Cart | undefined): void {
+  activeCart = cart;
+}
 
-// getAccessToken function removed
+function dispatchCartUpdated(): void {
+  if (typeof globalThis.window === 'undefined') return;
+  const totalQty =
+    activeCart?.lineItems.reduce((sum, index) => sum + index.quantity, 0) ?? 0;
+  globalThis.window.dispatchEvent(
+    new CustomEvent('cartUpdated', {
+      detail: { totalQty, cart: activeCart },
+    })
+  );
+}
+
+const logger = {
+  log: (...arguments_: unknown[]) =>
+    import.meta.env.MODE !== 'production' && console.log(...arguments_),
+  error: (...arguments_: unknown[]) =>
+    import.meta.env.MODE !== 'production' && console.error(...arguments_),
+};
 
 async function withLog<T>(function_: () => Promise<T>): Promise<T> {
   try {
     return await function_();
-  } catch (error: unknown) {
-    if (isAxiosError(error)) {
-      logger.error('Commercetools error →', error.response?.data, error); // Use logger
-    }
+  } catch (error) {
+    if (isAxiosError(error))
+      logger.error('Commercetools error →', error.response?.data, error);
     throw error;
   }
 }
 
-/* ────────── cart creation ────────── */
-
 async function createExternalCart(): Promise<Cart> {
   const { data } = await withLog(() =>
-    apiInstance.post<Cart>( // Authorization header removed, apiInstance handles it
+    apiInstance.post<Cart>(
       '/me/carts',
       {
         currency: 'EUR',
-        country: 'DE', // критично для выбора цены
+        country: 'DE',
         taxMode: 'External',
         shippingAddress: { country: 'DE' },
       },
@@ -62,8 +72,6 @@ async function createExternalCart(): Promise<Cart> {
   );
   return data;
 }
-
-/* ────────── public api ────────── */
 
 export async function getOrCreateCart(): Promise<Cart> {
   if (activeCart) return activeCart;
@@ -75,7 +83,6 @@ export async function getOrCreateCart(): Promise<Cart> {
       })
     );
 
-    /* 1a. корзина уже External и страна = DE */
     if (
       data.taxMode === 'External' &&
       data.shippingAddress?.country === 'DE' &&
@@ -85,7 +92,6 @@ export async function getOrCreateCart(): Promise<Cart> {
       return data;
     }
 
-    /* 1b. корзина пустая → правим режим и страну */
     if (data.lineItems.length === 0) {
       const { data: patched } = await withLog(() =>
         apiInstance.post<Cart>(
@@ -104,27 +110,20 @@ export async function getOrCreateCart(): Promise<Cart> {
       activeCart = patched;
       return patched;
     }
-
-    /* 1c. корзина с товарами → создаём новую */
-  } catch (error: unknown) {
+  } catch (error) {
     if (!isAxiosError(error) || error.response?.status !== 404) throw error;
   }
 
-  /* 2. корзины нет — создаём новую External */
-  const fresh = await createExternalCart();
-  activeCart = fresh;
-  return fresh;
+  activeCart = await createExternalCart();
+  return activeCart;
 }
 
-/** Добавление позиции с externalTaxRate и retry по версии */
 export async function addToCart(
   productId: string,
   variantId: number,
   quantity: number
 ): Promise<Cart> {
   const cart = await getOrCreateCart();
-  // const token = await getAccessToken(); // Removed, apiInstance handles token
-
   const actions = [
     {
       action: 'addLineItem',
@@ -151,23 +150,84 @@ export async function addToCart(
 
   try {
     activeCart = await postUpdate(cart);
+    dispatchCartUpdated();
     return activeCart;
-  } catch (error: unknown) {
+  } catch (error) {
     if (isAxiosError(error) && error.response?.status === 409) {
-      const fresh = await getOrCreateCart(); // обновляем версию
+      const fresh = await getOrCreateCart();
       activeCart = await postUpdate(fresh);
+      dispatchCartUpdated();
       return activeCart;
     }
     throw error;
   }
 }
 
-export async function applyDiscount(code: string): Promise<Cart> {
+export async function clearCart(): Promise<Cart> {
   const cart = await getOrCreateCart();
-  const actions = [{ action: 'addDiscountCode', code }];
+  const actions = cart.lineItems.map((li) => ({
+    action: 'removeLineItem',
+    lineItemId: li.id,
+  }));
   const { data } = await apiInstance.post<Cart>(
     `/me/carts/${cart.id}`,
     { version: cart.version, actions },
+    { params: { expand: 'discountCodes[*].discountCode' } }
+  );
+  activeCart = data;
+  dispatchCartUpdated();
+  return data;
+}
+
+export async function isProductInCart(
+  productId: string,
+  variantId?: number
+): Promise<{ isInCart: boolean; lineItemId?: string }> {
+  const cart = await getOrCreateCart();
+  const lineItem = cart.lineItems.find((index) =>
+    typeof variantId === 'number'
+      ? index.productId === productId && index.variant?.id === variantId
+      : index.productId === productId
+  );
+  return { isInCart: !!lineItem, lineItemId: lineItem?.id };
+}
+
+export async function removeLineItem(lineItemId: string): Promise<void> {
+  const cart = await getOrCreateCart();
+  const { data } = await apiInstance.post<Cart>(
+    `/me/carts/${cart.id}`,
+    {
+      version: cart.version,
+      actions: [{ action: 'removeLineItem', lineItemId }],
+    },
+    { params: { expand: 'discountCodes[*].discountCode' } }
+  );
+  activeCart = data;
+  dispatchCartUpdated();
+}
+
+export async function changeLineItemQuantity(
+  lineItemId: string,
+  quantity: number
+): Promise<void> {
+  const cart = await getOrCreateCart();
+  const { data } = await apiInstance.post<Cart>(
+    `/me/carts/${cart.id}`,
+    {
+      version: cart.version,
+      actions: [{ action: 'changeLineItemQuantity', lineItemId, quantity }],
+    },
+    { params: { expand: 'discountCodes[*].discountCode' } }
+  );
+  activeCart = data;
+  dispatchCartUpdated();
+}
+
+export async function applyDiscount(code: string): Promise<Cart> {
+  const cart = await getOrCreateCart();
+  const { data } = await apiInstance.post<Cart>(
+    `/me/carts/${cart.id}`,
+    { version: cart.version, actions: [{ action: 'addDiscountCode', code }] },
     { params: { expand: 'discountCodes[*].discountCode' } }
   );
   activeCart = data;

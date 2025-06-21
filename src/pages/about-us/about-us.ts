@@ -1,31 +1,56 @@
-import { 
+import {
   createEl as createElement,
   createSvgUse,
 } from '../../utils/element-utilities';
-// import { useCustomerStore } from '../../store/customer-store';
+import andrImage from '../../assets/images/andr.webp';
+import vitImage from '../../assets/images/vit.webp';
+import sergImage from '../../assets/images/serg.webp';
+import rsImage from '../../assets/images/rs.webp';
 import './about-style.scss';
 import { gsap } from 'gsap';
 
+type LinkItem = {
+  label: string;
+  url: string;
+};
+
+const linksData: Record<string, LinkItem[]> = {
+  Andrii: [{ label: 'Andrii GitHub Page', url: 'https://github.com/grenst' }],
+  Vitali: [
+    { label: 'Vitali GitHub Page', url: 'https://github.com/VitaliMay' },
+  ],
+  Sergey: [
+    { label: 'Sergei GitHub Page', url: 'https://github.com/SeregaSimba' },
+  ],
+  Rss: [
+    {
+      label: 'RSSchool Courses',
+      url: 'https://rs.school/courses/javascript-ru',
+    },
+  ],
+};
+
+type TextValue = { key: TextKeys; val: string };
+
 enum TextKeys {
-  ANSWER = 'answer',
+  // ANSWER = 'answer',
   ANDRII = 'Andrii',
   VITALI = 'Vitali',
   SERGEY = 'Sergey',
   RSS = 'Rss',
+  ANSWER = 'ANSWER',
 }
-
-type TextVal = { key: TextKeys; val: string };
 
 export default function createAboutUsPage(container: HTMLElement): void {
   container.innerHTML = '';
-  const big_text_container: TextVal[] = [
+  const big_text_container: TextValue[] = [
     {
       key: TextKeys.ANSWER,
       val: 'Our team works on equal terms, without strict hierarchy, We appreciate the contribution of each participant, We are building effective cooperation, Based on mutual respect and support!',
     },
     {
       key: TextKeys.ANDRII,
-      val: 'Andreii is a Team Leader The role in the project: Organizing the work of the team, working with the commercetools API, making key technical decisions, coordinating development and timing control. Contribution: Andrey implemented the SPA architecture, organized the project assembly process using Vite, provided integration with commercetools, and tirelessly motivated the team to create the Bubble Tea Shop.Collaboration methods: Regular meetings, code review, and setting up CI/CD processes.Brief biography: An experienced developer specializing in TypeScript, js, a variety of libraries and a modern interface. You can also check out his GitHub page:',
+      val: 'Andrii is a Team Leader The role in the project: Organizing the work of the team, working with the commercetools API, making key technical decisions, coordinating development and timing control. Contribution: Andrii implemented the SPA architecture, organized the project assembly process using Vite, provided integration with commercetools, and tirelessly motivated the team to create the Bubble Tea Shop.Collaboration methods: Regular meetings, code review, and setting up CI/CD processes.Brief biography: An experienced developer specializing in TypeScript, js, a variety of libraries and a modern interface. You can also check out his GitHub page:',
     },
     {
       key: TextKeys.VITALI,
@@ -41,9 +66,131 @@ export default function createAboutUsPage(container: HTMLElement): void {
     },
   ];
 
-  function getTextByKey(key: TextKeys): string | undefined {
-    const item = big_text_container.find((el) => el.key === key);
-    return item?.val;
+  function getTextByKey(key: TextKeys): string {
+    const item = big_text_container.find((element) => element.key === key);
+    return item?.val ?? '';
+  }
+
+  const textKeySet = new Set<string>(Object.values(TextKeys));
+
+  function isTextKey(value: string | TextKeys): value is TextKeys {
+    return textKeySet.has(value);
+  }
+
+  function createMessageBlock(
+    parent: HTMLElement,
+    type: 'user' | 'admin',
+    content: string | TextKeys,
+    classes: string[] = []
+  ): HTMLElement {
+    const typeConfig = {
+      user: {
+        containerClass: 'container-meseg-user-1',
+        titleClass: 'title-user-h3',
+        liClass: 'title-description-about',
+        titleText: 'Question',
+      },
+      admin: {
+        containerClass: 'container-meseg-user-2',
+        titleClass: 'title-user2-h3',
+        liClass: 'point-us1',
+        titleText: 'Answer',
+      },
+    }[type];
+
+    const container = createElement({
+      tag: 'ul',
+      classes: [typeConfig.containerClass, 'hidden1', ...classes],
+      attributes: { style: 'will-change: transform, opacity;' },
+      parent,
+    });
+
+    createElement({
+      tag: 'h3',
+      text: typeConfig.titleText,
+      classes: [typeConfig.titleClass],
+      parent: container,
+    });
+
+    const contentElement = createElement({
+      tag: 'li',
+      classes: [typeConfig.liClass],
+      parent: container,
+    });
+
+    // автоматическое сужение типа без каких-либо `as`
+    const text = isTextKey(content) ? getTextByKey(content) : content;
+    createElement({ tag: 'p', text, parent: contentElement });
+
+    return container;
+  }
+
+  function createLinkBlock(
+    key: string,
+    iconId: string,
+    svgClass: string
+  ): HTMLElement {
+    const links = linksData[key] || [];
+    const container = createElement({
+      tag: 'div',
+      classes: ['link-container'],
+    });
+
+    const svg = createSvgUse(`#${iconId}`, svgClass);
+    container.append(svg);
+
+    for (const link of links) {
+      createElement({
+        tag: 'a',
+        classes: ['custom-link-class'],
+        attributes: {
+          target: '_blank',
+          href: link.url,
+          'aria-label': link.label,
+        },
+        text: link.label,
+        parent: container,
+      });
+    }
+
+    return container;
+  }
+
+  function createMemberInfo(
+    parent: HTMLElement,
+    source: string,
+    alt: string,
+    key: TextKeys
+  ): void {
+    const ul = createElement({
+      tag: 'ul',
+      parent,
+      classes: ['container-meseg-user-2', 'hidden1'],
+      attributes: { style: 'will-change: transform, opacity;' },
+    });
+
+    const li = createElement({
+      tag: 'li',
+      parent: ul,
+      classes: ['point-us1'],
+    });
+
+    createElement({
+      tag: 'img',
+      parent: li,
+      attributes: {
+        src: source,
+        alt,
+        style:
+          'max-width: 200px; max-height: 200px; margin-bottom: 10px; border-radius: 20px;',
+      },
+    });
+
+    createElement({
+      tag: 'p',
+      parent: li,
+      text: getTextByKey(key),
+    });
   }
 
   const profileContainer = createElement({
@@ -91,7 +238,7 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const titleAbout = createElement({
     tag: 'h2',
-    text: 'Developers Bubble Tea Shop',
+    text: 'Developers of Bubble Tea Shop',
     classes: ['title-about'],
   });
   containerAbout.append(titleAbout);
@@ -130,61 +277,12 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   containerTextPreface.append(descriptionUl);
 
-  const containerMesegUser1 = createElement({
-    tag: 'ul',
-    classes: ['container-meseg-user-1', 'hidden1'],
-    attributes: {
-      style: 'will-change: transform, opacity;',
-    },
-  });
-  descriptionUl.append(containerMesegUser1);
-
-  const titleUserh3 = createElement({
-    tag: 'h3',
-    text: 'User',
-    classes: ['title-user-h3'],
-  });
-  containerMesegUser1.append(titleUserh3);
-
-  const titleDescription = createElement({
-    tag: 'li',
-    classes: ['title-description-about'],
-  });
-  containerMesegUser1.append(titleDescription);
-
-  const titleDescriptionPUser = createElement({
-    tag: 'p',
-    text: 'What is the general motto of your team?',
-  });
-  titleDescription.append(titleDescriptionPUser);
-
-  const containerMesegUser2 = createElement({
-    tag: 'ul',
-    classes: ['container-meseg-user-2', 'hidden1'],
-    attributes: {
-      style: 'will-change: transform, opacity;',
-    },
-  });
-  descriptionUl.append(containerMesegUser2);
-
-  const titleUser2h3 = createElement({
-    tag: 'h3',
-    text: 'Admin',
-    classes: ['title-user2-h3'],
-  });
-  containerMesegUser2.append(titleUser2h3);
-
-  const pointOne = createElement({
-    tag: 'li',
-    classes: ['point-us1'],
-  });
-  containerMesegUser2.append(pointOne);
-
-  const titleDescriptionPUser2 = createElement({
-    tag: 'p',
-    text: getTextByKey(TextKeys.ANSWER),
-  });
-  pointOne.append(titleDescriptionPUser2);
+  createMessageBlock(
+    descriptionUl,
+    'user',
+    'What is the general motto of your team?'
+  );
+  createMessageBlock(descriptionUl, 'admin', TextKeys.ANSWER);
 
   const technologiesTitleContainer = createElement({
     tag: 'div',
@@ -194,133 +292,86 @@ export default function createAboutUsPage(container: HTMLElement): void {
 
   const containerTechnologiesText = createElement({
     tag: 'div',
-    classes: ['container-technologies-text-andrei'],
+    classes: ['container-technologies-text-ii'],
   });
   technologiesTitleContainer.prepend(containerTechnologiesText);
 
-  const containerInfoUsAndreiUl = createElement({
+  const containerInfoUsAndriiUl = createElement({
     tag: 'ul',
     classes: ['description-ul-us'],
     attributes: {
       style: 'will-change: transform, opacity;',
     },
   });
-  containerTechnologiesText.append(containerInfoUsAndreiUl);
+  containerTechnologiesText.append(containerInfoUsAndriiUl);
 
-  const containerInfoUsAndreiUser1 = createElement({
-    tag: 'ul',
-    classes: ['container-meseg-user-1', 'hidden1'],
-    attributes: {
-      style: 'will-change: transform, opacity;',
-    },
-  });
-  containerInfoUsAndreiUl.append(containerInfoUsAndreiUser1);
+  createMessageBlock(
+    containerInfoUsAndriiUl,
+    'user',
+    'How many people do you have in your team?'
+  );
+  createMessageBlock(
+    containerInfoUsAndriiUl,
+    'admin',
+    'There are three people in the team and everyone has their own role:'
+  );
 
-  const technologiesTitleH3 = createElement({
-    tag: 'h3',
-    text: 'User',
-    classes: ['technologies-Title-h3-us'],
-  });
-  containerInfoUsAndreiUser1.append(technologiesTitleH3);
-
-  const titleMasegeAndreiUser1 = createElement({
-    tag: 'li',
-    classes: ['title-description-about'],
-  });
-  containerInfoUsAndreiUser1.append(titleMasegeAndreiUser1);
-
-  const technologiesTitleP = createElement({
-    tag: 'p',
-    text: 'How many people do you have in your team?',
-  });
-  titleMasegeAndreiUser1.append(technologiesTitleP);
-
-  const containerInfoUsAndreiUser2 = createElement({
+  const containerInfoUsAndriiUser22 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
     attributes: {
       style: 'will-change: transform, opacity;',
     },
   });
-  containerInfoUsAndreiUl.append(containerInfoUsAndreiUser2);
+  containerInfoUsAndriiUl.append(containerInfoUsAndriiUser22);
 
-  const h4Andrei = createElement({
-    tag: 'h3',
-    text: 'Admin',
-    classes: ['title-user2-h3'],
-  });
-  containerInfoUsAndreiUser2.append(h4Andrei);
-
-  const titleMasegeAndreiUser2 = createElement({
-    tag: 'li',
-    classes: ['point-us2'],
-  });
-  containerInfoUsAndreiUser2.append(titleMasegeAndreiUser2);
-
-  const technologiesTitleP2 = createElement({
-    tag: 'p',
-    text: 'There are three people in the team and everyone has their own role:',
-  });
-  titleMasegeAndreiUser2.append(technologiesTitleP2);
-
-  const containerInfoUsAndreiUser22 = createElement({
-    tag: 'ul',
-    classes: ['container-meseg-user-2', 'hidden1'],
-    attributes: {
-      style: 'will-change: transform, opacity;',
-    },
-  });
-  containerInfoUsAndreiUl.append(containerInfoUsAndreiUser22);
-
-  const titleMasegeAndreiUser3 = createElement({
+  const titleMasegeAndriiUser3 = createElement({
     tag: 'li',
     classes: ['point-us1'],
   });
-  containerInfoUsAndreiUser22.append(titleMasegeAndreiUser3);
+  containerInfoUsAndriiUser22.append(titleMasegeAndriiUser3);
+
+  const andriiImg = createElement({
+    tag: 'img',
+    attributes: {
+      src: andrImage,
+      alt: 'Andrii',
+      style:
+        'max-width: 200px; max-height: 200px; margin-bottom: 10px; border-radius: 30px;',
+    },
+  });
+  titleMasegeAndriiUser3.append(andriiImg);
 
   const technologiesTitleP3 = createElement({
     tag: 'p',
     text: getTextByKey(TextKeys.ANDRII),
   });
-  titleMasegeAndreiUser3.append(technologiesTitleP3);
+  titleMasegeAndriiUser3.append(technologiesTitleP3);
 
-  const containerInfoUsAndreiUser222 = createElement({
+  const containerInfoUsAndriiUser222 = createElement({
     tag: 'ul',
     classes: ['container-meseg-user-2', 'hidden1'],
     attributes: {
       style: 'will-change: transform, opacity;',
     },
   });
-  containerInfoUsAndreiUl.append(containerInfoUsAndreiUser222);
+  containerInfoUsAndriiUl.append(containerInfoUsAndriiUser222);
 
-  const titleMasegeAndreiUser4 = createElement({
+  const titleMasegeAndriiUser4 = createElement({
     tag: 'li',
     classes: ['point-us2'],
   });
-  containerInfoUsAndreiUser222.append(titleMasegeAndreiUser4);
+  containerInfoUsAndriiUser222.append(titleMasegeAndriiUser4);
 
   const containerImgTechnologies = createElement({
     tag: 'div',
-    classes: ['container-img-technologies-andrei'],
+    classes: ['container-img-andrii'],
   });
-  titleMasegeAndreiUser4.append(containerImgTechnologies);
+  titleMasegeAndriiUser4.append(containerImgTechnologies);
 
-  const svgGithubAndrei = createSvgUse('#github', 'about-svg_githubAnd');
-
-  containerImgTechnologies.append(svgGithubAndrei);
-
-  const footerLinkGithubAndrei = createElement({
-    tag: 'a',
-    classes: ['about-link-andrei'],
-    attributes: {
-      target: '_blank',
-      href: 'https://github.com/grenst',
-    },
-    text: 'Andrei GitHub Page',
-  });
-  containerImgTechnologies.append(footerLinkGithubAndrei);
-
-  //----------------------------------------------------
+  containerImgTechnologies.append(
+    createLinkBlock('Andrii', 'github', 'about-svg_githubAnd')
+  );
 
   const technologiesTitleContainerVit = createElement({
     tag: 'div',
@@ -343,54 +394,8 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   containerVitaliTitle.append(containerUlVitali);
 
-  const containerTechnologiesTextVit = createElement({
-    tag: 'ul',
-    classes: ['container-meseg-user-2', 'hidden1'],
-    attributes: {
-      style: 'will-change: transform, opacity;',
-    },
-  });
-  containerUlVitali.append(containerTechnologiesTextVit);
-
-  const h4Vit = createElement({
-    tag: 'h3',
-    text: 'Admin',
-    classes: ['title-user2-h3'],
-  });
-  containerTechnologiesTextVit.append(h4Vit);
-
-  const technologiesTitleLiVit = createElement({
-    tag: 'li',
-    classes: ['point-us'],
-  });
-  containerTechnologiesTextVit.append(technologiesTitleLiVit);
-
-  const technologiesTitleP2Vit = createElement({
-    tag: 'p',
-    text: 'Second team member:',
-  });
-  technologiesTitleLiVit.append(technologiesTitleP2Vit);
-
-  const containerTechnologiesTextVit1 = createElement({
-    tag: 'ul',
-    classes: ['container-meseg-user-2', 'hidden1'],
-    attributes: {
-      style: 'will-change: transform, opacity;',
-    },
-  });
-  containerUlVitali.append(containerTechnologiesTextVit1);
-
-  const technologiesTitleP3Vit = createElement({
-    tag: 'li',
-    classes: ['point-us1'],
-  });
-  containerTechnologiesTextVit1.append(technologiesTitleP3Vit);
-
-  const technologiesTitleVit = createElement({
-    tag: 'p',
-    text: getTextByKey(TextKeys.VITALI),
-  });
-  technologiesTitleP3Vit.append(technologiesTitleVit);
+  createMessageBlock(containerUlVitali, 'admin', 'Second team member:');
+  createMemberInfo(containerUlVitali, vitImage, 'Vitali', TextKeys.VITALI);
 
   const containerTechnologiesTextVit11 = createElement({
     tag: 'ul',
@@ -407,21 +412,9 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   containerTechnologiesTextVit11.append(containerImgTechnologiesVit);
 
-  const svgGithubVitaly = createSvgUse('#github', 'about-svg_githubVet');
-  containerImgTechnologiesVit.prepend(svgGithubVitaly);
-
-  const footerLinkGithubVitaly = createElement({
-    tag: 'a',
-    classes: ['about-link-vitali'],
-    attributes: {
-      target: '_blank',
-      href: 'https://github.com/VitaliMay',
-    },
-    text: 'Vitali GitHub Page',
-  });
-  containerImgTechnologiesVit.append(footerLinkGithubVitaly);
-
-  //--------------------------------------------------------------------
+  containerImgTechnologiesVit.append(
+    createLinkBlock('Vitali', 'github', 'about-svg_githubVet')
+  );
 
   const technologiesTitleContainerSer = createElement({
     tag: 'div',
@@ -444,54 +437,12 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   containerAboutSer.append(containerUlser);
 
-  const containerTechnologiesTextSer = createElement({
-    tag: 'ul',
-    classes: ['container-meseg-user-2', 'hidden1'],
-    attributes: {
-      style: 'will-change: transform, opacity;',
-    },
-  });
-  containerUlser.prepend(containerTechnologiesTextSer);
-
-  const h4ASergei = createElement({
-    tag: 'h3',
-    text: 'Admin',
-    classes: ['title-user2-h3'],
-  });
-  containerTechnologiesTextSer.append(h4ASergei);
-
-  const technologiesTitlePSer = createElement({
-    tag: 'li',
-    classes: ['point-us2'],
-  });
-  containerTechnologiesTextSer.append(technologiesTitlePSer);
-
-  const technologiesTitleP2Ser = createElement({
-    tag: 'p',
-    text: 'And the third of the developers:',
-  });
-  technologiesTitlePSer.append(technologiesTitleP2Ser);
-
-  const containerTechnologiesTextSer1 = createElement({
-    tag: 'ul',
-    classes: ['container-meseg-user-2', 'hidden1'],
-    attributes: {
-      style: 'will-change: transform, opacity;',
-    },
-  });
-  containerUlser.append(containerTechnologiesTextSer1);
-
-  const technologiesTitleP3Ser = createElement({
-    tag: 'li',
-    classes: ['point-us1'],
-  });
-  containerTechnologiesTextSer1.append(technologiesTitleP3Ser);
-
-  const technologiesTitleP4Ser = createElement({
-    tag: 'p',
-    text: getTextByKey(TextKeys.SERGEY),
-  });
-  technologiesTitleP3Ser.append(technologiesTitleP4Ser);
+  createMessageBlock(
+    containerUlser,
+    'admin',
+    'And the third of the developers:'
+  );
+  createMemberInfo(containerUlser, sergImage, 'Sergey', TextKeys.SERGEY);
 
   const containerTechnologiesTextSer11 = createElement({
     tag: 'ul',
@@ -508,19 +459,9 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   containerTechnologiesTextSer11.append(containerImgTechnologiesSer);
 
-  const svgGithubSergei = createSvgUse('#github', 'about-svg_githubSer');
-  containerImgTechnologiesSer.append(svgGithubSergei);
-
-  const footerLinkGithubSergei = createElement({
-    tag: 'a',
-    classes: ['sergei-link'],
-    attributes: {
-      target: '_blank',
-      href: 'https://github.com/SeregaSimba',
-    },
-    text: 'Sergei GitHub Page',
-  });
-  containerImgTechnologiesSer.append(footerLinkGithubSergei);
+  containerImgTechnologiesSer.append(
+    createLinkBlock('Sergey', 'github', 'about-svg_githubSer')
+  );
 
   //----------------------------------------------------------------
 
@@ -595,6 +536,16 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   userRssUl.append(userRssli);
 
+  const rssImg = createElement({
+    tag: 'img',
+    attributes: {
+      src: rsImage,
+      alt: 'RSS',
+      style: 'max-width: 200px; max-height: 200px; margin-bottom: 10px;',
+    },
+  });
+  userRssli.append(rssImg);
+
   const textPRss2 = createElement({
     tag: 'p',
     text: getTextByKey(TextKeys.RSS),
@@ -616,62 +567,31 @@ export default function createAboutUsPage(container: HTMLElement): void {
   });
   userRssUl1.append(containerImgFooter);
 
-  const linkRss = createElement({
-    tag: 'a',
-    classes: ['link-rss-about'],
-    attributes: {
-      target: '_blank',
-      href: 'https://rs.school/courses/javascript-ru',
+  containerImgFooter.append(createLinkBlock('Rss', 'rss', 'about-svg_rss'));
+
+  // Set initial hidden state for all animated elements
+  gsap.set('.hidden1', { autoAlpha: 0, y: 40 });
+
+  // Create Intersection Observer for lazy-loading animations
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          gsap.fromTo(
+            entry.target,
+            { autoAlpha: 0, y: 40 },
+            { autoAlpha: 1, y: 0, duration: 0.6 }
+          );
+          io.unobserve(entry.target);
+        }
+      }
     },
-  });
-  containerImgFooter.append(linkRss);
-  const svgRSS = createSvgUse('#rss', 'about-svg_rss');
-  linkRss.append(svgRSS);
-
-  const revealOrder: { el: HTMLElement, time: number }[] = [
-    { el: containerMesegUser1!, time: 1 },
-    { el: containerMesegUser2!, time: 3 },
-    { el: containerInfoUsAndreiUser1!, time: 6 },
-    { el: containerInfoUsAndreiUser2!, time: 9 },
-    { el: containerInfoUsAndreiUser22!, time: 12 },
-    { el: containerInfoUsAndreiUser222!, time: 15 },
-    { el: containerTechnologiesTextVit!, time: 18 },
-    { el: containerTechnologiesTextVit1!, time: 21 },
-    { el: containerTechnologiesTextVit11!, time: 24 },
-    { el: containerTechnologiesTextSer!, time: 27 },
-    { el: containerTechnologiesTextSer1!, time: 30 },
-    { el: containerTechnologiesTextSer11!, time: 33 },
-    { el: containeriRss!, time: 36 },
-    { el: userRssUl!, time: 39 },
-    { el: userRssUl1!, time: 42 },
-  ];
-
-  gsap.set(
-    revealOrder.map((item) => item.el),
-    {
-      autoAlpha: 0,
-      x: (_index, el: HTMLElement) =>
-        el.classList.contains('container-meseg-user-1') ? -100 : 100,
-    }
+    { threshold: 0.1 }
   );
 
-  const tl = gsap.timeline({
-    defaults: {
-      duration: 0.8,
-      ease: 'power1.out',
-    },
-  });
-
-  revealOrder.forEach(({ el, time }) => {
-    tl.to(
-      el,
-      {
-        duration: 2.5,
-        autoAlpha: 1,
-        x: 0,
-        ease: 'power1.out',
-      },
-      time
-    );
-  });
+  // Observe all hidden elements
+  const hiddenBlocks = document.querySelectorAll('.hidden1');
+  for (const block of hiddenBlocks) {
+    io.observe(block);
+  }
 }

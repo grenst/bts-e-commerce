@@ -31,3 +31,162 @@
   color: var(--color-primary-light);
   flex-shrink: 0;
 }
+
+.cart-container {
+  position: relative;
+}
+
+.in_cart_number {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  background-color: #000000;
+  color: white;
+  border-radius: 50%;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.in_cart_number.hidden {
+  display: none;
+}
+
+.header-nav {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+
+  ul {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  a {
+    color: var(--color-text-primary-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: var(--color-primary-light);
+    }
+  }
+}
+
+
+.pill-radio-container {
+  --main-color: #031ecd;
+  --secondary-color: #c9001e;
+  --text-color: #3b3b3b;
+  --pill-bg: #1a1a1a50;
+  --total-options: 4; // Adjusted for 4 links
+
+  display: flex;
+  position: relative;
+  // background: var(--pill-bg);
+  border-radius: 3rem;
+  padding: .2rem 1.5rem;
+  gap: 1rem;
+  // box-shadow: 0 0 20px #000 inset;
+  width: fit-content;
+}
+
+.pill-radio-container input {
+  display: none;
+}
+
+.pill-radio-container label {
+  position: relative;
+  padding: 0.4rem 0.1rem;
+  border-radius: 3rem;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-color);
+  transition: color 0.3s ease-in-out;
+  z-index: 2;
+}
+
+.pill-radio-container input:checked + label {
+  color: #000000;
+}
+
+.pill-radio-container label:hover {
+  color: var(--main-color);
+}
+
+.pill-indicator {
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  height: 4px;
+  width: calc(70% / var(--total-options));
+  background: linear-gradient(
+    to right,
+    var(--main-color),
+    var(--secondary-color)
+  );
+  border-radius: 2px;
+  transition: transform 0.3s ease-in-out;
+  z-index: 1;
+}
+
+/* Sliding effect */
+#pill-home:checked ~ .pill-indicator {
+  transform: translateX(33%);
+}
+#pill-catalog:checked ~ .pill-indicator {
+  transform: translateX(165%);
+}
+#pill-about-us:checked ~ .pill-indicator {
+  transform: translateX(320%);
+}
+#pill-cart:checked ~ .pill-indicator {
+  transform: translateX(450%);
+}
+
+
+.header-nav {
+  padding-top: 8px;
+}
+
+@media (max-width: 779px) {
+  .pill-radio-container {
+    display: none;
+  }
+}
+
+.about-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+
+  use {
+    transition: opacity 0.3s ease;
+    opacity: 1;
+  }
+
+  &[data-state='open'] {
+    transform: rotate(90deg);
+  }
+
+  &.icon-transition use {
+    opacity: 0;
+  }
+
+  &[data-state='open'].icon-transition use[href='#close-del'] {
+    opacity: 1;
+  }
+
+  &[data-state='closed'].icon-transition use[href='#burger'] {
+    opacity: 1;
+  }
+}
