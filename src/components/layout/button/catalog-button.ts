@@ -5,7 +5,7 @@ export function createCatalogButton(parent: HTMLElement): HTMLElement {
     tag: 'a',
     parent,
     attributes: { href: '/catalog', id: 'hero-button' },
-    classes: ['absolute', 'bottom-0', 'hero_btn', 'inline-block'],
+    classes: ['absolute', 'bottom-10', 'hero_btn', 'inline-block'],
   });
 
   createElement({

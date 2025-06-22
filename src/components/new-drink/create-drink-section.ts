@@ -114,8 +114,8 @@ export function createDrinkSection(
       illustrationAlignment,
       'max-[640px]:m-auto',
       'max-[640px]:h-150',
-      'max-[390px]:h-100',
-      'max-[390px]:mb-6',
+      'max-[390px]:h-120',
+      //   'max-[390px]:mb-6',
       'z-1',
     ],
   });
