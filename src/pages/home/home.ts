@@ -81,21 +81,5 @@ export default function mainNew(container: HTMLElement): void {
 
   initScrollReveal(mainContainer);
 
-  // const sections = [...mainContainer.querySelectorAll('.full-screen-section')];
-
-  // if (sections.length) {
-  //   ScrollTrigger.create({
-  //     trigger: mainContainer,      // тот же контейнер
-  //     scroller: mainContainer,     // передаём объект, не селектор
-  //     start: 'top top',
-  //     end: () => mainContainer.scrollHeight - mainContainer.clientHeight,
-  //     snap: {
-  //       snapTo: 1 / sections.length,
-  //       duration: 0.95,            // скорость прилипания
-  //       ease: 'power1.inOut',
-  //     },
-  //   });
-  // }
-
   createScrollTopButton(document.body);
 }

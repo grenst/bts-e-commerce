@@ -1,7 +1,8 @@
 /* hello-section.scss */
 .hello-section {
   position: relative;
-  background: #D0CDC3;
+  background: #BCAF9F;
+//   background: #D0CDC3;
   height: calc(100dvh - 60px);
 }
 
@@ -50,7 +51,7 @@
 }
 
 .text_of_hook {
-    font-family: 'nexa-light';
+    font-family: 'Nexa Light';
     font-size: 4rem;
     @media (max-width: 500px) {
     font-size: 2.5rem;

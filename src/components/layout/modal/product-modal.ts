@@ -67,7 +67,7 @@ function createQtyButton(
   if (!(element instanceof HTMLButtonElement)) {
     throw new TypeError('createQtyButton expected HTMLButtonElement');
   }
-  return element; // здесь уже гарантирован HTMLButtonElement
+  return element;
 }
 
 export interface ProductModal {
