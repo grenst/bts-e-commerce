@@ -25,7 +25,7 @@ $textColor: #000;
         transition: all .5s ease-out .5s;
         input {
             font-size: inherit;
-            font-family: 'nexa-light';
+            font-family: 'Nexa-Light';
             // line-height: inherit;
             padding: 4px 24px 0 0;
             border: 0;
@@ -45,7 +45,7 @@ $textColor: #000;
             transition: all 0s ease 0s;
             &::-webkit-input-placeholder {
 
-                font-family: 'nexa-light';
+                font-family: 'Nexa-Light';
                 color: $textColor;
             }
             &:-moz-placeholder {
@@ -65,7 +65,7 @@ $textColor: #000;
             span {
                 line-height: 1.9rem;
                 font-size: 1.6rem;
-                font-family: 'nexa-light';
+                font-family: 'Nexa-Light';
                 padding-top: 4px;
                 border-radius: 1px;
                 opacity: 0;
