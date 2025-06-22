@@ -4,8 +4,9 @@ import {
 } from '../utils/element-utilities';
 import { createCatalogPage } from '../pages/catalog/catalog';
 import { createCartPage } from '../pages/cart/cart';
+// import { mainNew } from '../pages/main-new';
 import { ModalManager } from '../components/layout/modal/product-modal';
-
+import { initScrollReveal, destroyScrollReveal } from '../utils/scroll-reveal';
 export interface Route {
   path: string;
   component: (container: HTMLElement, router: Router) => void;
@@ -175,16 +176,12 @@ export class Router {
     }
 
     removeAllChild(this.mainContainer);
+    destroyScrollReveal();
 
-    // if (hasSavedContainer) {
-    //   this.mainContainer.append(pageContainer);
-    //   this.restoreScrollPosition(path);
-    //   console.log(`Восстановили сохранённое состояние для ${path}`);
-    // } else {
     route.component(this.mainContainer, this);
+    initScrollReveal(this.mainContainer);
+
     window.scrollTo(0, 0);
-    console.log(`Первая отрисовка ${path}`);
-    // }
   }
 
   private createPageContainer(route: Route): HTMLElement {
@@ -270,6 +267,10 @@ export function createRouter(container: HTMLElement): Router {
       component: createCartPage,
       // preserveState: false,
     });
+    // routerInstance.addRoute({
+    //   path: '/main-new',
+    //   component: mainNew,
+    // });
   }
   return routerInstance;
 }

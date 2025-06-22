@@ -1,0 +1,37 @@
+/* hello-section.scss */
+.hello-section {
+  position: relative;
+  background: #D0CDC3;
+  height: calc(100dvh - 60px);
+}
+
+.hello-video video {
+//   width: 100%;
+  height: calc(100dvh - 46px);
+  object-fit: cover;
+}
+
+.main_description {
+    position: absolute;
+    bottom: 10%;
+    text-align: center;
+}
+
+.main-new-container {
+  scroll-snap-type: y mandatory;
+}
+
+.full-screen-section {
+  min-height: calc(100dvh - 45px);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.scroll-top-btn {
+  z-index: 10;
+}
+
+.text_of_hook {
+    font-family: 'nexa-light';
+    font-size: 4rem;
+}

@@ -1,0 +1,175 @@
+// $prime: #ff6e48;
+// $ciBlue: #00fff1;
+// $ciRed: #ff00aa;
+// $ciWhite: #ffffff;
+// $ciGreen: #46fcb4;
+$ciSecond: #0c1016;
+
+@mixin item($height, $delay) {
+  height: $height;
+  animation: pop .7s ease-out #{ $delay } backwards,
+             background 5s     #{ $delay } infinite ease-in-out;
+}
+
+$columns: (
+  ((7rem, 750ms), (13rem, 674ms), (9rem, 750ms)),
+  ((4rem, 490ms), (19rem, 354ms), (9rem, 550ms)),
+  ((8em, 790ms), (8rem, 615ms), (12rem, 790ms))
+);
+
+@mixin columns($columns...) {
+  @each $column in $columns {
+    &-#{index($columns, $column)} {
+      @each $item in $column {
+        .item-#{index($column, $item)} {
+          @include item(nth($item, 1), nth($item, 2));
+        }
+      }
+    }
+  }
+}
+
+.promo-grid {
+  position: relative;
+  width: 100%;
+  padding: 2rem 0;
+
+  overflow: hidden;
+
+  background-color: rgba(255, 255, 255, 0.45);
+  color: $ciSecond;
+
+  .promo-banner {
+    position: absolute;
+    height: 200px;
+    line-height: 200px;
+    top: 50%;
+    left: 50%;
+    translate: -50% -30%;
+    padding: 0 1.25rem;
+    border-radius: 1.5rem;
+    background-color: rgba(#000000, 0.6);
+    border: 3px solid white;
+    color: white;
+    font-family: 'nexa-bold';
+    font-size: 4rem;
+    font-weight: 600;
+    z-index: 2;
+    &::before {
+        content: 'Promo code:';
+        width: 100%;
+        position: absolute;
+        top: -65px;
+        font-family:Georgia, 'Times New Roman', Times, serif;
+        text-decoration:underline;
+        font-size: 3rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    &::after {
+        content: '-15% for all';
+        width: 100%;
+        position: absolute;
+        top: 55px;
+        right: -25%;
+        font-family:Georgia, 'Times New Roman', Times, serif;
+        text-decoration:overline;
+        font-size: 3rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    @media (max-width: 480px) {
+        font-size: 3rem;
+        &::after,
+        &::before {
+            font-size: 2.3rem;
+        }
+
+        &::before {
+            top: -55px;}
+
+        &::after {
+            top: 50px;
+        }
+    }
+  }
+
+  .grid-container {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    margin: auto;
+    width: 90%;
+    max-width: 200rem;
+
+    @media (max-width: 768px) {
+      max-width: 160rem;
+    }
+    @media (max-width: 480px) {
+      max-width: 20rem;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: inherit;
+      width: 100%;
+
+      @include columns($columns...);
+
+      .item {
+        width: inherit;
+        border-radius: 0.5rem;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        // background-size: cover;
+        background-size: 80vmax auto;
+        will-change: transform, opacity;
+      }
+    }
+  }
+}
+
+.promo_banner_helper {
+  position: absolute;
+  top: -8%;
+  left: 10%;
+  padding: 6px 10px 1px 10px;
+  background-color: #000000;
+  line-height: 1rem;
+  font-size: 1.2rem;
+  border: 2px solid white;
+  border-radius: 14px;
+}
+
+@keyframes background {
+  0%,  17% { background-image: var(--image-1); }
+  20%, 37% { background-image: var(--image-2); }
+  40%, 57% { background-image: var(--image-3); }
+  60%, 77% { background-image: var(--image-4); }
+  80%, 97% { background-image: var(--image-5); }
+  100%     { background-image: var(--image-1); }
+}
+@keyframes pop {
+  from { opacity: 0; transform: scale(.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.promo-notification {
+  position: fixed;
+  background-color: rgba(0,0,0,0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  z-index: 1000;
+  font-size: 14px;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+}
