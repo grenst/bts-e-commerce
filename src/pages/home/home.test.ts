@@ -101,7 +101,6 @@ describe('mainNew', () => {
   });
 
   test('calls createDrinkSection three times with correct arguments', () => {
-
     mainNew(container);
 
     expect(createDrinkSection).toHaveBeenCalledTimes(3);

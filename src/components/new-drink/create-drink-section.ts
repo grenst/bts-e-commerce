@@ -62,10 +62,12 @@ export function createDrinkSection(
   /* ----- cols ----- */
   const leftClasses = [
     'basis-full',
+    'max-h-[calc(100dvh-(40px))]',
     contentSide === 'left' ? 'sm:basis-[65%]' : 'sm:basis-[35%]',
   ];
   const rightClasses = [
     'basis-full',
+    'max-h-[calc(100dvh-(40px))]',
     contentSide === 'right' ? 'sm:basis-[65%]' : 'sm:basis-[35%]',
   ];
 
