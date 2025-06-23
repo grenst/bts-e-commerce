@@ -13,11 +13,11 @@ import bg3 from '../../assets/images/drink3-bg.webp';
 import ill1 from '../../assets/images/drink1-ill.webp';
 import ill2 from '../../assets/images/drink2-ill.webp';
 import ill3 from '../../assets/images/drink3-ill.webp';
-import gridImg1 from '@/assets/images/grid-1.webp';
-import gridImg2 from '@/assets/images/grid-2.webp';
-import gridImg3 from '@/assets/images/grid-3.webp';
-import gridImg4 from '@/assets/images/grid-4.webp';
-import gridImg5 from '@/assets/images/grid-5.webp';
+import gridImg1 from '../../assets/images/grid-1.webp';
+import gridImg2 from '../../assets/images/grid-2.webp';
+import gridImg3 from '../../assets/images/grid-3.webp';
+import gridImg4 from '../../assets/images/grid-4.webp';
+import gridImg5 from '../../assets/images/grid-5.webp';
 
 export default function mainNew(container: HTMLElement): void {
   const mainContainer = createElement({

@@ -1,0 +1,1 @@
+module.exports = 'test-mp4-stub';

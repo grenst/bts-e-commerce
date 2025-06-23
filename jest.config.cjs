@@ -1,17 +1,14 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   preset: 'ts-jest',
-  testEnvironment: 'jsdom', // Changed from 'node'
-  roots: ['<rootDir>/src'], // Look for tests in the src directory
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'], // Add this line
+  testEnvironment: 'jsdom',
+  roots: ['<rootDir>/src'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
-    // Handle CSS/SCSS imports
     '\\.(css|scss)$': 'jest-transform-stub',
-    // Handle module aliases (if you have them in tsconfig.json)!!
     '^@/(.*)$': '<rootDir>/src/$1',
     '^import\\.meta$': '<rootDir>/src/__mocks__/import-meta.ts',
-    // Mock image files
-    '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/src/__mocks__/fileMock.ts',
+    '\\.(jpg|jpeg|png|gif|svg|webp|mp4)$': '<rootDir>/src/__mocks__/assets.ts',
   },
   transform: {
     '^.+\\.ts$': ['ts-jest', {
@@ -20,7 +17,6 @@ module.exports = {
       compilerOptions: {
         module: 'esnext',
       },
-      // Add this to handle import.meta
       diagnostics: {
         ignoreCodes: [1343]
       },
@@ -34,9 +30,7 @@ module.exports = {
       }
     }]
   },
-  // Ensure we ignore image files and node_modules (except axios) from transformation
   transformIgnorePatterns: [
-    'node_modules/(?!(axios)/)',
-    '^.+\\.(jpg|jpeg|png|gif|webp|svg)$'
+    'node_modules/(?!(axios)/)'
   ]
 };
