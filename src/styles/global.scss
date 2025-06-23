@@ -18,6 +18,10 @@
   --color-border-light: #dee2e6;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--color-background-light);
   font-family: $font-family-sans;

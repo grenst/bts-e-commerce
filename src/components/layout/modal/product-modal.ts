@@ -757,7 +757,7 @@ export function createProductModal(): ProductModal {
       tag: 'button',
       parent: submitOrder,
       text: 'ADD TO CART',
-      classes: ['order-cart', 'w-28'],
+      classes: ['order-cart', 'w-30'],
     });
 
     if (!(rawButton instanceof HTMLButtonElement)) {

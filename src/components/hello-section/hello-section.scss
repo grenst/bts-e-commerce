@@ -1,4 +1,7 @@
-/* hello-section.scss */
+html {
+  scroll-snap-type: y proximity;
+}
+
 .hello-section {
   position: relative;
   background: #BCAF9F;
@@ -41,7 +44,8 @@
 // }
 
 .full-screen-section {
-  min-height: calc(100dvh - 45px);
+  min-height: calc(100dvh - 40px);
+  scroll-margin-top: 40px;
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }

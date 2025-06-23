@@ -128,7 +128,7 @@ export function createHelloSection(
 
   const buttonWrapper = createElement({
     tag: 'div',
-    classes: ['mt-[10%]', 'top-50', 'flex'],
+    classes: ['absolute', 'mt-[10%]', 'bottom-20', 'flex'],
     parent: heroContainer,
   });
 

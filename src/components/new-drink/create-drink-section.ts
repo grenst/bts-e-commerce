@@ -51,7 +51,7 @@ export function createDrinkSection(
     classes: [
       'absolute',
       'inset-0',
-      contentSide === 'left' ? 'bg-white/50' : 'bg-black/50',
+      contentSide === 'left' ? 'bg-black/50' : 'bg-black/50',
       'pointer-events-none',
       'sm:hidden',
       'z-0',
@@ -132,8 +132,9 @@ export function createDrinkSection(
       'z-5',
       'max-[640px]:left-0',
       'text-shadow-lg/30',
-      contentSide === 'left' ? 'text-black' : 'text-white',
-      contentSide === 'left' ? 'text-shadow-gray-100' : 'text-shadow-gray-900',
+      'text-white',
+      // contentSide === 'left' ? 'text-black' : 'text-white',
+      // contentSide === 'left' ? 'text-shadow-gray-100' : 'text-shadow-gray-900',
       contentSide === 'left' ? 'left-2' : 'right-2',
     ],
   });
