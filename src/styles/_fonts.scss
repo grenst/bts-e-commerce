@@ -1,0 +1,57 @@
+@use "sass:map";
+
+/* Google-Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* === Nexa === */
+@font-face {
+  font-family: 'Nexa Bold';
+  src: url('../assets/fonts/NexaBold.otf')  format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Nexa Light';
+  src: url('../assets/fonts/NexaLight.otf')  format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Alumni';
+  src: url('../assets/fonts/AlumniSansPinstripe-Regular.ttf')  format('opentype');
+  // font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Dimkin Light';
+  src: url('../assets/fonts/Dimkin-Light.ttf')  format('opentype');
+  // font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Dimkin Regular';
+  src: url('../assets/fonts/Dimkin-Regular.ttf')  format('opentype');
+  // font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+$font-family-sans: 'Inter', sans-serif;
+$font-family-mono: monospace;
+$font-family-nexa-bold:  'Nexa Bold', sans-serif;
+$font-family-nexa-light:  'Nexa Light', sans-serif;
+$font-family-alumni:  'Alumni', sans-serif;
+$font-family-dimkin-light:  'Dimkin Light', sans-serif;
+$font-family-dimkin-regular:  'Dimkin Regular', sans-serif;
+
+$font-size-base: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-2xl: 1.5rem;

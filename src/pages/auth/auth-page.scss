@@ -1,0 +1,25 @@
+
+.button-eye {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  right: 20px;
+  // top: 50%;
+  transform: translateY(50%);
+  cursor: pointer;
+  color: var( --color-gray-600);
+
+  &:hover {
+    color: var( --color-gray-900);
+  }
+}
+
+.eye {
+  width: inherit;
+  height: inherit;
+  display: none;
+
+  &_active {
+    display: block;
+  }
+}
