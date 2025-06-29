@@ -293,8 +293,9 @@ export function updateUserNavOnHeader(
 
   // Subscribe to cart updates
   globalThis.addEventListener('cartUpdated', (event: Event) => {
-    const customEvent = event as CustomEvent<{ totalQty: number }>;
-    updateCartQty(customEvent.detail.totalQty);
+    if (event instanceof CustomEvent) {
+      updateCartQty(event.detail.totalQty);
+    }
   });
 
   const aboutDropdownContainer = createElement({

@@ -89,7 +89,8 @@ export function createCartItem(
   // Quantity controls with better UX
   const qtyWrapper = createElement({
     tag: 'div',
-    classes: ['flex', 'justify-center', 'md:justify-start'],
+    classes: ['flex', 'justify-between', 'gap-6'],
+    // classes: ['flex', 'justify-between', 'sm:justify-start', 'gap-6'],
   });
 
   const qtyBox = createElement({
@@ -157,7 +158,7 @@ export function createCartItem(
   if (item.discountedPrice !== undefined) {
     subtotal.classList.add('has-discount');
   }
-  root.append(priceWrapper);
+  qtyWrapper.append(priceWrapper);
 
   // Event handlers with loading states
   const updateQuantity = (newQty: number) => {

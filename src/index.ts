@@ -73,7 +73,7 @@ const routes: Route[] = [
   {
     path: '/login',
     component: createAuthPage,
-    preserveState: false, // можно и не ставить
+    preserveState: true, // можно и не ставить
   },
   {
     path: '/aboutInfo',

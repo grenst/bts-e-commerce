@@ -30,7 +30,7 @@ export function setActiveCart(cart: Cart | undefined): void {
 }
 
 function dispatchCartUpdated(): void {
-  if (typeof globalThis.window === 'undefined') return;
+  if (globalThis.window === undefined) return;
   const totalQty =
     activeCart?.lineItems.reduce((sum, index) => sum + index.quantity, 0) ?? 0;
   globalThis.window.dispatchEvent(

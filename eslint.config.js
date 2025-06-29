@@ -1,4 +1,3 @@
-// eslint.config.js
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettierPlugin from "eslint-plugin-prettier";
@@ -20,13 +19,10 @@ export default tseslint.config(
     ],
   },
 
-  // Базові правила ESLint
   eslint.configs.recommended,
 
-  // Рекомендовані правила для TypeScript
   ...tseslint.configs.recommended,
 
-  // Налаштування для TS/TSX файлів
   {
     files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
@@ -48,16 +44,12 @@ export default tseslint.config(
       "unicorn": unicornPlugin,
     },
     rules: {
-      // Вимикаємо правила, що конфліктують з Prettier
       ...eslintConfigPrettier.rules,
 
-      // Unicorn: рекомендовані правила
       ...unicornPlugin.configs.recommended.rules,
 
-      // Prettier як правило ESLint
       "prettier/prettier": "warn",
 
-      // TypeScript-правила
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unnecessary-type-assertion": "warn",
@@ -66,7 +58,6 @@ export default tseslint.config(
     },
   },
 
-  // Ігноруємо тестові файли від правил Unicorn та деяких TS-правил
   {
     files: ["**/*.test.ts", "**/*.spec.ts"],
     rules: {

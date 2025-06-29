@@ -270,9 +270,20 @@ export function createProductCardElement(product: Product): HTMLElement {
     classes: ['px-2', 'mt-auto', 'z-1'],
   });
 
-  const button: HTMLButtonElement = createElement({
-    tag: 'button',
-    parent: buttonContainer,
+  // Create button safely without type assertion
+  const createButton = (options: {
+    text: string;
+    classes: string[];
+    parent: HTMLElement;
+  }): HTMLButtonElement => {
+    const button = document.createElement('button');
+    button.textContent = options.text;
+    button.classList.add(...options.classes);
+    options.parent.append(button);
+    return button;
+  };
+
+  const button = createButton({
     text: 'ADD TO CART',
     classes: [
       'text-black',
@@ -281,7 +292,6 @@ export function createProductCardElement(product: Product): HTMLElement {
       'rounded-b-lg',
       'border',
       'border-gray-400',
-      // 'px-4',
       'bg-gray-100',
       'hover:bg-gray-400',
       'transition',
@@ -290,16 +300,19 @@ export function createProductCardElement(product: Product): HTMLElement {
       'hover:animate-wiggle',
       'hover:animate-once',
     ],
-  }) as HTMLButtonElement;
+    parent: buttonContainer,
+  });
 
   // Function to update cart status
-  type CartUpdatedEvent = CustomEvent<{
-    cart: { lineItems: Array<{ productId: string }> };
-  }>;
+  // type CartUpdatedEvent = CustomEvent<{
+  //   cart: { lineItems: Array<{ productId: string }> };
+  // }>;
 
   const updateCartStatus = (event: Event) => {
-    const customEvent = event as CartUpdatedEvent;
-    const cart = customEvent.detail?.cart;
+    // Check if event is CustomEvent without type assertion
+    if (!('detail' in event && event instanceof CustomEvent)) return;
+
+    const cart = event.detail?.cart;
     if (!cart) return;
 
     const isInCart = cart.lineItems.some(

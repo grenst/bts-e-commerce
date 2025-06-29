@@ -5,7 +5,7 @@ import {
 import { createCatalogPage } from '../pages/catalog/catalog';
 import { createCartPage } from '../pages/cart/cart';
 import { ModalManager } from '../components/layout/modal/product-modal';
-
+import { initScrollReveal, destroyScrollReveal } from '../utils/scroll-reveal';
 export interface Route {
   path: string;
   component: (container: HTMLElement, router: Router) => void;
@@ -28,10 +28,6 @@ export class Router {
 
   private setupEventListeners(): void {
     globalThis.addEventListener('popstate', () => this.handleRouteChange());
-    // Commented out state saving
-    // globalThis.addEventListener('beforeunload', () =>
-    //   this.saveCurrentScrollPosition()
-    // );
   }
 
   addRoute(route: Route): void {
@@ -41,19 +37,11 @@ export class Router {
   navigateTo(path: string, state: RouteState = {}): void {
     if (this.currentPath === path && Object.keys(state).length === 0) return;
 
-    // Проверяем, является ли текущий переход открытием модалки
-    // const isOpeningModal = state?.openProductModal !== undefined;
-    // Закрываем модалку только если:
-    // 1. Это не переход открытия модалки
-    // 2. Путь не содержит ID продукта
     const isProductPath = path.match(
       /^\/(catalog|main)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
     );
     const modal = ModalManager.getModal();
-    // if (modal && !isOpeningModal && !isProductPath) {
-    //   modal.hideModal();
-    // }
-    // Закрываем модалку только при явном переходе не на продукт
+
     if (modal && !isProductPath && !state?.isModalOpen) {
       modal.hideModal();
     }
@@ -65,11 +53,6 @@ export class Router {
   private async handleRouteChange(): Promise<void> {
     const path = globalThis.location.pathname;
     if (this.currentPath === path) return;
-
-    // Commented out state saving
-    // this.saveCurrentScrollPosition();
-    // this.currentPath = path;
-
     /************************************************* */
     const state = history.state;
 
@@ -86,19 +69,6 @@ export class Router {
     if (modal && !isProductPath && !isOpeningModal) {
       modal.hideModal();
     }
-
-    // Закрываем модалку если:
-    // 1. Это не открытие модалки
-    // 2. Это не страница продукта
-    // 3. ИЛИ это переход назад с продукта на /main
-    // if (
-    //   (modal && !isOpeningModal && !isProductPath) ||
-    //   (isComingFromProduct && path === '/main')
-    // ) {
-    //   modal.hideModal();
-
-    //   // console.log(`Попытка закрыть ${modal}`);
-    // }
 
     this.currentPath = path;
 
@@ -136,7 +106,6 @@ export class Router {
         }
 
         // this.navigateTo(basePath, { openProductModal: productId });
-        // Явно указываем, что это открытие модалки
         this.navigateTo(basePath, {
           isModalOpen: true,
           productId: productId,
@@ -175,16 +144,12 @@ export class Router {
     }
 
     removeAllChild(this.mainContainer);
+    destroyScrollReveal();
 
-    // if (hasSavedContainer) {
-    //   this.mainContainer.append(pageContainer);
-    //   this.restoreScrollPosition(path);
-    //   console.log(`Восстановили сохранённое состояние для ${path}`);
-    // } else {
     route.component(this.mainContainer, this);
+    initScrollReveal(this.mainContainer);
+
     window.scrollTo(0, 0);
-    console.log(`Первая отрисовка ${path}`);
-    // }
   }
 
   private createPageContainer(route: Route): HTMLElement {
@@ -196,18 +161,6 @@ export class Router {
     return pageContainer;
   }
 
-  // private saveCurrentScrollPosition(): void {
-  //   if (this.currentPath)
-  //     this.scrollPositions.set(this.currentPath, window.scrollY);
-  // }
-
-  // private restoreScrollPosition(path: string): void {
-  //   requestAnimationFrame(() => {
-  //     const savedPosition = this.scrollPositions.get(path) ?? 0;
-  //     window.scrollTo(0, savedPosition);
-  //   });
-  // }
-
   init(): void {
     if (globalThis.location.pathname === '/') {
       this.navigateTo('/main');
@@ -215,16 +168,6 @@ export class Router {
       this.handleRouteChange();
     }
   }
-
-  // clearCache(): void {
-  //   this.pageContainers.clear();
-  //   this.scrollPositions.clear();
-  // }
-
-  // clearPageCache(path: string): void {
-  //   this.pageContainers.delete(path);
-  //   this.scrollPositions.delete(path);
-  // }
 }
 
 export function createRouterLink(
@@ -262,8 +205,6 @@ export function createRouter(container: HTMLElement): Router {
     routerInstance.addRoute({
       path: '/catalog',
       component: createCatalogPage,
-      // preserveState: true,
-      // preserveState: false,
     });
     routerInstance.addRoute({
       path: '/cart',
