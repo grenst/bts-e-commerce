@@ -20,6 +20,9 @@ importers:
       '@commercetools/sdk-middleware-http':
         specifier: ^8.0.1
         version: 8.0.1
+      '@eslint/plugin-kit':
+        specifier: ^0.3.4
+        version: 0.3.4
       axios:
         specifier: ^1.10.0
         version: 1.10.0
