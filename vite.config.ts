@@ -9,8 +9,7 @@ export default defineConfig(({ mode })=>{
 
   return {
     define: {
-      'process.env.NODE_ENV': JSON.stringify(mode), // Add this line
-      // Прокидываем все переменные как process.env.*
+      'process.env.NODE_ENV': JSON.stringify(mode),
       ...Object.keys(env).reduce((prev, key) => {
         prev[`process.env.${key}`] = JSON.stringify(env[key]);
         return prev;
